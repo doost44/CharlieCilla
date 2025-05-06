@@ -1,0 +1,169 @@
+ <style>
+
+body {
+   margin: 0;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+body.fade-out {
+    opacity: 0;
+}
+
+body.fade-in {
+    opacity: 0;
+}
+
+        * {
+      margin: 0;
+      
+      padding: 0;
+      box-sizing: border-box;
+    }
+      body {
+       margin: 0;
+        font-family: 'Century Gothic', sans-serif;
+        background-color: black;
+        color: white;
+      }
+
+      h1 {
+        font-size: 50px;
+        text-align: center;
+      }
+      header {
+        width: 100%;
+        background-color: black;
+        
+        margin-top: -75px;
+           padding-top: 30px;
+       
+        z-index: 11;
+        position: fixed;
+        
+      }
+      li {
+
+      margin-right: 15px;
+      margin-left: 15px;
+     
+      z-index: 10;
+      display: inline;
+      
+    }
+       ul {
+      z-index: 10;
+      text-align: center;
+      background-color: black;
+       margin-top: -10px;
+         margin-bottom: -20px;
+        
+    }
+       a {
+
+      text-decoration: none;
+      color: #ffffff;
+
+
+    }
+       a:hover {
+      color: red;
+    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Transition</title>
+    <style>
+        body {
+            margin: 0;
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        body.fade-out {
+            opacity: 0;
+        }
+
+        body.fade-in {
+            opacity: 0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Century Gothic', sans-serif;
+            background-color: black;
+            color: white;
+        }
+
+        h1 {
+            font-size: 50px;
+            text-align: center;
+        }
+
+        header {
+            width: 100%;
+            background-color: black;
+            margin-top: -75px;
+            padding-top: 30px;
+            z-index: 11;
+            position: fixed;
+        }
+
+        li {
+            margin-right: 15px;
+            margin-left: 15px;
+            z-index: 10;
+            display: inline;
+        }
+
+        ul {
+            z-index: 10;
+            text-align: center;
+            background-color: black;
+            margin-top: -10px;
+            margin-bottom: -20px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        a:hover {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <ul>
+            <li><a href="pages_code/index.html">Home</a></li>
+            <li><a href="pages_code/page_about.html">About</a></li>
+            <li><a href="pages_code/page_contact.html">Contact</a></li>
+           <li><a href="pages_code/page_portfolio.html">Contact</a></li>
+        </ul>
+    </header>
+
+    <h1>Welcome to the Home Page</h1>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.body.classList.add('fade-in');
+        });
+
+        window.addEventListener("beforeunload", function() {
+            document.body.classList.add('fade-out');
+        });
+    </script>
+</body>
+</html>
+
+</style>

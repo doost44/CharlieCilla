@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles.css">
+    <title>Charlie Cilla</title>
+    <style>
+        h2 {
+            font-size: 50px;
+            color: white;
+            margin: 0;
+        }
+        h4 {  font-size: 35px;
+            color: white;
+            margin: 0;
+           }
+             header {
+        width: 100%;
+        background-color: black;
+        
+        margin-top: -25px;
+       
+        z-index: 11;
+        position: fixed;
+        
+      }
+            
+      
+
+        .overlay-box {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        nav {
+            color: #ffffff;
+            background-color: white;
+            height: 30px;
+            font-size: 50;
+            padding: 7px 0px 0px 0px;
+        }
+
+        #central-portfolio-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 20px;
+        }
+
+        #central-project {
+            flex: 100%;
+            max-width: 1920px; /* Full screen width */
+            margin: 0;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1920px; /* Full screen width */
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .left-column, .middle-column, .right-column {
+            width: 48%;
+        }
+
+        .left-column h1, .middle-column h1, .right-column h1 {
+            font-weight: bold;
+        }
+
+        .left-column img, .middle-column img, .right-column img {
+            width: 100%;
+            max-width: 500px;
+            max-height: 450px;
+            display: block;
+            padding: 20px;
+        }
+
+        .video-wrapper {
+            display: flex;
+            justify-content: center; /* Center the video-container horizontally */
+            margin: 50px auto;
+            max-width: 1920px; /* Full screen width */
+            width: 100%; /* Ensure it takes full width */
+        }
+
+        .video-container {
+            display: flex; /* Use flexbox to align text and video horizontally */
+            align-items: flex-start; /* Align items to the top */
+            gap: 20px; /* Space between text and video */
+            width: 100%; /* Ensure the container takes full width */
+            max-width: 1920px; /* Full screen width */
+        }
+
+        .video-text {
+            flex: 1; /* Take up available space */
+            color: white;
+            font-size: 50px;
+            background-color: black;
+            padding: 10px;
+            max-width: 400px; /* Adjust as needed */
+            margin-left: 20px; /* Align text to the left */
+        }
+
+        .yt-embeded-holder {
+            flex: 4; /* Give more space to the video */
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 40%; /* Wider aspect ratio (adjust as needed) */
+            overflow: hidden;
+        }
+
+        .yt-embeded-holder img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensure the image covers the container */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>CHARLIE CILLA</h1>
+        <ul>
+            <li><a href="home_page.html">HOME</a></li>
+            <li><a href="page_portfolio.html">PORTFOLIO</a></li>
+            <li><a href="page_contact.html">CONTACT</a></li>
+            <li><a href="page_about.html">ABOUT</a></li>
+        </ul>
+    </header>
+
+    <section id="central-portfolio-section"> 
+        <!-- Second Video -->
+        <div id="central-project">
+            <div class="video-wrapper">
+                <div class="video-container">
+                    <div class="video-text">
+                        <h2><br>The Goatman<br></h2>
+                        <h4><br>2025 Short Film<br> <br> A painted journey through <br> a strange world<br></h4>
+                    </div>
+                    <div class="yt-embeded-holder">
+                        <a href="https://www.youtube.com/watch?v=_8m2P_TAWSE" target="_blank">
+                            <img src="https://img.youtube.com/vi/_8m2P_TAWSE/maxresdefault.jpg" alt="The Goatman">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end of video -->
+        <!-- First Video -->
+        <div id="central-project">
+            <div class="video-wrapper">
+                <div class="video-container">
+                    <div class="video-text">
+                        <h2><br>The Call<br></h2>
+                        <h4><br>2024 Short film.<br> <br> </vr>A Kafkaesque <br>reflection <br> of modern <br> digital life.</h4>
+                    </div>
+                    <div class="yt-embeded-holder">
+                        <a href="https://www.youtube.com/watch?v=85gvlt7RyTA" target="_blank">
+                            <img src="https://img.youtube.com/vi/85gvlt7RyTA/maxresdefault.jpg" alt="The Call">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+  <!-- end of video -->
+        <!-- Second Video -->
+        <div id="central-project">
+            <div class="video-wrapper">
+                <div class="video-container">
+                    <div class="video-text">
+                        <h2>Bound by Boards<br></h2>
+                        <h4><br>2025 Short Doc<br> Connections made <br> through griptape.<br> <br> Credt: DP</h4>
+                    </div>
+                    <div class="yt-embeded-holder">
+                        <a href="https://www.youtube.com/watch?v=84KcwAFeiZg" target="_blank">
+                            <img src="https://img.youtube.com/vi/84KcwAFeiZg/maxresdefault.jpg" alt="Bound by Boards">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+  <!-- end of video -->
+         
+    </section>
+</body>
+</html>

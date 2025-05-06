@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InnisdaleSS_Print - Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Century Gothic', sans-serif;
+            background-color: black;
+            color: white;
+        }
+
+        header {
+            width: 100%;
+            background-color: black;
+            padding: 20px 0;
+            position: fixed;
+            top: 0;
+            z-index: 11;
+        }
+
+        header h1 {
+            text-align: center;
+            font-size: 2rem;
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background-color: black;
+            color: white;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: red;
+        }
+
+        main {
+            padding: 80px 20px 20px; /* Add space to account for fixed header */
+        }
+
+        .project-detail {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .project-detail img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        @media screen and (max-width: 600px) {
+            body {
+                font-size: 0.875em;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .project-detail img {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>InnisdaleSS_Print</h1>
+    </header>
+    <main>
+        <section class="project-detail">
+            <img src="../InnisdaleSS_Print.jpg" alt="InnisdaleSS_Print Image">
+            <p>A reflection of creativity in design fundamentals, blending aesthetics and functionality.</p>
+        </section>
+    </main>
+    <footer>
+ <p><a href="../pages_code/page_portfolio.html">Back to Portfolio</a></p>    
+    </footer>
+</body>
+</html>
