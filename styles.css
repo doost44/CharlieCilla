@@ -180,6 +180,71 @@ body.fade-in {
       height: auto;
     }
   }
+
+  /* Base styles for responsive layout */
+body, html {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Header and text */
+h1, h2, h3, h4 {
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
+/* Mobile-specific tweaks */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  nav ul {
+    flex-direction: column;
+    text-align: left;
+    width: 100%;
+    padding-left: 0;
+  }
+
+  nav ul li {
+    margin: 10px 0;
+    list-style: none;
+  }
+
+  h2 {
+    font-size: 24px !important;
+  }
+
+  h4 {
+    font-size: 16px !important;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .main-content, .container, .page {
+    padding: 10px;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+}
+
   
     </style>
 </head>
