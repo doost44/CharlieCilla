@@ -1,61 +1,193 @@
-<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <link rel="stylesheet" href="../styles.css"> 
-    <title>Charlie Cilla Portfolio</title> 
-    <style> 
-        body { margin: 0; padding: 0; font-family: Arial, sans-serif; } 
-       
-        header { max-width: 100%; background-color: black; margin-top: -10px; z-index: 11; position: fixed; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
-        
-        .header-content { display: flex; align-items: center; } 
-        .logo { max-width: 50px; height: auto; margin-right: 20px; } 
-        h1 { margin: 0; color: white; } 
-        header ul { list-style-type: none; display: flex; margin: 0; padding: 0; } 
-        header ul li { margin-left: 20px; } header ul li a { color: white; text-decoration: none; } 
-        .container { display: flex; max-width: 1920px; margin: 80px auto 0; padding: 20px; } 
-        .left-column, .middle-column, .right-column { max-width: 33.33%; } .left-column img, .middle-column img, .right-column img { max-width: 100%; max-width: 500px; max-height: 625px; display: block; padding: 20px; } 
-        .left-column img:hover, .middle-column img:hover, .right-column img:hover { transform: scale(1.2); transition: transform 0.1s ease; } 
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../styles.css" />
+    <title>Charlie Cilla - Archives</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: #000;
+        color: #fff;
+      }
 
-        
-    </style> 
-</head> 
-    <body> 
-        <header> 
-            <div class="header-content"> 
-            <img src="../logo.png" alt="Logo" class="logo"> <h1>CHARLIE CILLA</h1> </div> <ul> <li><a href="../index.html">HOME</a></li> <li><a href="page_portfolio.html">ARCHIVES</a></li> <li><a href="page_contact.html">CONTACT</a></li> <li><a href="page_about.html">ABOUT</a></li>  <li><a href="page_projects.html">PROJECTS</a></li> </ul> 
-        </header>
-text
-<div class="container">
-    <div class="left-column">
+      header {
+        width: 100%;
+        background-color: black;
+        z-index: 11;
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 40px;
+        box-sizing: border-box;
+      }
+
+      .header-content {
+        display: flex;
+        align-items: center;
+      }
+
+      .logo {
+        max-width: 50px;
+        height: auto;
+        margin-right: 20px;
+      }
+
+      h1 {
+        margin: 0;
+        color: white;
+      }
+
+      header ul {
+        list-style-type: none;
+        display: flex;
+        margin: 0;
+        padding: 0;
+      }
+
+      header ul li {
+        margin-left: 20px;
+      }
+
+      header ul li a {
+        color: white;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      header ul li a:hover {
+        color: #ff4444;
+      }
+
+      .container {
+        display: flex;
+        max-width: 1400px;
+        margin: 100px auto 40px;
+        padding: 20px 40px;
+        gap: 30px;
+        justify-content: center;
+      }
+
+      .left-column,
+      .middle-column,
+      .right-column {
+        flex: 1;
+        max-width: 400px;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+      }
+
+      .left-column a,
+      .middle-column a,
+      .right-column a {
+        display: block;
+        overflow: visible;
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+        position: relative;
+      }
+
+      .left-column a:hover,
+      .middle-column a:hover,
+      .right-column a:hover {
+        transform: scale(1.2);
+        z-index: 10;
+        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.2);
+      }
+
+      .left-column img,
+      .middle-column img,
+      .right-column img {
+        width: 100%;
+        height: auto;
+        max-height: 500px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .left-column a:hover img,
+      .middle-column a:hover img,
+      .right-column a:hover img {
+        transform: scale(1.05);
+      }
+
+      .page-title {
+        text-align: center;
+        margin-top: 100px;
+        margin-bottom: -40px;
+        font-size: 36px;
+        letter-spacing: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-content">
+        <img src="../logo.png" alt="Logo" class="logo" />
+        <h1>CHARLIE CILLA</h1>
+      </div>
+      <ul>
+        <li><a href="../index.html">HOME</a></li>
+        <li><a href="page_portfolio.html">ARCHIVES</a></li>
+        <li><a href="page_contact.html">CONTACT</a></li>
+        <li><a href="page_about.html">ABOUT</a></li>
+        <li><a href="page_projects.html">PROJECTS</a></li>
+      </ul>
+    </header>
+
+    <h2 class="page-title">ARCHIVES</h2>
+
+    <div class="container">
+      <div class="left-column">
         <a href="../projects_code/project1.html">
-            <img src="../NationalGeo_CollageWork.jpg" alt="National Geo Collage Work Screenshot">
+          <img
+            src="../NationalGeo_CollageWork.jpg"
+            alt="National Geo Collage Work"
+          />
         </a>
         <a href="../projects_code/project2.html">
-            <img src="../Song cover v1.jpg" alt="Song cover v1">
+          <img src="../Song cover v1.jpg" alt="Song Cover" />
         </a>
         <a href="../projects_code/project3.html">
-            <img src="../A5_Charlie_Cilla_Paradox.jpg" alt="A5_Charlie_Cilla_Paradox">
+          <img src="../A5_Charlie_Cilla_Paradox.jpg" alt="Paradox" />
         </a>
-    </div>
-    <div class="middle-column">
+      </div>
+      <div class="middle-column">
         <a href="../projects_code/project4.html">
-            <img src="../ahftw_UOW_works2.jpg" alt="AHFTW UOW Works 2">
+          <img src="../ahftw_UOW_works2.jpg" alt="AHFTW UOW Works" />
         </a>
         <a href="../projects_code/project5.html">
-            <img src="../Editorial_Illustration_scientificamerican.jpg" alt="Editorial_Illustration_scientificamerican">
+          <img
+            src="../Editorial_Illustration_scientificamerican.jpg"
+            alt="Editorial Illustration"
+          />
         </a>
         <a href="../projects_code/project6.html">
-            <img src="../InnisdaleSS_Print.jpg" alt="InnisdaleSS_Print">
+          <img src="../InnisdaleSS_Print.jpg" alt="Innisdale Print" />
         </a>
-    </div>
-    <div class="right-column">
+      </div>
+      <div class="right-column">
         <a href="../projects_code/project7.html">
-            <img src="../huh_UOW_Works1.jpg" alt="Huh UOW Works 1">
+          <img src="../huh_UOW_Works1.jpg" alt="Huh UOW Works" />
         </a>
         <a href="../projects_code/project8.html">
-            <img src="../DDE_UOW_Works4.jpg" alt="DDE_UOW_Works4">
+          <img src="../DDE_UOW_Works4.jpg" alt="DDE UOW Works" />
         </a>
         <a href="../projects_code/project9.html">
-            <img src="../A7_Charlie_Cilla_finalassignment2.png" alt="A7_Charlie_Cilla_finalassignment2">
+          <img
+            src="../A7_Charlie_Cilla_finalassignment2.png"
+            alt="Final Assignment"
+          />
         </a>
+      </div>
     </div>
-</div>
-</body> </html>
+  </body>
+</html>

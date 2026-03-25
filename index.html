@@ -25,15 +25,17 @@
         }
 
         header {
-            max-width: 100%;
+            width: 100%;
             background-color: rgb(0, 0, 0);
-            margin-top: -10px;
             z-index: 11;
             position: fixed;
+            top: 0;
+            left: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 20px;
+            padding: 10px 40px;
+            box-sizing: border-box;
         }
 
         .header-content {
@@ -66,6 +68,11 @@
         header ul li a {
             color: white;
             text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        header ul li a:hover {
+            color: #ff4444;
         }
 
        
@@ -96,17 +103,17 @@
 
         #central-portfolio-section {
             display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            padding: 20px;
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
+            padding: 100px 20px 60px;
+            max-width: 100%;
+            margin: 0 auto;
         }
 
         #central-project {
-            flex: 100%;
-            max-width: 1920px;
+            width: 100%;
             margin: 0;
-            text-align: center;
-            margin-top: 20px;
         }
 
         .container {
@@ -135,34 +142,51 @@
         .video-wrapper {
             display: flex;
             justify-content: center;
-            margin: 50px auto;
-            max-width: 1920px;
+            margin: 0 auto;
             width: 100%;
+            padding: 0 40px;
+            box-sizing: border-box;
         }
 
         .video-container {
             display: flex;
-            align-items: flex-start;
-            gap: 20px;
+            align-items: stretch;
+            gap: 0;
             width: 100%;
-            max-width: 1920px;
         }
 
         .video-text {
-            flex: 1;
+            flex: 0 0 350px;
             color: white;
-            font-size: 50px;
-            background-color: black;
-            padding: 10px;
-            max-width: 400px;
-            margin-left: 20px;
+            background-color: transparent;
+            padding: 30px 40px 30px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .video-text h2 {
+            font-size: 52px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+            line-height: 1.0;
+        }
+
+        .video-text h4 {
+            font-size: 14px;
+            line-height: 1.8;
+            font-weight: 400;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .yt-embeded-holder {
-            flex: 4;
+            flex: 1;
             position: relative;
-            max-width: 100%;
-            max-height: 0;
+            width: 100%;
             padding-bottom: 40%;
             overflow: hidden;
         }
@@ -171,9 +195,14 @@
         position: absolute;
         top: 0;
         left: 0;
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: cover; /* Ensure the image covers the container */
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .yt-embeded-holder img:hover {
+        transform: scale(1.02);
     }
 </style>
 </head> <body> <header> 
@@ -199,8 +228,8 @@
             <div class="video-wrapper">
                 <div class="video-container">
                     <div class="video-text">
-                        <h2><br>The Goatman<br></h2>
-                        <h4><br>2025 Short Film<br> <br> A painted journey through <br> a strange world<br></h4>
+                        <h2>THE GOATMAN</h2>
+                        <h4>2025 SHORT FILM<br><br>A PAINTED JOURNEY THROUGH A STRANGE WORLD</h4>
                     </div>
                     <div class="yt-embeded-holder">
                         <a href="https://www.youtube.com/watch?v=_8m2P_TAWSE" target="_blank">
@@ -216,8 +245,8 @@
             <div class="video-wrapper">
                 <div class="video-container">
                     <div class="video-text">
-                        <h2><br>The Call<br></h2>
-                        <h4><br>2024 Short film.<br> <br> </vr>A Kafkaesque <br>reflection <br> of modern <br> digital life.</h4>
+                        <h2>THE CALL</h2>
+                        <h4>2024 SHORT FILM<br><br>A KAFKAESQUE REFLECTION OF MODERN DIGITAL LIFE</h4>
                     </div>
                     <div class="yt-embeded-holder">
                         <a href="https://www.youtube.com/watch?v=85gvlt7RyTA" target="_blank">
@@ -233,8 +262,8 @@
             <div class="video-wrapper">
                 <div class="video-container">
                     <div class="video-text">
-                        <h2>Bound by Boards<br></h2>
-                        <h4><br>2025 Short Doc<br> Connections made <br> through griptape.<br> <br> Credt: DP</h4>
+                        <h2>BOUND BY BOARDS</h2>
+                        <h4>2025 SHORT DOC<br><br>CONNECTIONS MADE THROUGH GRIPTAPE<br><br>CREDIT: DP</h4>
                     </div>
                     <div class="yt-embeded-holder">
                         <a href="https://www.youtube.com/watch?v=84KcwAFeiZg" target="_blank">
