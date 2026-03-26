@@ -184,6 +184,49 @@
         box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
         z-index: 10;
       }
+
+      /* Flipbook viewer styles */
+      .flipbook-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+
+      #flipbook-viewer {
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .flipbook-controls {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .flipbook-controls button {
+        background: none;
+        color: white;
+        border: 2px solid white;
+        padding: 10px 20px;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+      }
+
+      .flipbook-controls button:hover {
+        background: white;
+        color: #111;
+      }
+
+      .flipbook-page-info {
+        color: #ccc;
+        font-size: 14px;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
@@ -221,7 +264,14 @@
       </div>
     </section>
 
+    <!-- PDF.js library for rendering PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Flipbook viewer library -->
+    <script src="Handbook_Files/flipbook-viewer-master/dist/flipbook-viewer.js"></script>
     <script>
+      // Set up PDF.js worker
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
       const projects = {
         project1: {
           title: "Student Meal Plan App Prototype",
@@ -262,7 +312,11 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
           description: `A comprehensive visual guide exploring the fundamental principles of design.<br><br>
         This handbook serves as both a personal reference and a creative exploration of typography, color theory, composition, and visual hierarchy.<br><br>
         Each spread demonstrates practical applications of design principles through carefully crafted layouts and thoughtful use of whitespace.`,
-          images: ["../Mealplan.jpg"],
+          flipbookImages: {
+            basePath: "Handbook_Files/handbook-pages/page-",
+            pageCount: 22,
+            extension: ".png"
+          },
         },
         project5: {
           title: "Voices 2026",
@@ -273,9 +327,17 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
         },
       };
 
+      // Global variable to track current flipbook viewer
+      let currentViewer = null;
+
       function showProject(key) {
         const project = projects[key];
         const imagesContainer = document.getElementById("images");
+
+        // Clean up previous flipbook viewer if exists
+        if (currentViewer) {
+          currentViewer = null;
+        }
 
         document.getElementById("description").innerHTML =
           `<h2>${project.title}</h2><p>${project.description}</p>`;
@@ -287,7 +349,39 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
           imagesContainer.classList.add("grid-5");
         }
 
-        if (project.images) {
+        if (project.flipbookImages) {
+          // Create flipbook viewer using pre-rendered images (fast!)
+          imagesContainer.innerHTML = `
+            <div class="flipbook-container">
+              <div id="flipbook-viewer"></div>
+              <div class="flipbook-controls">
+                <button id="flip-prev">← Previous</button>
+                <button id="flip-next">Next →</button>
+                <button id="flip-zoom">Zoom</button>
+              </div>
+              <div class="flipbook-page-info" id="page-info">Loading...</div>
+            </div>
+          `;
+
+          // Initialize the flipbook with images
+          initFlipbookImages(project.flipbookImages);
+        } else if (project.flipbook) {
+          // Create flipbook viewer for PDF
+          imagesContainer.innerHTML = `
+            <div class="flipbook-container">
+              <div id="flipbook-viewer"></div>
+              <div class="flipbook-controls">
+                <button id="flip-prev">← Previous</button>
+                <button id="flip-next">Next →</button>
+                <button id="flip-zoom">Zoom</button>
+              </div>
+              <div class="flipbook-page-info" id="page-info">Loading...</div>
+            </div>
+          `;
+
+          // Initialize the flipbook
+          initFlipbook(project.flipbook);
+        } else if (project.images) {
           imagesContainer.innerHTML = project.images
             .map((src) => `<img src="${src}" alt="${project.title}">`)
             .join("");
@@ -298,6 +392,297 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
         } else {
           imagesContainer.innerHTML = `<p>No visuals available.</p>`;
         }
+      }
+
+      // Initialize flipbook viewer with pre-rendered images (FAST!)
+      function initFlipbookImages(config) {
+        const pageInfo = document.getElementById("page-info");
+        const flipViewerEl = document.getElementById("flipbook-viewer");
+        pageInfo.textContent = "Loading...";
+
+        const { basePath, pageCount, extension } = config;
+        const cache = [];
+
+        // Add empty page at start, black page at end
+        // Index 0 = empty, Index 1-pageCount = actual pages, Index pageCount+1 = black
+        const totalPages = pageCount + 2;
+
+        // Create a black page image
+        let blackPageCache = null;
+        function getBlackPage() {
+          if (blackPageCache) return blackPageCache;
+          const canvas = document.createElement('canvas');
+          canvas.width = 1200;
+          canvas.height = 1553;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#111111';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          const img = new Image();
+          img.src = canvas.toDataURL();
+          blackPageCache = {
+            img,
+            num: pageCount + 1,
+            width: canvas.width,
+            height: canvas.height,
+          };
+          return blackPageCache;
+        }
+
+        // Preload page images
+        function preloadImage(bookPageIndex) {
+          return new Promise((resolve, reject) => {
+            if (cache[bookPageIndex] !== undefined) return resolve(cache[bookPageIndex]);
+
+            // Index 0 = empty (no page)
+            if (bookPageIndex === 0) {
+              cache[bookPageIndex] = null;
+              return resolve(null);
+            }
+
+            // File pages are 1-based (page-01.png)
+            const filePageNum = bookPageIndex;
+
+            const img = new Image();
+            const paddedNum = String(filePageNum).padStart(2, '0');
+            img.src = `${basePath}${paddedNum}${extension}`;
+
+            img.onload = () => {
+              cache[bookPageIndex] = {
+                img,
+                num: bookPageIndex,
+                width: img.width,
+                height: img.height,
+              };
+              resolve(cache[bookPageIndex]);
+            };
+            img.onerror = () => reject(`Failed to load page ${filePageNum}`);
+          });
+        }
+
+        // Create book interface
+        const book = {
+          numPages: () => totalPages,
+          getPage: (n, cb) => {
+            // Return nothing for empty slots or out of bounds
+            if (n < 0 || n >= totalPages) return cb();
+            if (n === 0) return cb(); // Empty slot at start
+            if (n > pageCount) return cb(null, getBlackPage()); // Black page at end
+
+            if (cache[n]) return cb(null, cache[n]);
+
+            preloadImage(n)
+              .then(result => {
+                if (result) cb(null, result);
+                else cb();
+              })
+              .catch(err => cb(err));
+          }
+        };
+
+        // Preload first few pages (skip index 0 since it's empty)
+        const initialPages = Math.min(5, pageCount);
+        const preloadPromises = [];
+        for (let i = 1; i <= initialPages; i++) {
+          preloadPromises.push(preloadImage(i));
+        }
+
+        Promise.all(preloadPromises)
+          .then(() => {
+            // Calculate responsive size
+            const containerWidth = flipViewerEl.parentElement.offsetWidth;
+            const width = Math.min(900, containerWidth - 40);
+            const height = Math.floor(width * 0.7);
+
+            const opts = {
+              width: width,
+              height: height,
+              backgroundColor: "#111111",
+              boxColor: "#111111",
+              boxBorder: 0,
+            };
+
+            flipbook.init(book, flipViewerEl, opts, (err, viewer) => {
+              if (err) {
+                console.error(err);
+                pageInfo.textContent = "Error loading flipbook";
+                return;
+              }
+
+              currentViewer = viewer;
+              pageInfo.textContent = `Page 1 of ${pageCount}`;
+
+              // Track page views
+              viewer.on("seen", n => {
+                const displayPage = Math.max(1, Math.min(n, pageCount));
+                pageInfo.textContent = `Page ${displayPage} of ${pageCount}`;
+                // Preload next pages when viewing
+                for (let i = 1; i <= 4; i++) {
+                  if (n + i <= pageCount) preloadImage(n + i);
+                }
+              });
+
+              // Set up controls
+              document.getElementById("flip-next").onclick = () => viewer.flip_forward();
+              document.getElementById("flip-prev").onclick = () => viewer.flip_back();
+              document.getElementById("flip-zoom").onclick = () => viewer.zoom();
+
+              // Preload remaining pages in background
+              for (let i = initialPages + 1; i <= pageCount; i++) {
+                setTimeout(() => preloadImage(i), (i - initialPages) * 100);
+              }
+            });
+          })
+          .catch(err => {
+            console.error("Failed to load images:", err);
+            pageInfo.textContent = "Failed to load handbook";
+          });
+      }
+
+      // Initialize flipbook viewer with PDF
+      function initFlipbook(pdfPath) {
+        const pageInfo = document.getElementById("page-info");
+        const flipViewerEl = document.getElementById("flipbook-viewer");
+        pageInfo.textContent = "Loading PDF...";
+
+        // Page cache and render queue
+        const cache = [];
+        const pendingCallbacks = {};
+        let isRendering = false;
+        const renderQueue = [];
+
+        // Process render queue one at a time to avoid overwhelming the browser
+        function processRenderQueue() {
+          if (isRendering || renderQueue.length === 0) return;
+          isRendering = true;
+          const { pdf, n, cb } = renderQueue.shift();
+
+          renderPage(pdf, n, (err, result) => {
+            isRendering = false;
+            if (cb) cb(err, result);
+            // Continue processing queue
+            setTimeout(processRenderQueue, 10);
+          });
+        }
+
+        // Render a single page
+        function renderPage(pdf, n, cb) {
+          pdf.getPage(n).then(page => {
+            // Use lower scale for faster rendering
+            const scale = 1.0;
+            const viewport = page.getViewport({ scale });
+
+            const canvas = document.createElement("canvas");
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            const context = canvas.getContext("2d");
+            const renderContext = {
+              canvasContext: context,
+              viewport,
+            };
+
+            page.render(renderContext).promise.then(() => {
+              // Create image from canvas
+              const img = new Image();
+              img.onload = () => {
+                cache[n] = {
+                  img,
+                  num: n,
+                  width: img.width,
+                  height: img.height,
+                };
+                cb(null, cache[n]);
+              };
+              img.onerror = () => cb("Failed to load image");
+              img.src = canvas.toDataURL("image/jpeg", 0.85); // JPEG is faster than PNG
+            }).catch(err => cb(err));
+          }).catch(err => cb(err));
+        }
+
+        // Pre-cache pages in background
+        function precachePages(pdf, startPage, count) {
+          for (let i = 0; i < count && startPage + i <= pdf.numPages; i++) {
+            const pageNum = startPage + i;
+            if (!cache[pageNum] && !pendingCallbacks[pageNum]) {
+              pendingCallbacks[pageNum] = true;
+              renderQueue.push({ pdf, n: pageNum, cb: () => { delete pendingCallbacks[pageNum]; } });
+            }
+          }
+          processRenderQueue();
+        }
+
+        pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
+          const book = {
+            pdf: pdf,
+            numPages: () => pdf.numPages,
+            getPage: (n, cb) => {
+              if (!n || n > pdf.numPages) return cb();
+              if (cache[n]) return cb(null, cache[n]);
+
+              // Priority render for requested page
+              renderPage(pdf, n, (err, result) => {
+                cb(err, result);
+                // Pre-cache next few pages
+                precachePages(pdf, n + 1, 4);
+              });
+            }
+          };
+
+          // Calculate responsive size
+          const containerWidth = flipViewerEl.parentElement.offsetWidth;
+          const width = Math.min(900, containerWidth - 40);
+          const height = Math.floor(width * 0.7);
+
+          const opts = {
+            width: width,
+            height: height,
+            backgroundColor: "#353535",
+          };
+
+          // Pre-cache first few pages before initializing
+          pageInfo.textContent = "Preparing pages...";
+
+          // Render first 4 pages, then initialize flipbook
+          let pagesReady = 0;
+          const pagesToPreload = Math.min(4, pdf.numPages);
+
+          for (let i = 1; i <= pagesToPreload; i++) {
+            renderPage(pdf, i, () => {
+              pagesReady++;
+              pageInfo.textContent = `Loading page ${pagesReady}/${pagesToPreload}...`;
+
+              if (pagesReady === pagesToPreload) {
+                // All initial pages ready, start flipbook
+                flipbook.init(book, flipViewerEl, opts, (err, viewer) => {
+                  if (err) {
+                    console.error(err);
+                    pageInfo.textContent = "Error loading flipbook";
+                    return;
+                  }
+
+                  currentViewer = viewer;
+                  pageInfo.textContent = `Page 1 of ${viewer.page_count}`;
+
+                  // Track page views
+                  viewer.on("seen", n => {
+                    pageInfo.textContent = `Page ${n} of ${viewer.page_count}`;
+                  });
+
+                  // Set up controls
+                  document.getElementById("flip-next").onclick = () => viewer.flip_forward();
+                  document.getElementById("flip-prev").onclick = () => viewer.flip_back();
+                  document.getElementById("flip-zoom").onclick = () => viewer.zoom();
+
+                  // Continue pre-caching remaining pages in background
+                  precachePages(pdf, 5, pdf.numPages - 4);
+                });
+              }
+            });
+          }
+        }).catch(err => {
+          console.error("Failed to load PDF:", err);
+          pageInfo.textContent = "Failed to load PDF";
+        });
       }
     </script>
   </body>
