@@ -1,8 +1,8 @@
-'use strict'
-import { h } from '@tpp/htm-x';
-import * as EventEmitter from 'events';
+"use strict";
+import { h } from "@tpp/htm-x";
+import * as EventEmitter from "events";
 
-class FlipbookViewer extends EventEmitter {};
+class FlipbookViewer extends EventEmitter {}
 
 const outputScale = window.devicePixelRatio || 1; // Support HiDPI-screens
 
@@ -14,11 +14,11 @@ export function flipbookViewer(ctx, cb) {
   const viewer = new FlipbookViewer();
   viewer.page_count = ctx.book.numPages();
 
-  setupCanvas(ctx, err => {
-    if(err) return cb(err);
+  setupCanvas(ctx, (err) => {
+    if (err) return cb(err);
 
-    calcLayoutParameters(ctx, err => {
-      if(err) return cb(err);
+    calcLayoutParameters(ctx, (err) => {
+      if (err) return cb(err);
 
       ctx.app.c(ctx.canvas.e);
 
@@ -32,54 +32,49 @@ export function flipbookViewer(ctx, cb) {
       cb(null, viewer);
 
       showPages(ctx, viewer);
-
     });
-
   });
-
 }
 
-
 function setupControls(ctx, viewer) {
-
-  viewer.zoom = zoom => {
+  viewer.zoom = (zoom) => {
     zoom = Number(zoom);
-    if(isNaN(zoom)) {
+    if (isNaN(zoom)) {
       zoom = ctx.zoom * 2 + 1;
-      if(zoom > 4) zoom = 0;
+      if (zoom > 4) zoom = 0;
     }
-    if(!zoom) {
+    if (!zoom) {
       ctx.zoom = 0;
       ctx.pan = null;
       showPages(ctx, viewer);
     } else {
       animate({
-        draw: curr => {
+        draw: (curr) => {
           ctx.zoom = curr.zoom;
           showPages(ctx, viewer);
         },
         duration: 500,
         from: { zoom: ctx.zoom },
         to: { zoom },
-        timing: t => t * t * (3.0 - 2.0 * t),
-      })
+        timing: (t) => t * t * (3.0 - 2.0 * t),
+      });
     }
-  }
+  };
 
   viewer.flip_forward = () => {
-    if(ctx.flipNdx || ctx.flipNdx === 0) return;
-    if(ctx.book.numPages() <= 1) return;
-    if((ctx.showNdx * 2 + 1) >= ctx.book.numPages()) return;
+    if (ctx.flipNdx || ctx.flipNdx === 0) return;
+    if (ctx.book.numPages() <= 1) return;
+    if (ctx.showNdx * 2 + 1 >= ctx.book.numPages()) return;
     ctx.flipNdx = ctx.showNdx + 1;
     flip_1(ctx);
-  }
+  };
   viewer.flip_back = () => {
-    if(ctx.flipNdx || ctx.flipNdx === 0) return;
-    if(ctx.book.numPages() <= 1) return;
-    if(!ctx.showNdx) return;
+    if (ctx.flipNdx || ctx.flipNdx === 0) return;
+    if (ctx.book.numPages() <= 1) return;
+    if (!ctx.showNdx) return;
     ctx.flipNdx = ctx.showNdx - 1;
     flip_1(ctx);
-  }
+  };
 
   function flip_1(ctx) {
     // Skip animation - just change page instantly
@@ -89,7 +84,6 @@ function setupControls(ctx, viewer) {
   }
 }
 
-
 /*    way/
  * set up a canvas element with some width
  * and height and use the first page to
@@ -97,10 +91,10 @@ function setupControls(ctx, viewer) {
  */
 function setupCanvas(ctx, cb) {
   const canvas = {
-    e: h("canvas")
+    e: h("canvas"),
   };
 
-  canvas.ctx = canvas.e.getContext('2d');
+  canvas.ctx = canvas.e.getContext("2d");
   canvas.e.width = Math.floor(ctx.sz.boxw * outputScale);
   canvas.e.height = Math.floor(ctx.sz.boxh * outputScale);
   canvas.e.style.width = Math.floor(ctx.sz.boxw) + "px";
@@ -119,16 +113,16 @@ function calcLayoutParameters(ctx, cb) {
   const h = ctx.sz.boxh * outputScale;
 
   ctx.book.getPage(1, (err, pg) => {
-    if(err) return cb(err);
+    if (err) return cb(err);
 
-    const usableH = 1 - (ctx.sz.marginTop/100);
+    const usableH = 1 - ctx.sz.marginTop / 100;
     let height = h * usableH;
-    const usableW = 1 - (ctx.sz.marginLeft/100);
-    let width = (pg.width * 2) * (height / pg.height);
+    const usableW = 1 - ctx.sz.marginLeft / 100;
+    let width = pg.width * 2 * (height / pg.height);
     const maxwidth = w * usableW;
-    if(width > maxwidth) {
+    if (width > maxwidth) {
       width = maxwidth;
-      height = (pg.height) * (width / (pg.width * 2));
+      height = pg.height * (width / (pg.width * 2));
     }
 
     ctx.layout = {
@@ -148,25 +142,25 @@ function calcLayoutParameters(ctx, cb) {
  * actual handlers if set up
  */
 function setupMouseHandler(ctx, viewer) {
-  const handlers = [
-    setupPanning(ctx, viewer),
-  ];
+  const handlers = [setupPanning(ctx, viewer)];
 
   const events = [
-    "onmouseenter", "onmouseleave",
+    "onmouseenter",
+    "onmouseleave",
     "onmousemove",
     "onclick",
-    "onmousedown", "onmouseup",
+    "onmousedown",
+    "onmouseup",
   ];
 
   const attr = {};
-  events.map(e => {
-    attr[e] = evt => {
-      handlers.map(h => {
-        if(h[e]) h[e](evt);
-      })
-    }
-  })
+  events.map((e) => {
+    attr[e] = (evt) => {
+      handlers.map((h) => {
+        if (h[e]) h[e](evt);
+      });
+    };
+  });
 
   ctx.app.attr(attr);
 }
@@ -184,9 +178,9 @@ function setupPanning(ctx, viewer) {
   }
 
   function onmousedown(evt) {
-    if(!ctx.zoom) return;
+    if (!ctx.zoom) return;
     start = mousePt(ctx, evt);
-    if(ctx.pan) {
+    if (ctx.pan) {
       start.x -= ctx.pan.x;
       start.y -= ctx.pan.y;
     }
@@ -198,10 +192,10 @@ function setupPanning(ctx, viewer) {
 
   function onmousemove(evt) {
     const pt = mousePt(ctx, evt);
-    if(start && inBox(ctx, pt)) {
+    if (start && inBox(ctx, pt)) {
       ctx.pan = {
-        x: (pt.x - start.x),
-        y: (pt.y - start.y),
+        x: pt.x - start.x,
+        y: pt.y - start.y,
       };
       showPages(ctx, viewer);
     } else {
@@ -215,7 +209,6 @@ function setupPanning(ctx, viewer) {
     onmouseup,
     onmousemove,
   };
-
 }
 
 /*    way/
@@ -223,8 +216,9 @@ function setupPanning(ctx, viewer) {
  */
 function inBox(ctx, pt) {
   const rt = currBox(ctx);
-  return (rt.top <= pt.y && rt.bottom >= pt.y &&
-          rt.left <= pt.x && rt.right >= pt.x);
+  return (
+    rt.top <= pt.y && rt.bottom >= pt.y && rt.left <= pt.x && rt.right >= pt.x
+  );
 }
 
 /*    way/
@@ -234,7 +228,7 @@ function mousePt(ctx, evt) {
   const rect = ctx.app.getBoundingClientRect();
   return {
     x: evt.clientX - rect.x,
-    y: evt.clientY - rect.y
+    y: evt.clientY - rect.y,
   };
 }
 
@@ -257,16 +251,16 @@ function currBox(ctx) {
 function calcLayout(ctx) {
   let layout = ctx.layout;
 
-  if(ctx.zoom > 0) {
+  if (ctx.zoom > 0) {
     layout = Object.assign({}, layout);
-    if(ctx.zoom) {
+    if (ctx.zoom) {
       const zoom = ctx.zoom * 0.5;
-      layout.left = layout.left - layout.width * zoom / 2;
-      layout.top = layout.top - layout.height * zoom / 2;
+      layout.left = layout.left - (layout.width * zoom) / 2;
+      layout.top = layout.top - (layout.height * zoom) / 2;
       layout.width = layout.width * (1 + zoom);
       layout.height = layout.height * (1 + zoom);
     }
-    if(ctx.pan) {
+    if (ctx.pan) {
       layout.left += ctx.pan.x;
       layout.top += ctx.pan.y;
       layout.mid += ctx.pan.x;
@@ -286,14 +280,15 @@ function showPages(ctx, viewer) {
   canvas.ctx.save();
   show_bg_1();
   ctx.book.getPage(left_, (err, left) => {
-    if(err) return console.error(err);
-    if(!ctx.flipNdx && ctx.flipNdx !== 0 && left) viewer.emit('seen', left_);
+    if (err) return console.error(err);
+    if (!ctx.flipNdx && ctx.flipNdx !== 0 && left) viewer.emit("seen", left_);
     ctx.book.getPage(right_, (err, right) => {
-      if(err) return console.error(err);
-      if(!ctx.flipNdx && ctx.flipNdx !== 0 && right) viewer.emit('seen', right_);
+      if (err) return console.error(err);
+      if (!ctx.flipNdx && ctx.flipNdx !== 0 && right)
+        viewer.emit("seen", right_);
       show_pgs_1(left, right, () => canvas.ctx.restore());
-    })
-  })
+    });
+  });
 
   /*    way/
    * get the current layout and, if no zoom, show the
@@ -303,15 +298,15 @@ function showPages(ctx, viewer) {
   function show_pgs_1(left, right, cb) {
     const layout = calcLayout(ctx);
 
-    if(ctx.zoom == 0) show_bx_1(layout);
+    if (ctx.zoom == 0) show_bx_1(layout);
 
     const page_l = Object.assign({}, layout);
     const page_r = Object.assign({}, layout);
     page_l.width /= 2;
     page_r.width /= 2;
     page_r.left = layout.mid;
-    if(left) show_pg_1(left, page_l);
-    if(right) show_pg_1(right, page_r);
+    if (left) show_pg_1(left, page_l);
+    if (right) show_pg_1(right, page_r);
     cb();
   }
 
@@ -321,15 +316,24 @@ function showPages(ctx, viewer) {
 
   function show_bx_1(loc) {
     const border = ctx.sz.bx_border;
-    if(border <= 0) return; // Skip drawing box if no border
+    if (border <= 0) return; // Skip drawing box if no border
     canvas.ctx.fillStyle = ctx.color.bx;
-    canvas.ctx.fillRect(loc.left - border, loc.top-border, loc.width+border*2, loc.height+2*border);
+    canvas.ctx.fillRect(
+      loc.left - border,
+      loc.top - border,
+      loc.width + border * 2,
+      loc.height + 2 * border,
+    );
   }
 
   function show_bg_1() {
-
     canvas.ctx.fillStyle = ctx.color.bg;
-    canvas.ctx.fillRect(0, 0, ctx.sz.boxw*outputScale, ctx.sz.boxh*outputScale);
+    canvas.ctx.fillRect(
+      0,
+      0,
+      ctx.sz.boxw * outputScale,
+      ctx.sz.boxh * outputScale,
+    );
   }
 }
 
@@ -347,19 +351,17 @@ function showFlip(ctx, viewer) {
   canvas.ctx.save();
 
   ctx.book.getPage(left, (err, left) => {
-    if(err) return console.error(err);
+    if (err) return console.error(err);
     ctx.book.getPage(right, (err, right) => {
-      if(err) return console.error(err);
+      if (err) return console.error(err);
       show_flip_1(left, right, ctx.flipFrac, () => canvas.ctx.restore());
-    })
-  })
-
+    });
+  });
 
   function show_flip_1(left, right, frac, cb) {
     let loc, show, width, region, xloc, oheight, otop, controlpt, endpt;
 
-    if(ctx.showNdx < ctx.flipNdx) {
-
+    if (ctx.showNdx < ctx.flipNdx) {
       loc = Object.assign({}, layout);
       loc.width /= 2;
       loc.left = layout.mid;
@@ -368,10 +370,16 @@ function showFlip(ctx, viewer) {
       xloc = xpand_rect_1(ctx, loc);
       canvas.ctx.save();
       region = new Path2D();
-      region.rect(show, xloc.top-5, width, xloc.height+10);
+      region.rect(show, xloc.top - 5, width, xloc.height + 10);
       canvas.ctx.clip(region);
-      if(right) {
-        canvas.ctx.drawImage(right.img, loc.left, loc.top, loc.width, loc.height);
+      if (right) {
+        canvas.ctx.drawImage(
+          right.img,
+          loc.left,
+          loc.top,
+          loc.width,
+          loc.height,
+        );
       } else {
         show_empty_1(ctx.color.bg, xloc);
       }
@@ -384,8 +392,8 @@ function showFlip(ctx, viewer) {
 
       oheight = loc.height;
       otop = loc.top;
-      loc.height *= (1 + strength * 0.1);
-      loc.top -= (loc.height-oheight)/2;
+      loc.height *= 1 + strength * 0.1;
+      loc.top -= (loc.height - oheight) / 2;
 
       canvas.ctx.save();
       region = new Path2D();
@@ -403,7 +411,7 @@ function showFlip(ctx, viewer) {
       region.lineTo(endpt.x, otop);
       controlpt = {
         x: loc.left + width,
-        y: loc.top
+        y: loc.top,
       };
       endpt = {
         x: loc.left,
@@ -414,12 +422,11 @@ function showFlip(ctx, viewer) {
       canvas.ctx.drawImage(left.img, loc.left, loc.top, loc.width, loc.height);
       canvas.ctx.restore();
 
-
       canvas.ctx.save();
       const shadowsz = (loc.width / 2) * Math.max(Math.min(strength, 0.5), 0);
 
       // Draw a sharp shadow on the left side of the page
-      canvas.ctx.strokeStyle = 'rgba(0,0,0,'+(0.1 * strength)+')';
+      canvas.ctx.strokeStyle = "rgba(0,0,0," + 0.1 * strength + ")";
       canvas.ctx.lineWidth = 30 * strength;
       canvas.ctx.beginPath();
       canvas.ctx.moveTo(loc.left, otop);
@@ -427,31 +434,39 @@ function showFlip(ctx, viewer) {
       canvas.ctx.stroke();
 
       // Right side drop shadow
-      let gradient = canvas.ctx.createLinearGradient(loc.left + width, otop, loc.left+width+shadowsz, otop);
-      gradient.addColorStop(0, 'rgba(0,0,0,'+ (0.3*strength)+')');
-      gradient.addColorStop(0.8, 'rgba(0,0,0,0.0)');
+      let gradient = canvas.ctx.createLinearGradient(
+        loc.left + width,
+        otop,
+        loc.left + width + shadowsz,
+        otop,
+      );
+      gradient.addColorStop(0, "rgba(0,0,0," + 0.3 * strength + ")");
+      gradient.addColorStop(0.8, "rgba(0,0,0,0.0)");
       canvas.ctx.fillStyle = gradient;
       canvas.ctx.fillRect(loc.left + width, otop, width + shadowsz, oheight);
 
       canvas.ctx.restore();
-
     } else {
-
       loc = Object.assign({}, layout);
       loc.width /= 2;
       width = loc.width * frac + ctx.sz.bx_border;
       xloc = xpand_rect_1(ctx, loc);
       canvas.ctx.save();
       region = new Path2D();
-      region.rect(xloc.left, xloc.top-5, width, xloc.height+10);
+      region.rect(xloc.left, xloc.top - 5, width, xloc.height + 10);
       canvas.ctx.clip(region);
-      if(left) {
-        canvas.ctx.drawImage(left.img, loc.left, loc.top, loc.width, loc.height);
+      if (left) {
+        canvas.ctx.drawImage(
+          left.img,
+          loc.left,
+          loc.top,
+          loc.width,
+          loc.height,
+        );
       } else {
         show_empty_1(ctx.color.bg, loc);
       }
       canvas.ctx.restore();
-
 
       loc = Object.assign({}, layout);
       loc.width /= 2;
@@ -461,8 +476,8 @@ function showFlip(ctx, viewer) {
 
       oheight = loc.height;
       otop = loc.top;
-      loc.height *= (1 + strength * 0.1);
-      loc.top -= (loc.height-oheight)/2;
+      loc.height *= 1 + strength * 0.1;
+      loc.top -= (loc.height - oheight) / 2;
 
       canvas.ctx.save();
       region = new Path2D();
@@ -480,7 +495,7 @@ function showFlip(ctx, viewer) {
       region.lineTo(endpt.x, otop);
       controlpt = {
         x: show + width,
-        y: loc.top
+        y: loc.top,
       };
       endpt = {
         x: show,
@@ -491,12 +506,11 @@ function showFlip(ctx, viewer) {
       canvas.ctx.drawImage(right.img, loc.left, loc.top, loc.width, loc.height);
       canvas.ctx.restore();
 
-
       canvas.ctx.save();
       const shadowsz = (loc.width / 2) * Math.max(Math.min(strength, 0.5), 0);
 
       // Draw a sharp shadow on the right side of the page
-      canvas.ctx.strokeStyle = 'rgba(0,0,0,'+(0.1 * strength)+')';
+      canvas.ctx.strokeStyle = "rgba(0,0,0," + 0.1 * strength + ")";
       canvas.ctx.lineWidth = 30 * strength;
       canvas.ctx.beginPath();
       canvas.ctx.moveTo(show + width, otop);
@@ -504,14 +518,18 @@ function showFlip(ctx, viewer) {
       canvas.ctx.stroke();
 
       // Left side drop shadow
-      let gradient = canvas.ctx.createLinearGradient(show, otop, show-shadowsz, otop);
-      gradient.addColorStop(0, 'rgba(0,0,0,'+ (0.3*strength)+')');
-      gradient.addColorStop(0.8, 'rgba(0,0,0,0.0)');
+      let gradient = canvas.ctx.createLinearGradient(
+        show,
+        otop,
+        show - shadowsz,
+        otop,
+      );
+      gradient.addColorStop(0, "rgba(0,0,0," + 0.3 * strength + ")");
+      gradient.addColorStop(0.8, "rgba(0,0,0,0.0)");
       canvas.ctx.fillStyle = gradient;
-      canvas.ctx.fillRect(show-shadowsz, otop, shadowsz, oheight);
+      canvas.ctx.fillRect(show - shadowsz, otop, shadowsz, oheight);
 
       canvas.ctx.restore();
-
     }
 
     cb();
@@ -520,7 +538,12 @@ function showFlip(ctx, viewer) {
   function show_empty_1(fillStyle, loc) {
     canvas.ctx.fillStyle = fillStyle;
     const border = ctx.sz.bx_border;
-    canvas.ctx.fillRect(loc.left - border, loc.top-border-5, loc.width+border*2, loc.height+2*border+10);
+    canvas.ctx.fillRect(
+      loc.left - border,
+      loc.top - border - 5,
+      loc.width + border * 2,
+      loc.height + 2 * border + 10,
+    );
   }
 
   function xpand_rect_1(ctx, loc) {
@@ -532,15 +555,14 @@ function showFlip(ctx, viewer) {
       height: loc.height + border * 2,
     };
   }
-
 }
 
 /*    understand/
  * animate the properties {from -> to} , calling ondone when ends
  */
 function animate({ draw, duration, from, to, timing, ondone }) {
-  if(!ondone) ondone = () => 1;
-  if(!timing) timing = t => t;
+  if (!ondone) ondone = () => 1;
+  if (!timing) timing = (t) => t;
 
   const start = Date.now();
 
@@ -548,17 +570,17 @@ function animate({ draw, duration, from, to, timing, ondone }) {
 
   function animate_1() {
     let frac = (Date.now() - start) / duration;
-    if(frac > 1) frac = 1;
+    if (frac > 1) frac = 1;
     const curr = progress_1(frac);
     draw(curr);
-    if(frac === 1) ondone();
+    if (frac === 1) ondone();
     else requestAnimationFrame(animate_1);
   }
 
   function progress_1(frac) {
     frac = timing(frac);
     const ret = Object.assign({}, from);
-    for(let k in from) {
+    for (let k in from) {
       const s = Number(from[k]);
       const e = Number(to[k]);
       ret[k] = s + (e - s) * frac;
