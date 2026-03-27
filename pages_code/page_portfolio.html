@@ -146,48 +146,43 @@
     <h2 class="page-title">ARCHIVES</h2>
 
     <div class="container">
-      <div class="left-column">
-        <a href="../projects_code/project1.html">
-          <img
-            src="../NationalGeo_CollageWork.jpg"
-            alt="National Geo Collage Work"
-          />
-        </a>
-        <a href="../projects_code/project2.html">
-          <img src="../Song cover v1.jpg" alt="Song Cover" />
-        </a>
-        <a href="../projects_code/project3.html">
-          <img src="../A5_Charlie_Cilla_Paradox.jpg" alt="Paradox" />
-        </a>
-      </div>
-      <div class="middle-column">
-        <a href="../projects_code/project4.html">
-          <img src="../ahftw_UOW_works2.jpg" alt="AHFTW UOW Works" />
-        </a>
-        <a href="../projects_code/project5.html">
-          <img
-            src="../Editorial_Illustration_scientificamerican.jpg"
-            alt="Editorial Illustration"
-          />
-        </a>
-        <a href="../projects_code/project6.html">
-          <img src="../InnisdaleSS_Print.jpg" alt="Innisdale Print" />
-        </a>
-      </div>
-      <div class="right-column">
-        <a href="../projects_code/project7.html">
-          <img src="../huh_UOW_Works1.jpg" alt="Huh UOW Works" />
-        </a>
-        <a href="../projects_code/project8.html">
-          <img src="../DDE_UOW_Works4.jpg" alt="DDE UOW Works" />
-        </a>
-        <a href="../projects_code/project9.html">
-          <img
-            src="../A7_Charlie_Cilla_finalassignment2.png"
-            alt="Final Assignment"
-          />
-        </a>
-      </div>
+      <div class="left-column" id="archive-left"></div>
+      <div class="middle-column" id="archive-middle"></div>
+      <div class="right-column" id="archive-right"></div>
     </div>
+
+    <footer style="text-align: center; padding: 30px 20px; color: #333;">
+      <span style="color: #444; font-size: 11px;">&copy; 2025 Charlie Cilla</span>
+    </footer>
+
+    <!-- Admin Panel Scripts -->
+    <link rel="stylesheet" href="../admin/admin.css">
+    <script src="../admin/data.js"></script>
+    <script src="../admin/admin.js"></script>
+    <script>
+      // Render archive page projects dynamically
+      function renderArchivePage() {
+        const projects = AdminData.getArchiveProjects().filter(p => p.visible);
+
+        const leftProjects = projects.filter(p => p.column === 'left');
+        const middleProjects = projects.filter(p => p.column === 'middle');
+        const rightProjects = projects.filter(p => p.column === 'right');
+
+        function renderColumn(columnProjects) {
+          return columnProjects.map(p => `
+            <a href="${p.detailPagePath}">
+              <img src="${p.imagePath}" alt="${p.title}" />
+            </a>
+          `).join('');
+        }
+
+        document.getElementById('archive-left').innerHTML = renderColumn(leftProjects);
+        document.getElementById('archive-middle').innerHTML = renderColumn(middleProjects);
+        document.getElementById('archive-right').innerHTML = renderColumn(rightProjects);
+      }
+
+      // Initial render
+      renderArchivePage();
+    </script>
   </body>
 </html>

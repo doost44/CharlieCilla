@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Projects Page</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .status {
+            background: #222;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .success { border-left: 4px solid #4caf50; }
+        .error { border-left: 4px solid #f44336; }
+        .warning { border-left: 4px solid #ff9800; }
+        button {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #cc3333;
+        }
+        pre {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            overflow: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Projects Page Test</h1>
+
+    <div class="status">
+        <h2>Page Loaded</h2>
+        <p>✓ This HTML page is loading correctly</p>
+    </div>
+
+    <div id="script-test" class="status warning">
+        <h2>JavaScript Test</h2>
+        <p>⏳ Testing JavaScript...</p>
+    </div>
+
+    <div id="data-test" class="status warning">
+        <h2>AdminData Test</h2>
+        <p>⏳ Loading admin/data.js...</p>
+    </div>
+
+    <div id="projects-test" class="status warning">
+        <h2>Projects Data Test</h2>
+        <p>⏳ Loading projects...</p>
+    </div>
+
+    <div id="render-test" class="status warning">
+        <h2>Render Test</h2>
+        <div id="render-output"></div>
+    </div>
+
+    <div>
+        <button onclick="location.href='debug.html'">Open Debug Page</button>
+        <button onclick="location.href='pages_code/page_projects.html'">Open Real Projects Page</button>
+        <button onclick="clearAndReload()">Clear localStorage & Reload</button>
+    </div>
+
+    <!-- Load admin data -->
+    <script src="admin/data.js"></script>
+
+    <script>
+        console.log('Test page script started');
+
+        // Test 1: JavaScript works
+        try {
+            document.getElementById('script-test').className = 'status success';
+            document.getElementById('script-test').innerHTML = '<h2>JavaScript Test</h2><p>✓ JavaScript is executing correctly</p>';
+            console.log('✓ JavaScript test passed');
+        } catch (e) {
+            console.error('✗ JavaScript test failed:', e);
+        }
+
+        // Test 2: AdminData loaded
+        try {
+            if (typeof AdminData !== 'undefined') {
+                document.getElementById('data-test').className = 'status success';
+                document.getElementById('data-test').innerHTML = '<h2>AdminData Test</h2><p>✓ AdminData module loaded successfully</p>';
+                console.log('✓ AdminData loaded');
+            } else {
+                throw new Error('AdminData is undefined');
+            }
+        } catch (e) {
+            document.getElementById('data-test').className = 'status error';
+            document.getElementById('data-test').innerHTML = '<h2>AdminData Test</h2><p>✗ AdminData failed to load: ' + e.message + '</p>';
+            console.error('✗ AdminData test failed:', e);
+        }
+
+        // Test 3: Get projects
+        try {
+            const projects = AdminData.getProjects();
+            const visible = projects.filter(p => p.visible);
+
+            document.getElementById('projects-test').className = 'status success';
+            document.getElementById('projects-test').innerHTML = `
+                <h2>Projects Data Test</h2>
+                <p>✓ Projects loaded: ${projects.length} total, ${visible.length} visible</p>
+                <pre>${JSON.stringify(visible.map(p => ({ id: p.id, title: p.title, type: p.type, visible: p.visible })), null, 2)}</pre>
+            `;
+            console.log('✓ Projects loaded:', projects);
+
+            // Test 4: Render buttons
+            if (visible.length > 0) {
+                const buttons = visible.map(p =>
+                    `<button onclick="alert('Project: ${p.title}')">${p.title}</button>`
+                ).join('');
+
+                document.getElementById('render-test').className = 'status success';
+                document.getElementById('render-output').innerHTML = `
+                    <h2>Render Test</h2>
+                    <p>✓ Successfully rendered ${visible.length} project buttons:</p>
+                    <div style="margin-top: 10px;">${buttons}</div>
+                `;
+                console.log('✓ Render test passed');
+            } else {
+                document.getElementById('render-test').className = 'status warning';
+                document.getElementById('render-output').innerHTML = `
+                    <h2>Render Test</h2>
+                    <p>⚠ No visible projects to render</p>
+                `;
+            }
+        } catch (e) {
+            document.getElementById('projects-test').className = 'status error';
+            document.getElementById('projects-test').innerHTML = '<h2>Projects Data Test</h2><p>✗ Error: ' + e.message + '</p><pre>' + e.stack + '</pre>';
+            console.error('✗ Projects test failed:', e);
+        }
+
+        function clearAndReload() {
+            localStorage.removeItem('charliecilla_projects');
+            localStorage.removeItem('charliecilla_home_projects');
+            localStorage.removeItem('charliecilla_archive_projects');
+            alert('localStorage cleared! Reloading...');
+            location.reload();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug - Check localStorage</title>
+    <style>
+        body {
+            background: #111;
+            color: white;
+            font-family: monospace;
+            padding: 20px;
+        }
+        pre {
+            background: #222;
+            padding: 15px;
+            border-radius: 8px;
+            overflow: auto;
+        }
+        button {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #cc3333;
+        }
+    </style>
+</head>
+<body>
+    <h1>localStorage Debug</h1>
+
+    <h2>Stored Projects Data:</h2>
+    <pre id="projects-data">Loading...</pre>
+
+    <h2>Stored Home Data:</h2>
+    <pre id="home-data">Loading...</pre>
+
+    <h2>Stored Archives Data:</h2>
+    <pre id="archives-data">Loading...</pre>
+
+    <div>
+        <button onclick="clearProjects()">Clear Projects Data</button>
+        <button onclick="clearAll()">Clear All Data (Reset to Defaults)</button>
+        <button onclick="location.reload()">Refresh</button>
+    </div>
+
+    <script src="admin/data.js"></script>
+    <script>
+        function display() {
+            const projectsRaw = localStorage.getItem('charliecilla_projects');
+            const homeRaw = localStorage.getItem('charliecilla_home_projects');
+            const archivesRaw = localStorage.getItem('charliecilla_archive_projects');
+
+            document.getElementById('projects-data').textContent = projectsRaw || 'Not set (will use defaults)';
+            document.getElementById('home-data').textContent = homeRaw || 'Not set (will use defaults)';
+            document.getElementById('archives-data').textContent = archivesRaw || 'Not set (will use defaults)';
+
+            // Also try to parse and display
+            console.log('Projects from AdminData.getProjects():', AdminData.getProjects());
+            console.log('Home from AdminData.getHomeProjects():', AdminData.getHomeProjects());
+            console.log('Archives from AdminData.getArchiveProjects():', AdminData.getArchiveProjects());
+        }
+
+        function clearProjects() {
+            localStorage.removeItem('charliecilla_projects');
+            alert('Projects data cleared! Refresh to see defaults.');
+            location.reload();
+        }
+
+        function clearAll() {
+            localStorage.removeItem('charliecilla_projects');
+            localStorage.removeItem('charliecilla_home_projects');
+            localStorage.removeItem('charliecilla_archive_projects');
+            alert('All data cleared! Refresh to see defaults.');
+            location.reload();
+        }
+
+        window.addEventListener('load', display);
+    </script>
+</body>
+</html>

@@ -1,0 +1,518 @@
+/* Admin Panel Styles */
+
+.admin-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 10000;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.admin-modal-content {
+  background: #1a1a1a;
+  border-radius: 12px;
+  padding: 30px;
+  position: relative;
+  max-width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid #333;
+}
+
+.admin-login-box {
+  width: 350px;
+  text-align: center;
+}
+
+.admin-login-box h2 {
+  color: #fff;
+  margin: 0 0 25px 0;
+  font-size: 24px;
+}
+
+.admin-login-box input {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 16px;
+  border: 2px solid #333;
+  border-radius: 8px;
+  background: #222;
+  color: #fff;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+}
+
+.admin-login-box input:focus {
+  outline: none;
+  border-color: #ff4444;
+}
+
+.admin-login-box button {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  background: #ff4444;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.admin-login-box button:hover {
+  background: #cc3333;
+}
+
+.admin-panel-box {
+  width: 800px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #333;
+}
+
+.admin-header h2 {
+  color: #fff;
+  margin: 0;
+  font-size: 24px;
+}
+
+.admin-header > div {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.admin-close {
+  font-size: 28px;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.3s;
+  line-height: 1;
+}
+
+.admin-close:hover {
+  color: #fff;
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.admin-tab {
+  padding: 10px 20px;
+  background: #222;
+  border: 2px solid #333;
+  border-radius: 8px;
+  color: #888;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.admin-tab:hover {
+  border-color: #555;
+  color: #fff;
+}
+
+.admin-tab.active {
+  background: #ff4444;
+  border-color: #ff4444;
+  color: #fff;
+}
+
+.admin-tab-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.admin-toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.admin-btn-primary {
+  padding: 10px 20px;
+  background: #ff4444;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.admin-btn-primary:hover {
+  background: #cc3333;
+}
+
+.admin-btn-secondary {
+  padding: 10px 20px;
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.admin-btn-secondary:hover {
+  background: #444;
+}
+
+.admin-project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.admin-project-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: #222;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+.admin-project-item.hidden-project {
+  opacity: 0.5;
+}
+
+.admin-project-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.admin-project-info strong {
+  color: #fff;
+  font-size: 16px;
+}
+
+.admin-project-info span {
+  color: #888;
+  font-size: 12px;
+}
+
+.admin-project-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-btn-small {
+  padding: 6px 12px;
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.3s;
+}
+
+.admin-btn-small:hover {
+  background: #444;
+}
+
+.admin-btn-danger {
+  background: #661111;
+}
+
+.admin-btn-danger:hover {
+  background: #881111;
+}
+
+/* Toggle Switch */
+.admin-toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.admin-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.admin-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #333;
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.admin-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #fff;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.admin-toggle input:checked + .admin-toggle-slider {
+  background-color: #ff4444;
+}
+
+.admin-toggle input:checked + .admin-toggle-slider:before {
+  transform: translateX(20px);
+}
+
+/* Edit Form */
+.admin-edit-box {
+  width: 500px;
+}
+
+.admin-edit-box h2 {
+  color: #fff;
+  margin: 0 0 20px 0;
+  font-size: 20px;
+}
+
+.admin-edit-box form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.admin-edit-box label {
+  color: #888;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.admin-edit-box input,
+.admin-edit-box textarea,
+.admin-edit-box select {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 14px;
+  border: 2px solid #333;
+  border-radius: 6px;
+  background: #222;
+  color: #fff;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.admin-edit-box input:focus,
+.admin-edit-box textarea:focus,
+.admin-edit-box select:focus {
+  outline: none;
+  border-color: #ff4444;
+}
+
+.admin-form-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.admin-form-hint {
+  color: #666;
+  font-size: 11px;
+  margin: -10px 0 5px 0;
+  font-style: italic;
+}
+
+/* Wide Edit Box for Projects */
+.admin-edit-box-wide {
+  width: 600px;
+}
+
+.project-type-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 15px;
+  background: #1f1f1f;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+/* Image Picker Grid */
+.image-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 10px;
+  background: #181818;
+  border-radius: 6px;
+  border: 1px solid #333;
+}
+
+.image-picker-item {
+  position: relative;
+  cursor: pointer;
+  border: 3px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  aspect-ratio: 1;
+}
+
+.image-picker-item:hover {
+  border-color: #666;
+  transform: scale(1.05);
+}
+
+.image-picker-item.selected {
+  border-color: #ff4444;
+}
+
+.image-picker-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.image-picker-name {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font-size: 10px;
+  padding: 4px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* External URL Input */
+.external-url-input {
+  display: flex;
+  gap: 10px;
+}
+
+.external-url-input input {
+  flex: 1;
+}
+
+/* Selected Images List */
+.selected-images-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.selected-image-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #252525;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.selected-image-order {
+  color: #ff4444;
+  font-weight: bold;
+  min-width: 20px;
+}
+
+.selected-image-path {
+  flex: 1;
+  color: #ccc;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Scrollbar Styles */
+.admin-project-list::-webkit-scrollbar,
+.admin-tab-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-project-list::-webkit-scrollbar-track,
+.admin-tab-content::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.admin-project-list::-webkit-scrollbar-thumb,
+.admin-tab-content::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+
+.admin-project-list::-webkit-scrollbar-thumb:hover,
+.admin-tab-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Footer Admin Link */
+footer {
+  text-align: center;
+  padding: 30px 20px;
+  color: #333;
+  font-size: 12px;
+}
+
+/* Responsive */
+@media (max-width: 850px) {
+  .admin-panel-box {
+    width: 100%;
+  }
+
+  .admin-edit-box,
+  .admin-edit-box-wide {
+    width: 100%;
+  }
+
+  .admin-project-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .admin-project-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

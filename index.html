@@ -223,57 +223,204 @@
     </script>
 
     <section id="central-portfolio-section">
-        <!-- Second Video -->
-        <div id="central-project">
-            <div class="video-wrapper">
-                <div class="video-container">
-                    <div class="video-text">
-                        <h2>THE GOATMAN</h2>
-                        <h4>2025 SHORT FILM<br><br>A PAINTED JOURNEY THROUGH A STRANGE WORLD</h4>
-                    </div>
-                    <div class="yt-embeded-holder">
-                        <a href="https://www.youtube.com/watch?v=_8m2P_TAWSE" target="_blank">
-                            <img src="https://img.youtube.com/vi/_8m2P_TAWSE/maxresdefault.jpg" alt="The Goatman">
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- end of video -->
-        <!-- First Video -->
-        <div id="central-project">
-            <div class="video-wrapper">
-                <div class="video-container">
-                    <div class="video-text">
-                        <h2>THE CALL</h2>
-                        <h4>2024 SHORT FILM<br><br>A KAFKAESQUE REFLECTION OF MODERN DIGITAL LIFE</h4>
-                    </div>
-                    <div class="yt-embeded-holder">
-                        <a href="https://www.youtube.com/watch?v=85gvlt7RyTA" target="_blank">
-                            <img src="https://img.youtube.com/vi/85gvlt7RyTA/maxresdefault.jpg" alt="The Call">
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- end of video -->
-        <!-- Second Video -->
-        <div id="central-project">
-            <div class="video-wrapper">
-                <div class="video-container">
-                    <div class="video-text">
-                        <h2>BOUND BY BOARDS</h2>
-                        <h4>2025 SHORT DOC<br><br>CONNECTIONS MADE THROUGH GRIPTAPE<br><br>CREDIT: DP</h4>
-                    </div>
-                    <div class="yt-embeded-holder">
-                        <a href="https://www.youtube.com/watch?v=84KcwAFeiZg" target="_blank">
-                            <img src="https://img.youtube.com/vi/84KcwAFeiZg/maxresdefault.jpg" alt="Bound by Boards">
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- end of video -->
+        <!-- Projects will be rendered dynamically -->
+    </section>
+
+    <footer style="text-align: center; padding: 30px 20px; color: #333;">
+        <span style="color: #444; font-size: 11px;">&copy; 2025 Charlie Cilla</span>
+    </footer>
+
+    <!-- Admin Panel Scripts -->
+    <link rel="stylesheet" href="admin/admin.css">
+    <script src="admin/data.js"></script>
+    <script src="admin/admin.js"></script>
+
+    <!-- PDF.js library for rendering PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Flipbook viewer library -->
+    <script src="pages_code/Handbook_Files/flipbook-viewer-master/dist/flipbook-viewer.js"></script>
+
+    <script>
+        // Set up PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+        // Render home page projects dynamically
+        function renderHomePage() {
+            const projects = AdminData.getHomeProjects().filter(p => p.visible);
+            const container = document.getElementById('central-portfolio-section');
+
+            container.innerHTML = projects.map(p => {
+                const projectType = p.type || 'video';
+
+                if (projectType === 'video') {
+                    return `
+                        <div id="central-project">
+                            <div class="video-wrapper">
+                                <div class="video-container">
+                                    <div class="video-text">
+                                        <h2>${p.title}</h2>
+                                        <h4>${p.year} ${p.category}<br><br>${p.description}${p.credit ? '<br><br>CREDIT: ' + p.credit : ''}</h4>
+                                    </div>
+                                    <div class="yt-embeded-holder">
+                                        <a href="${p.youtubeUrl}" target="_blank">
+                                            <img src="https://img.youtube.com/vi/${p.youtubeId}/maxresdefault.jpg" alt="${p.title}">
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (projectType === 'images') {
+                    return `
+                        <div id="central-project">
+                            <div class="video-wrapper">
+                                <div class="video-container">
+                                    <div class="video-text">
+                                        <h2>${p.title}</h2>
+                                        <h4>${p.year} ${p.category}<br><br>${p.description}${p.credit ? '<br><br>CREDIT: ' + p.credit : ''}</h4>
+                                    </div>
+                                    <div class="yt-embeded-holder">
+                                        ${(p.images || []).map(img => `
+                                            <img src="${img}" alt="${p.title}" style="width: 100%; margin-bottom: 10px;">
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (projectType === 'flipbook-pdf') {
+                    const flipbookId = 'flipbook-' + p.id;
+                    setTimeout(() => initHomeFlipbook(p.id, p.flipbookPdf), 100);
+                    return `
+                        <div id="central-project">
+                            <div class="video-wrapper">
+                                <div class="video-container">
+                                    <div class="video-text">
+                                        <h2>${p.title}</h2>
+                                        <h4>${p.year} ${p.category}<br><br>${p.description}${p.credit ? '<br><br>CREDIT: ' + p.credit : ''}</h4>
+                                    </div>
+                                    <div class="yt-embeded-holder" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                                        <div id="${flipbookId}" style="width: 100%;"></div>
+                                        <div style="display: flex; gap: 10px; justify-content: center;">
+                                            <button onclick="flipPrev('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">← Previous</button>
+                                            <button onclick="flipNext('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">Next →</button>
+                                        </div>
+                                        <div id="${flipbookId}-info" style="color: #ccc; font-size: 14px;">Loading...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                return '';
+            }).join('');
+        }
+
+        // Store flipbook viewers
+        const homeViewers = {};
+
+        // Initialize flipbook for home page
+        function initHomeFlipbook(projectId, pdfPath) {
+            const flipbookId = 'flipbook-' + projectId;
+            const flipViewerEl = document.getElementById(flipbookId);
+            const pageInfo = document.getElementById(flipbookId + '-info');
+
+            if (!flipViewerEl || !pageInfo) return;
+
+            pageInfo.textContent = "Loading PDF...";
+
+            const cache = [];
+
+            function renderPage(pdf, n, cb) {
+                pdf.getPage(n).then((page) => {
+                    const scale = 1.0;
+                    const viewport = page.getViewport({ scale });
+                    const canvas = document.createElement("canvas");
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    const context = canvas.getContext("2d");
+
+                    page.render({
+                        canvasContext: context,
+                        viewport: viewport
+                    }).promise.then(() => {
+                        const img = new Image();
+                        img.onload = () => {
+                            cache[n] = {
+                                img,
+                                num: n,
+                                width: img.width,
+                                height: img.height
+                            };
+                            cb(null, cache[n]);
+                        };
+                        img.src = canvas.toDataURL("image/jpeg", 0.85);
+                    }).catch(cb);
+                }).catch(cb);
+            }
+
+            pdfjsLib.getDocument(pdfPath).promise.then((pdf) => {
+                const book = {
+                    pdf: pdf,
+                    numPages: () => pdf.numPages,
+                    getPage: (n, cb) => {
+                        if (!n || n > pdf.numPages) return cb();
+                        if (cache[n]) return cb(null, cache[n]);
+                        renderPage(pdf, n, cb);
+                    }
+                };
+
+                const containerWidth = flipViewerEl.offsetWidth;
+                const width = Math.min(700, containerWidth - 40);
+                const height = Math.floor(width * 0.7);
+
+                // Preload first 2 pages
+                renderPage(pdf, 1, () => {
+                    renderPage(pdf, 2, () => {
+                        flipbook.init(book, flipViewerEl, {
+                            width: width,
+                            height: height,
+                            backgroundColor: "#111111",
+                            boxColor: "#111111",
+                            boxBorder: 0
+                        }, (err, viewer) => {
+                            if (err) {
+                                console.error(err);
+                                pageInfo.textContent = "Error loading PDF";
+                                return;
+                            }
+
+                            homeViewers[flipbookId] = viewer;
+                            pageInfo.textContent = `Page 1 of ${pdf.numPages}`;
+
+                            viewer.on("seen", (n) => {
+                                pageInfo.textContent = `Page ${n} of ${pdf.numPages}`;
+                            });
+                        });
+                    });
+                });
+            }).catch((err) => {
+                console.error("Failed to load PDF:", err);
+                pageInfo.textContent = "Failed to load PDF";
+            });
+        }
+
+        function flipPrev(flipbookId) {
+            if (homeViewers[flipbookId]) {
+                homeViewers[flipbookId].flip_back();
+            }
+        }
+
+        function flipNext(flipbookId) {
+            if (homeViewers[flipbookId]) {
+                homeViewers[flipbookId].flip_forward();
+            }
+        }
+
+        // Initial render
+        renderHomePage();
+    </script>
     <!-- </section> 
     <section id="photography-gallery">
     <h2 style="text-align:center; color:white; font-size:40px; margin-top: 60px;">Photography</h2>
