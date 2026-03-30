@@ -48,13 +48,26 @@ const REPOSITORY_IMAGES = [
 
 // Dedicated image list for flipbook pages on the Projects page.
 // Paths are relative to pages_code/page_projects.html.
-const REPOSITORY_FLIPBOOK_IMAGES = Array.from({ length: 22 }, (_, i) => {
+const HANDBOOK_FLIPBOOK_IMAGES = Array.from({ length: 22 }, (_, i) => {
   const pageNum = String(i + 1).padStart(2, "0");
   return {
     path: `Handbook_Files/handbook-pages/page-${pageNum}.png`,
     name: `Handbook Page ${pageNum}`,
   };
 });
+
+const VOICES_FLIPBOOK_IMAGES = Array.from({ length: 36 }, (_, i) => {
+  const pageNum = String(i + 1).padStart(2, "0");
+  return {
+    path: `Handbook_Files/handbook-pages/voices-${pageNum}.png`,
+    name: `Voices Page ${pageNum}`,
+  };
+});
+
+const REPOSITORY_FLIPBOOK_IMAGES = [
+  ...HANDBOOK_FLIPBOOK_IMAGES,
+  ...VOICES_FLIPBOOK_IMAGES,
+];
 
 // Default home page projects (video/film)
 const DEFAULT_HOME_PROJECTS = [
