@@ -234,6 +234,35 @@
         transform: scale(1.02);
       }
 
+      .home-flipbook-controls {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .home-flipbook-controls button {
+        background: none;
+        color: white;
+        border: 2px solid white;
+        padding: 10px 20px;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+      }
+
+      .home-flipbook-controls button:hover {
+        background: white;
+        color: #111;
+      }
+
+      .home-flipbook-page-info {
+        color: #ccc;
+        font-size: 14px;
+        text-align: center;
+      }
+
       @media (max-width: 1200px) {
         .home-flipbook-stage,
         .home-flipbook-shift {
@@ -358,12 +387,12 @@
                                     </div>
                                     <div class="interactive-holder">
                                         <div id="${flipbookId}" class="home-flipbook-stage"></div>
-                                        <div class="home-flipbook-shift" style="display: flex; gap: 10px; justify-content: center;">
-                                            <button onclick="flipPrev('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">← Previous</button>
-                                            <button onclick="flipNext('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">Next →</button>
-                                            <button onclick="flipZoom('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">Zoom</button>
+                                        <div class="home-flipbook-shift home-flipbook-controls">
+                                          <button onclick="flipPrev('${flipbookId}')">← Previous</button>
+                                          <button onclick="flipNext('${flipbookId}')">Next →</button>
+                                          <button onclick="flipZoom('${flipbookId}')">Zoom</button>
                                         </div>
-                                        <div id="${flipbookId}-info" class="home-flipbook-shift" style="color: #ccc; font-size: 14px;">Loading...</div>
+                                        <div id="${flipbookId}-info" class="home-flipbook-shift home-flipbook-page-info">Loading...</div>
                                     </div>
                                 </div>
                             </div>
@@ -385,12 +414,12 @@
                                     </div>
                                     <div class="interactive-holder">
                                         <div id="${flipbookId}" class="home-flipbook-stage"></div>
-                                        <div class="home-flipbook-shift" style="display: flex; gap: 10px; justify-content: center;">
-                                            <button onclick="flipPrev('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">← Previous</button>
-                                            <button onclick="flipNext('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">Next →</button>
-                                            <button onclick="flipZoom('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">Zoom</button>
+                                        <div class="home-flipbook-shift home-flipbook-controls">
+                                          <button onclick="flipPrev('${flipbookId}')">← Previous</button>
+                                          <button onclick="flipNext('${flipbookId}')">Next →</button>
+                                          <button onclick="flipZoom('${flipbookId}')">Zoom</button>
                                         </div>
-                                        <div id="${flipbookId}-info" class="home-flipbook-shift" style="color: #ccc; font-size: 14px;">Loading...</div>
+                                        <div id="${flipbookId}-info" class="home-flipbook-shift home-flipbook-page-info">Loading...</div>
                                     </div>
                                 </div>
                             </div>
