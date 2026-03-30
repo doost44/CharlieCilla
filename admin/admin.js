@@ -1,6 +1,6 @@
 // Admin Panel UI Logic
 
-(function() {
+(function () {
   // Create and inject admin panel HTML
   function createAdminPanel() {
     const panelHTML = `
@@ -84,6 +84,7 @@
             <select id="edit-home-type" onchange="AdminPanel.toggleHomeTypeFields()">
               <option value="video">Video (YouTube)</option>
               <option value="images">Images</option>
+              <option value="flipbook-images">Flipbook Images</option>
               <option value="flipbook-pdf">Flipbook PDF</option>
             </select>
 
@@ -106,6 +107,36 @@
                 <button type="button" onclick="AdminPanel.addHomeExternalImage()" class="admin-btn-small">Add</button>
               </div>
               <div id="home-selected-images-list" class="selected-images-list"></div>
+            </div>
+
+            <!-- Flipbook Images Type Fields -->
+            <div id="home-type-flipbook-images" class="project-type-fields" style="display: none;">
+              <div class="picker-header-row">
+                <label>Select Flipbook Pages from Repository</label>
+                <button type="button" class="admin-btn-small" onclick="AdminPanel.openFlipbookLibrary('home')">Select Images</button>
+              </div>
+              <div id="home-flipbook-image-picker-grid" class="image-picker-grid image-picker-grid-large">
+                <!-- Flipbook pages will be rendered by JavaScript -->
+              </div>
+              <p class="admin-form-hint">Click pages to select/deselect and set their order. PNG files are supported.</p>
+              <label>Or Add External Image URL</label>
+              <div class="external-url-input">
+                <input type="text" id="edit-home-flipbook-external-url" placeholder="https://example.com/page.png">
+                <button type="button" onclick="AdminPanel.addHomeFlipbookExternalImage()" class="admin-btn-small">Add</button>
+              </div>
+              <div id="home-selected-flipbook-images-list" class="selected-images-list"></div>
+              <p class="admin-form-hint">Selected pages are used first. Pattern settings below are kept as a fallback.</p>
+              <label>Base Path</label>
+              <input type="text" id="edit-home-basepath" placeholder="pages_code/Handbook_Files/handbook-pages/page-">
+              <p class="admin-form-hint">Path prefix for image files (e.g., folder/page-)</p>
+              <label>Page Count</label>
+              <input type="number" id="edit-home-pagecount" min="1" value="1">
+              <label>File Extension</label>
+              <input type="text" id="edit-home-extension" value=".png" placeholder=".png or .jpg">
+              <label style="display:flex; align-items:center; gap:8px; text-transform:none; letter-spacing:0; color:#ccc; font-size:13px;">
+                <input type="checkbox" id="edit-home-skipfirst" style="width:auto; margin:0;">
+                Skip first page when opening the flipbook
+              </label>
             </div>
 
             <!-- Flipbook PDF Type Fields -->
@@ -196,6 +227,21 @@
 
             <!-- Flipbook Images Type Fields -->
             <div id="project-type-flipbook-images" class="project-type-fields" style="display: none;">
+              <div class="picker-header-row">
+                <label>Select Flipbook Pages from Repository</label>
+                <button type="button" class="admin-btn-small" onclick="AdminPanel.openFlipbookLibrary('projects')">Select Images</button>
+              </div>
+              <div id="flipbook-image-picker-grid" class="image-picker-grid image-picker-grid-large">
+                <!-- Flipbook pages will be rendered by JavaScript -->
+              </div>
+              <p class="admin-form-hint">Click pages to select/deselect and set their order. PNG files are supported.</p>
+              <label>Or Add External Image URL</label>
+              <div class="external-url-input">
+                <input type="text" id="edit-project-flipbook-external-url" placeholder="https://example.com/page.png">
+                <button type="button" onclick="AdminPanel.addFlipbookExternalImage()" class="admin-btn-small">Add</button>
+              </div>
+              <div id="selected-flipbook-images-list" class="selected-images-list"></div>
+              <p class="admin-form-hint">Selected pages are used first. Pattern settings below are kept as a fallback.</p>
               <label>Base Path</label>
               <input type="text" id="edit-project-basepath" placeholder="Handbook_Files/handbook-pages/page-">
               <p class="admin-form-hint">Path prefix for image files (e.g., folder/page-)</p>
@@ -219,10 +265,24 @@
           </form>
         </div>
       </div>
+
+      <!-- Flipbook Library Modal -->
+      <div id="admin-flipbook-library-modal" class="admin-modal" style="display: none;">
+        <div class="admin-modal-content admin-edit-box admin-edit-box-library">
+          <span class="admin-close" onclick="AdminPanel.closeFlipbookLibrary()">&times;</span>
+          <h2>Select Flipbook Images</h2>
+          <p class="admin-form-hint">Choose pages in any order, then reorder in the selected list using ↑ / ↓ controls.</p>
+          <div id="admin-flipbook-library-grid" class="image-picker-grid image-picker-grid-library"></div>
+          <div class="admin-form-buttons">
+            <button type="button" onclick="AdminPanel.closeFlipbookLibrary()" class="admin-btn-secondary">Cancel</button>
+            <button type="button" onclick="AdminPanel.applyFlipbookLibrarySelection()" class="admin-btn-primary">Apply Selection</button>
+          </div>
+        </div>
+      </div>
     `;
 
-    const container = document.createElement('div');
-    container.id = 'admin-container';
+    const container = document.createElement("div");
+    container.id = "admin-container";
     container.innerHTML = panelHTML;
     document.body.appendChild(container);
 
@@ -230,155 +290,205 @@
     addFooterLink();
 
     // Setup form handlers
-    document.getElementById('admin-edit-home-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      AdminPanel.saveHomeProject();
-    });
+    document
+      .getElementById("admin-edit-home-form")
+      .addEventListener("submit", function (e) {
+        e.preventDefault();
+        AdminPanel.saveHomeProject();
+      });
 
-    document.getElementById('admin-edit-archive-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      AdminPanel.saveArchiveProject();
-    });
+    document
+      .getElementById("admin-edit-archive-form")
+      .addEventListener("submit", function (e) {
+        e.preventDefault();
+        AdminPanel.saveArchiveProject();
+      });
 
-    document.getElementById('admin-edit-project-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      AdminPanel.saveProject();
-    });
+    document
+      .getElementById("admin-edit-project-form")
+      .addEventListener("submit", function (e) {
+        e.preventDefault();
+        AdminPanel.saveProject();
+      });
   }
 
   // Add admin link to footer or create footer
   function addFooterLink() {
-    let footer = document.querySelector('footer');
+    let footer = document.querySelector("footer");
     if (!footer) {
-      footer = document.createElement('footer');
-      footer.style.cssText = 'text-align: center; padding: 20px; color: #333; font-size: 12px;';
+      footer = document.createElement("footer");
+      footer.style.cssText =
+        "text-align: center; padding: 20px; color: #333; font-size: 12px;";
       document.body.appendChild(footer);
     }
 
-    const adminLink = document.createElement('a');
-    adminLink.href = '#';
-    adminLink.textContent = 'Admin';
-    adminLink.style.cssText = 'color: #444; text-decoration: none; font-size: 11px; opacity: 0.5; margin-left: 20px;';
-    adminLink.onclick = function(e) {
+    const adminLink = document.createElement("a");
+    adminLink.href = "#";
+    adminLink.textContent = "Admin";
+    adminLink.style.cssText =
+      "color: #444; text-decoration: none; font-size: 11px; opacity: 0.5; margin-left: 20px;";
+    adminLink.onclick = function (e) {
       e.preventDefault();
       AdminPanel.showLogin();
     };
     footer.appendChild(adminLink);
   }
 
+  function resolveAdminPreviewPath(path) {
+    if (!path) return "";
+    if (/^(https?:|data:|blob:)/i.test(path)) return path;
+    if (path.startsWith("/")) return path;
+
+    const inPagesCode =
+      typeof window !== "undefined" &&
+      /\/pages_code\//.test(window.location.pathname.replace(/\\/g, "/"));
+
+    if (path.startsWith("Handbook_Files/")) {
+      return inPagesCode ? path : `pages_code/${path}`;
+    }
+
+    if (path.startsWith("../")) {
+      return inPagesCode ? path : path.replace(/^\.\.\//, "");
+    }
+
+    if (path.startsWith("pages_code/")) {
+      return inPagesCode ? `../${path}` : path;
+    }
+
+    return path;
+  }
+
   // Extract YouTube ID from URL
   function extractYoutubeId(url) {
     const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
-    return match ? match[1] : '';
+    return match ? match[1] : "";
   }
 
   // Render home projects list
   function renderHomeProjects() {
     const projects = AdminData.getHomeProjects();
-    const list = document.getElementById('admin-home-list');
+    const list = document.getElementById("admin-home-list");
 
     const typeLabels = {
-      'video': 'Video',
-      'images': 'Images',
-      'flipbook-pdf': 'Flipbook PDF'
+      video: "Video",
+      images: "Images",
+      "flipbook-images": "Flipbook Images",
+      "flipbook-pdf": "Flipbook PDF",
     };
 
-    list.innerHTML = projects.map(p => {
-      const type = p.type || 'video';
-      return `
-      <div class="admin-project-item ${!p.visible ? 'hidden-project' : ''}">
+    list.innerHTML = projects
+      .map((p) => {
+        const type = p.type || "video";
+        return `
+      <div class="admin-project-item ${!p.visible ? "hidden-project" : ""}">
         <div class="admin-project-info">
           <strong>${p.title}</strong>
           <span>${p.year} ${p.category} • ${typeLabels[type]}</span>
         </div>
         <div class="admin-project-actions">
+          <button onclick="AdminPanel.moveHomeProject('${p.id}', 'up')" class="admin-btn-small" title="Move up">↑</button>
+          <button onclick="AdminPanel.moveHomeProject('${p.id}', 'down')" class="admin-btn-small" title="Move down">↓</button>
           <label class="admin-toggle">
-            <input type="checkbox" ${p.visible ? 'checked' : ''} onchange="AdminPanel.toggleHomeVisibility('${p.id}')">
+            <input type="checkbox" ${p.visible ? "checked" : ""} onchange="AdminPanel.toggleHomeVisibility('${p.id}')">
             <span class="admin-toggle-slider"></span>
           </label>
           <button onclick="AdminPanel.editHomeProject('${p.id}')" class="admin-btn-small">Edit</button>
           <button onclick="AdminPanel.deleteHomeProject('${p.id}')" class="admin-btn-small admin-btn-danger">Delete</button>
         </div>
       </div>
-    `}).join('');
+    `;
+      })
+      .join("");
   }
 
   // Render archive projects list
   function renderArchiveProjects() {
     const projects = AdminData.getArchiveProjects();
-    const list = document.getElementById('admin-archives-list');
+    const list = document.getElementById("admin-archives-list");
 
-    list.innerHTML = projects.map(p => `
-      <div class="admin-project-item ${!p.visible ? 'hidden-project' : ''}">
+    list.innerHTML = projects
+      .map(
+        (p) => `
+      <div class="admin-project-item ${!p.visible ? "hidden-project" : ""}">
         <div class="admin-project-info">
           <strong>${p.title}</strong>
           <span>Column: ${p.column}</span>
         </div>
         <div class="admin-project-actions">
+          <button onclick="AdminPanel.moveArchiveProject('${p.id}', 'up')" class="admin-btn-small" title="Move up">↑</button>
+          <button onclick="AdminPanel.moveArchiveProject('${p.id}', 'down')" class="admin-btn-small" title="Move down">↓</button>
           <label class="admin-toggle">
-            <input type="checkbox" ${p.visible ? 'checked' : ''} onchange="AdminPanel.toggleArchiveVisibility('${p.id}')">
+            <input type="checkbox" ${p.visible ? "checked" : ""} onchange="AdminPanel.toggleArchiveVisibility('${p.id}')">
             <span class="admin-toggle-slider"></span>
           </label>
           <button onclick="AdminPanel.editArchiveProject('${p.id}')" class="admin-btn-small">Edit</button>
           <button onclick="AdminPanel.deleteArchiveProject('${p.id}')" class="admin-btn-small admin-btn-danger">Delete</button>
         </div>
       </div>
-    `).join('');
+    `,
+      )
+      .join("");
   }
 
   // Render projects list (Projects Page)
   function renderProjects() {
     const projects = AdminData.getProjects();
-    const list = document.getElementById('admin-projects-list');
+    const list = document.getElementById("admin-projects-list");
     if (!list) return; // Not on projects page
 
     const typeLabels = {
-      'images': 'Images',
-      'flipbook-images': 'Flipbook (Images)',
-      'flipbook-pdf': 'Flipbook (PDF)'
+      images: "Images",
+      "flipbook-images": "Flipbook (Images)",
+      "flipbook-pdf": "Flipbook (PDF)",
     };
 
-    list.innerHTML = projects.map(p => `
-      <div class="admin-project-item ${!p.visible ? 'hidden-project' : ''}">
+    list.innerHTML = projects
+      .map(
+        (p) => `
+      <div class="admin-project-item ${!p.visible ? "hidden-project" : ""}">
         <div class="admin-project-info">
           <strong>${p.title}</strong>
           <span>Type: ${typeLabels[p.type] || p.type}</span>
         </div>
         <div class="admin-project-actions">
+          <button onclick="AdminPanel.moveProject('${p.id}', 'up')" class="admin-btn-small" title="Move up">↑</button>
+          <button onclick="AdminPanel.moveProject('${p.id}', 'down')" class="admin-btn-small" title="Move down">↓</button>
           <label class="admin-toggle">
-            <input type="checkbox" ${p.visible ? 'checked' : ''} onchange="AdminPanel.toggleProjectVisibility('${p.id}')">
+            <input type="checkbox" ${p.visible ? "checked" : ""} onchange="AdminPanel.toggleProjectVisibility('${p.id}')">
             <span class="admin-toggle-slider"></span>
           </label>
           <button onclick="AdminPanel.editProject('${p.id}')" class="admin-btn-small">Edit</button>
           <button onclick="AdminPanel.deleteProject('${p.id}')" class="admin-btn-small admin-btn-danger">Delete</button>
         </div>
       </div>
-    `).join('');
+    `,
+      )
+      .join("");
   }
 
   // Admin Panel Methods
   window.AdminPanel = {
-    init: function() {
+    init: function () {
       createAdminPanel();
     },
 
-    showLogin: function() {
+    showLogin: function () {
       if (AdminData.isAdminLoggedIn()) {
         this.showPanel();
       } else {
-        document.getElementById('admin-login-modal').style.display = 'flex';
-        document.getElementById('admin-password').focus();
+        document.getElementById("admin-login-modal").style.display = "flex";
+        document.getElementById("admin-password").focus();
       }
     },
 
-    closeLogin: function() {
-      document.getElementById('admin-login-modal').style.display = 'none';
-      document.getElementById('admin-password').value = '';
-      document.getElementById('admin-login-error').style.display = 'none';
+    closeLogin: function () {
+      document.getElementById("admin-login-modal").style.display = "none";
+      document.getElementById("admin-password").value = "";
+      document.getElementById("admin-login-error").style.display = "none";
     },
 
-    login: async function() {
-      const password = document.getElementById('admin-password').value;
+    login: async function () {
+      const password = document.getElementById("admin-password").value;
       const isValid = await AdminData.verifyPassword(password);
 
       if (isValid) {
@@ -386,131 +496,195 @@
         this.closeLogin();
         this.showPanel();
       } else {
-        document.getElementById('admin-login-error').style.display = 'block';
+        document.getElementById("admin-login-error").style.display = "block";
       }
     },
 
-    logout: function() {
+    logout: function () {
       AdminData.setAdminLoggedIn(false);
       this.closePanel();
     },
 
-    showPanel: function() {
+    showPanel: function () {
       renderHomeProjects();
       renderArchiveProjects();
       renderProjects();
-      document.getElementById('admin-panel-modal').style.display = 'flex';
+      document.getElementById("admin-panel-modal").style.display = "flex";
     },
 
-    closePanel: function() {
-      document.getElementById('admin-panel-modal').style.display = 'none';
+    closePanel: function () {
+      document.getElementById("admin-panel-modal").style.display = "none";
     },
 
-    switchTab: function(tab) {
-      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
+    switchTab: function (tab) {
+      document
+        .querySelectorAll(".admin-tab")
+        .forEach((t) => t.classList.remove("active"));
+      document
+        .querySelectorAll(".admin-tab-content")
+        .forEach((c) => (c.style.display = "none"));
 
-      const tabs = document.querySelectorAll('.admin-tab');
-      if (tab === 'home') {
-        tabs[0].classList.add('active');
-        document.getElementById('admin-tab-home').style.display = 'block';
-      } else if (tab === 'archives') {
-        tabs[1].classList.add('active');
-        document.getElementById('admin-tab-archives').style.display = 'block';
-      } else if (tab === 'projects') {
-        tabs[2].classList.add('active');
-        document.getElementById('admin-tab-projects').style.display = 'block';
+      const tabs = document.querySelectorAll(".admin-tab");
+      if (tab === "home") {
+        tabs[0].classList.add("active");
+        document.getElementById("admin-tab-home").style.display = "block";
+      } else if (tab === "archives") {
+        tabs[1].classList.add("active");
+        document.getElementById("admin-tab-archives").style.display = "block";
+      } else if (tab === "projects") {
+        tabs[2].classList.add("active");
+        document.getElementById("admin-tab-projects").style.display = "block";
       }
     },
 
     // Home Project Methods
-    toggleHomeVisibility: function(id) {
+    toggleHomeVisibility: function (id) {
       const projects = AdminData.getHomeProjects();
-      const project = projects.find(p => p.id === id);
+      const project = projects.find((p) => p.id === id);
       if (project) {
         project.visible = !project.visible;
         AdminData.saveHomeProjects(projects);
         renderHomeProjects();
-        if (typeof renderHomePage === 'function') renderHomePage();
+        if (typeof renderHomePage === "function") renderHomePage();
       }
     },
 
-    addHomeProject: function() {
-      document.getElementById('admin-edit-home-title').textContent = 'Add Project';
-      document.getElementById('edit-home-id').value = '';
-      document.getElementById('edit-home-title').value = '';
-      document.getElementById('edit-home-year').value = new Date().getFullYear();
-      document.getElementById('edit-home-category').value = 'SHORT FILM';
-      document.getElementById('edit-home-description').value = '';
-      document.getElementById('edit-home-credit').value = '';
-      document.getElementById('edit-home-type').value = 'video';
-      document.getElementById('edit-home-youtube').value = '';
-      document.getElementById('edit-home-pdf').value = '';
-      this.selectedHomeImages = [];
-      this.toggleHomeTypeFields();
-      document.getElementById('admin-edit-home-modal').style.display = 'flex';
+    moveHomeProject: function (id, direction) {
+      const projects = AdminData.getHomeProjects();
+      const index = projects.findIndex((p) => p.id === id);
+      if (index === -1) return;
+
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= projects.length) return;
+
+      const temp = projects[targetIndex];
+      projects[targetIndex] = projects[index];
+      projects[index] = temp;
+
+      AdminData.saveHomeProjects(projects);
+      renderHomeProjects();
+      if (typeof renderHomePage === "function") renderHomePage();
     },
 
-    editHomeProject: function(id) {
+    addHomeProject: function () {
+      document.getElementById("admin-edit-home-title").textContent =
+        "Add Project";
+      document.getElementById("edit-home-id").value = "";
+      document.getElementById("edit-home-title").value = "";
+      document.getElementById("edit-home-year").value =
+        new Date().getFullYear();
+      document.getElementById("edit-home-category").value = "SHORT FILM";
+      document.getElementById("edit-home-description").value = "";
+      document.getElementById("edit-home-credit").value = "";
+      document.getElementById("edit-home-type").value = "video";
+      document.getElementById("edit-home-youtube").value = "";
+      document.getElementById("edit-home-pdf").value = "";
+      document.getElementById("edit-home-basepath").value = "";
+      document.getElementById("edit-home-pagecount").value = "1";
+      document.getElementById("edit-home-extension").value = ".png";
+      document.getElementById("edit-home-skipfirst").checked = false;
+      this.selectedHomeImages = [];
+      this.selectedHomeFlipbookImages = [];
+      this.toggleHomeTypeFields();
+      document.getElementById("admin-edit-home-modal").style.display = "flex";
+    },
+
+    editHomeProject: function (id) {
       const projects = AdminData.getHomeProjects();
-      const project = projects.find(p => p.id === id);
+      const project = projects.find((p) => p.id === id);
       if (project) {
-        document.getElementById('admin-edit-home-title').textContent = 'Edit Project';
-        document.getElementById('edit-home-id').value = project.id;
-        document.getElementById('edit-home-title').value = project.title;
-        document.getElementById('edit-home-year').value = project.year;
-        document.getElementById('edit-home-category').value = project.category;
-        document.getElementById('edit-home-description').value = project.description;
-        document.getElementById('edit-home-credit').value = project.credit || '';
+        document.getElementById("admin-edit-home-title").textContent =
+          "Edit Project";
+        document.getElementById("edit-home-id").value = project.id;
+        document.getElementById("edit-home-title").value = project.title;
+        document.getElementById("edit-home-year").value = project.year;
+        document.getElementById("edit-home-category").value = project.category;
+        document.getElementById("edit-home-description").value =
+          project.description;
+        document.getElementById("edit-home-credit").value =
+          project.credit || "";
 
-        const projectType = project.type || 'video';
-        document.getElementById('edit-home-type').value = projectType;
+        const projectType = project.type || "video";
+        document.getElementById("edit-home-type").value = projectType;
 
-        if (projectType === 'video') {
-          document.getElementById('edit-home-youtube').value = project.youtubeUrl || '';
+        if (projectType === "video") {
+          document.getElementById("edit-home-youtube").value =
+            project.youtubeUrl || "";
           this.selectedHomeImages = [];
-        } else if (projectType === 'images') {
+          this.selectedHomeFlipbookImages = [];
+        } else if (projectType === "images") {
           this.selectedHomeImages = [...(project.images || [])];
-        } else if (projectType === 'flipbook-pdf') {
-          document.getElementById('edit-home-pdf').value = project.flipbookPdf || '';
+          this.selectedHomeFlipbookImages = [];
+        } else if (projectType === "flipbook-images") {
           this.selectedHomeImages = [];
+          const fb = project.flipbookImages || {};
+          this.selectedHomeFlipbookImages = Array.isArray(fb.pages)
+            ? [...fb.pages]
+            : [];
+          document.getElementById("edit-home-basepath").value =
+            fb.basePath || "";
+          document.getElementById("edit-home-pagecount").value =
+            fb.pageCount || 1;
+          document.getElementById("edit-home-extension").value =
+            fb.extension || ".png";
+          document.getElementById("edit-home-skipfirst").checked =
+            fb.skipFirstPage === true;
+        } else if (projectType === "flipbook-pdf") {
+          document.getElementById("edit-home-pdf").value =
+            project.flipbookPdf || "";
+          this.selectedHomeImages = [];
+          this.selectedHomeFlipbookImages = [];
         }
 
         this.toggleHomeTypeFields();
-        document.getElementById('admin-edit-home-modal').style.display = 'flex';
+        document.getElementById("admin-edit-home-modal").style.display = "flex";
       }
     },
 
-    saveHomeProject: function() {
-      const id = document.getElementById('edit-home-id').value;
-      const projectType = document.getElementById('edit-home-type').value;
+    saveHomeProject: function () {
+      const id = document.getElementById("edit-home-id").value;
+      const projectType = document.getElementById("edit-home-type").value;
 
       const projectData = {
-        id: id || AdminData.generateId('home'),
-        title: document.getElementById('edit-home-title').value,
-        year: document.getElementById('edit-home-year').value,
-        category: document.getElementById('edit-home-category').value,
-        description: document.getElementById('edit-home-description').value,
-        credit: document.getElementById('edit-home-credit').value,
+        id: id || AdminData.generateId("home"),
+        title: document.getElementById("edit-home-title").value,
+        year: document.getElementById("edit-home-year").value,
+        category: document.getElementById("edit-home-category").value,
+        description: document.getElementById("edit-home-description").value,
+        credit: document.getElementById("edit-home-credit").value,
         type: projectType,
-        visible: true
+        visible: true,
       };
 
       // Set type-specific fields
-      if (projectType === 'video') {
-        const youtubeUrl = document.getElementById('edit-home-youtube').value;
+      if (projectType === "video") {
+        const youtubeUrl = document.getElementById("edit-home-youtube").value;
         projectData.youtubeUrl = youtubeUrl;
         projectData.youtubeId = extractYoutubeId(youtubeUrl);
-      } else if (projectType === 'images') {
+      } else if (projectType === "images") {
         projectData.images = [...this.selectedHomeImages];
-      } else if (projectType === 'flipbook-pdf') {
-        projectData.flipbookPdf = document.getElementById('edit-home-pdf').value;
+      } else if (projectType === "flipbook-images") {
+        const selectedPages = [...this.selectedHomeFlipbookImages];
+        projectData.flipbookImages = {
+          basePath: document.getElementById("edit-home-basepath").value,
+          pageCount:
+            selectedPages.length ||
+            parseInt(document.getElementById("edit-home-pagecount").value) ||
+            1,
+          extension:
+            document.getElementById("edit-home-extension").value || ".png",
+          skipFirstPage: document.getElementById("edit-home-skipfirst").checked,
+          pages: selectedPages,
+        };
+      } else if (projectType === "flipbook-pdf") {
+        projectData.flipbookPdf =
+          document.getElementById("edit-home-pdf").value;
       }
 
       const projects = AdminData.getHomeProjects();
 
       if (id) {
-        const index = projects.findIndex(p => p.id === id);
+        const index = projects.findIndex((p) => p.id === id);
         if (index !== -1) {
           projectData.visible = projects[index].visible;
           projects[index] = projectData;
@@ -522,59 +696,70 @@
       AdminData.saveHomeProjects(projects);
       this.closeEditHome();
       renderHomeProjects();
-      if (typeof renderHomePage === 'function') renderHomePage();
+      if (typeof renderHomePage === "function") renderHomePage();
     },
 
-    deleteHomeProject: function(id) {
-      if (confirm('Are you sure you want to delete this project?')) {
-        const projects = AdminData.getHomeProjects().filter(p => p.id !== id);
+    deleteHomeProject: function (id) {
+      if (confirm("Are you sure you want to delete this project?")) {
+        const projects = AdminData.getHomeProjects().filter((p) => p.id !== id);
         AdminData.saveHomeProjects(projects);
         renderHomeProjects();
-        if (typeof renderHomePage === 'function') renderHomePage();
+        if (typeof renderHomePage === "function") renderHomePage();
       }
     },
 
-    closeEditHome: function() {
-      document.getElementById('admin-edit-home-modal').style.display = 'none';
+    closeEditHome: function () {
+      document.getElementById("admin-edit-home-modal").style.display = "none";
     },
 
     // Home project type management
     selectedHomeImages: [],
+    selectedHomeFlipbookImages: [],
+    libraryContext: null,
+    librarySelection: [],
 
-    toggleHomeTypeFields: function() {
-      const type = document.getElementById('edit-home-type').value;
-      document.querySelectorAll('#admin-edit-home-modal .project-type-fields').forEach(f => f.style.display = 'none');
-      document.getElementById('home-type-' + type).style.display = 'block';
-      if (type === 'images') {
+    toggleHomeTypeFields: function () {
+      const type = document.getElementById("edit-home-type").value;
+      document
+        .querySelectorAll("#admin-edit-home-modal .project-type-fields")
+        .forEach((f) => (f.style.display = "none"));
+      document.getElementById("home-type-" + type).style.display = "block";
+      if (type === "images") {
         this.renderHomeImagePicker();
+      } else if (type === "flipbook-images") {
+        this.renderHomeFlipbookImagePicker();
       }
     },
 
-    renderHomeImagePicker: function() {
-      const grid = document.getElementById('home-image-picker-grid');
+    renderHomeImagePicker: function () {
+      const grid = document.getElementById("home-image-picker-grid");
       if (!grid) return;
 
       const images = AdminData.REPOSITORY_IMAGES || [];
-      grid.innerHTML = images.map(img => `
-        <div class="image-picker-item ${this.selectedHomeImages.includes(img.path) ? 'selected' : ''}"
-             data-image-path="${img.path.replace(/"/g, '&quot;')}"
+      grid.innerHTML = images
+        .map(
+          (img) => `
+        <div class="image-picker-item ${this.selectedHomeImages.includes(img.path) ? "selected" : ""}"
+             data-image-path="${img.path.replace(/"/g, "&quot;")}"
              title="${img.name}">
           <img src="${img.path}" alt="${img.name}" onerror="this.parentElement.style.display='none'">
           <span class="image-picker-name">${img.name}</span>
         </div>
-      `).join('');
+      `,
+        )
+        .join("");
 
       // Add click handlers
-      grid.querySelectorAll('.image-picker-item').forEach(item => {
-        item.addEventListener('click', () => {
-          this.toggleHomeImageSelection(item.getAttribute('data-image-path'));
+      grid.querySelectorAll(".image-picker-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          this.toggleHomeImageSelection(item.getAttribute("data-image-path"));
         });
       });
 
       this.renderHomeSelectedImagesList();
     },
 
-    toggleHomeImageSelection: function(path) {
+    toggleHomeImageSelection: function (path) {
       const index = this.selectedHomeImages.indexOf(path);
       if (index === -1) {
         this.selectedHomeImages.push(path);
@@ -584,17 +769,17 @@
       this.renderHomeImagePicker();
     },
 
-    addHomeExternalImage: function() {
-      const input = document.getElementById('edit-home-external-url');
+    addHomeExternalImage: function () {
+      const input = document.getElementById("edit-home-external-url");
       const url = input.value.trim();
       if (url && !this.selectedHomeImages.includes(url)) {
         this.selectedHomeImages.push(url);
-        input.value = '';
+        input.value = "";
         this.renderHomeSelectedImagesList();
       }
     },
 
-    removeHomeSelectedImage: function(path) {
+    removeHomeSelectedImage: function (path) {
       const index = this.selectedHomeImages.indexOf(path);
       if (index !== -1) {
         this.selectedHomeImages.splice(index, 1);
@@ -602,8 +787,8 @@
       }
     },
 
-    renderHomeSelectedImagesList: function() {
-      const list = document.getElementById('home-selected-images-list');
+    renderHomeSelectedImagesList: function () {
+      const list = document.getElementById("home-selected-images-list");
       if (!list) return;
 
       if (this.selectedHomeImages.length === 0) {
@@ -611,112 +796,296 @@
         return;
       }
 
-      list.innerHTML = '<label>Selected Images (' + this.selectedHomeImages.length + ')</label>' +
-        this.selectedHomeImages.map((path, i) => `
+      list.innerHTML =
+        "<label>Selected Images (" +
+        this.selectedHomeImages.length +
+        ")</label>" +
+        this.selectedHomeImages
+          .map(
+            (path, i) => `
           <div class="selected-image-item">
             <span class="selected-image-order">${i + 1}.</span>
-            <span class="selected-image-path">${path.split('/').pop()}</span>
-            <button type="button" data-image-path="${path.replace(/"/g, '&quot;')}" class="admin-btn-small admin-btn-danger remove-home-image">×</button>
+            <span class="selected-image-path">${path.split("/").pop()}</span>
+            <button type="button" data-image-path="${path.replace(/"/g, "&quot;")}" class="admin-btn-small admin-btn-danger remove-home-image">×</button>
           </div>
-        `).join('');
+        `,
+          )
+          .join("");
 
       // Add click handlers to remove buttons
-      list.querySelectorAll('.remove-home-image').forEach(btn => {
-        btn.addEventListener('click', () => {
-          this.removeHomeSelectedImage(btn.getAttribute('data-image-path'));
+      list.querySelectorAll(".remove-home-image").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          this.removeHomeSelectedImage(btn.getAttribute("data-image-path"));
         });
       });
     },
 
-    resetHome: function() {
-      if (confirm('Reset all home projects to defaults? This will remove any custom projects.')) {
-        localStorage.removeItem('charliecilla_home_projects');
+    renderHomeFlipbookImagePicker: function () {
+      const grid = document.getElementById("home-flipbook-image-picker-grid");
+      if (!grid) return;
+
+      const images =
+        AdminData.REPOSITORY_FLIPBOOK_IMAGES ||
+        (AdminData.REPOSITORY_IMAGES || []).filter((img) =>
+          /\.(png|jpg|jpeg|webp|gif)$/i.test(img.path),
+        );
+
+      grid.innerHTML = images
+        .map(
+          (img) => `
+        <div class="image-picker-item ${this.selectedHomeFlipbookImages.includes(img.path) ? "selected" : ""}"
+             data-image-path="${img.path.replace(/"/g, "&quot;")}"
+             title="${img.name}">
+          <img src="${resolveAdminPreviewPath(img.path)}" alt="${img.name}" onerror="this.style.display='none';this.parentElement.classList.add('image-picker-item-error')">
+          <span class="image-picker-name">${img.name}</span>
+        </div>
+      `,
+        )
+        .join("");
+
+      grid.querySelectorAll(".image-picker-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          this.toggleHomeFlipbookImageSelection(
+            item.getAttribute("data-image-path"),
+          );
+        });
+      });
+
+      this.renderHomeSelectedFlipbookImagesList();
+    },
+
+    toggleHomeFlipbookImageSelection: function (path) {
+      const index = this.selectedHomeFlipbookImages.indexOf(path);
+      if (index === -1) {
+        this.selectedHomeFlipbookImages.push(path);
+      } else {
+        this.selectedHomeFlipbookImages.splice(index, 1);
+      }
+      this.renderHomeFlipbookImagePicker();
+    },
+
+    addHomeFlipbookExternalImage: function () {
+      const input = document.getElementById("edit-home-flipbook-external-url");
+      if (!input) return;
+      const url = input.value.trim();
+      if (url && !this.selectedHomeFlipbookImages.includes(url)) {
+        this.selectedHomeFlipbookImages.push(url);
+        input.value = "";
+        this.renderHomeSelectedFlipbookImagesList();
+      }
+    },
+
+    removeHomeSelectedFlipbookImage: function (path) {
+      const index = this.selectedHomeFlipbookImages.indexOf(path);
+      if (index !== -1) {
+        this.selectedHomeFlipbookImages.splice(index, 1);
+        this.renderHomeFlipbookImagePicker();
+      }
+    },
+
+    moveHomeSelectedFlipbookImage: function (path, direction) {
+      const index = this.selectedHomeFlipbookImages.indexOf(path);
+      if (index === -1) return;
+
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (
+        targetIndex < 0 ||
+        targetIndex >= this.selectedHomeFlipbookImages.length
+      ) {
+        return;
+      }
+
+      const temp = this.selectedHomeFlipbookImages[targetIndex];
+      this.selectedHomeFlipbookImages[targetIndex] =
+        this.selectedHomeFlipbookImages[index];
+      this.selectedHomeFlipbookImages[index] = temp;
+      this.renderHomeSelectedFlipbookImagesList();
+    },
+
+    renderHomeSelectedFlipbookImagesList: function () {
+      const list = document.getElementById(
+        "home-selected-flipbook-images-list",
+      );
+      if (!list) return;
+
+      if (this.selectedHomeFlipbookImages.length === 0) {
+        list.innerHTML =
+          '<p class="admin-form-hint">No flipbook pages selected</p>';
+        return;
+      }
+
+      list.innerHTML =
+        "<label>Selected Flipbook Pages (" +
+        this.selectedHomeFlipbookImages.length +
+        ")</label>" +
+        this.selectedHomeFlipbookImages
+          .map(
+            (path, i) => `
+          <div class="selected-image-item">
+            <span class="selected-image-order">${i + 1}.</span>
+            <span class="selected-image-path">${path.split("/").pop()}</span>
+            <div class="selected-image-actions">
+              <button type="button" data-image-path="${path.replace(/"/g, "&quot;")}" class="admin-btn-small move-home-flipbook-up" title="Move up">↑</button>
+              <button type="button" data-image-path="${path.replace(/"/g, "&quot;")}" class="admin-btn-small move-home-flipbook-down" title="Move down">↓</button>
+              <button type="button" data-image-path="${path.replace(/"/g, "&quot;")}" class="admin-btn-small admin-btn-danger remove-home-flipbook-image" title="Remove page">×</button>
+            </div>
+          </div>
+        `,
+          )
+          .join("");
+
+      list.querySelectorAll(".move-home-flipbook-up").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          this.moveHomeSelectedFlipbookImage(
+            btn.getAttribute("data-image-path"),
+            "up",
+          );
+        });
+      });
+
+      list.querySelectorAll(".move-home-flipbook-down").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          this.moveHomeSelectedFlipbookImage(
+            btn.getAttribute("data-image-path"),
+            "down",
+          );
+        });
+      });
+
+      list.querySelectorAll(".remove-home-flipbook-image").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          this.removeHomeSelectedFlipbookImage(
+            btn.getAttribute("data-image-path"),
+          );
+        });
+      });
+
+      const pageCountInput = document.getElementById("edit-home-pagecount");
+      if (pageCountInput && this.selectedHomeFlipbookImages.length > 0) {
+        pageCountInput.value = String(this.selectedHomeFlipbookImages.length);
+      }
+    },
+
+    resetHome: function () {
+      if (
+        confirm(
+          "Reset all home projects to defaults? This will remove any custom projects.",
+        )
+      ) {
+        localStorage.removeItem("charliecilla_home_projects");
         renderHomeProjects();
-        if (typeof renderHomePage === 'function') renderHomePage();
+        if (typeof renderHomePage === "function") renderHomePage();
       }
     },
 
     // Archive Project Methods
-    toggleArchiveVisibility: function(id) {
+    toggleArchiveVisibility: function (id) {
       const projects = AdminData.getArchiveProjects();
-      const project = projects.find(p => p.id === id);
+      const project = projects.find((p) => p.id === id);
       if (project) {
         project.visible = !project.visible;
         AdminData.saveArchiveProjects(projects);
         renderArchiveProjects();
-        if (typeof renderArchivePage === 'function') renderArchivePage();
+        if (typeof renderArchivePage === "function") renderArchivePage();
       }
     },
 
-    addArchiveProject: function() {
-      document.getElementById('admin-edit-archive-title').textContent = 'Add Project';
-      document.getElementById('edit-archive-id').value = '';
-      document.getElementById('edit-archive-title').value = '';
-      document.getElementById('edit-archive-image').value = '';
-      document.getElementById('edit-archive-detail').value = '';
-      document.getElementById('edit-archive-column').value = 'left';
-      this.renderArchiveImagePicker('');
-      document.getElementById('admin-edit-archive-modal').style.display = 'flex';
-    },
-
-    editArchiveProject: function(id) {
+    moveArchiveProject: function (id, direction) {
       const projects = AdminData.getArchiveProjects();
-      const project = projects.find(p => p.id === id);
+      const index = projects.findIndex((p) => p.id === id);
+      if (index === -1) return;
+
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= projects.length) return;
+
+      const temp = projects[targetIndex];
+      projects[targetIndex] = projects[index];
+      projects[index] = temp;
+
+      AdminData.saveArchiveProjects(projects);
+      renderArchiveProjects();
+      if (typeof renderArchivePage === "function") renderArchivePage();
+    },
+
+    addArchiveProject: function () {
+      document.getElementById("admin-edit-archive-title").textContent =
+        "Add Project";
+      document.getElementById("edit-archive-id").value = "";
+      document.getElementById("edit-archive-title").value = "";
+      document.getElementById("edit-archive-image").value = "";
+      document.getElementById("edit-archive-detail").value = "";
+      document.getElementById("edit-archive-column").value = "left";
+      this.renderArchiveImagePicker("");
+      document.getElementById("admin-edit-archive-modal").style.display =
+        "flex";
+    },
+
+    editArchiveProject: function (id) {
+      const projects = AdminData.getArchiveProjects();
+      const project = projects.find((p) => p.id === id);
       if (project) {
-        document.getElementById('admin-edit-archive-title').textContent = 'Edit Project';
-        document.getElementById('edit-archive-id').value = project.id;
-        document.getElementById('edit-archive-title').value = project.title;
-        document.getElementById('edit-archive-image').value = project.imagePath;
-        document.getElementById('edit-archive-detail').value = project.detailPagePath;
-        document.getElementById('edit-archive-column').value = project.column;
+        document.getElementById("admin-edit-archive-title").textContent =
+          "Edit Project";
+        document.getElementById("edit-archive-id").value = project.id;
+        document.getElementById("edit-archive-title").value = project.title;
+        document.getElementById("edit-archive-image").value = project.imagePath;
+        document.getElementById("edit-archive-detail").value =
+          project.detailPagePath;
+        document.getElementById("edit-archive-column").value = project.column;
         this.renderArchiveImagePicker(project.imagePath);
-        document.getElementById('admin-edit-archive-modal').style.display = 'flex';
+        document.getElementById("admin-edit-archive-modal").style.display =
+          "flex";
       }
     },
 
-    renderArchiveImagePicker: function(selectedPath) {
-      const grid = document.getElementById('archive-image-picker-grid');
+    renderArchiveImagePicker: function (selectedPath) {
+      const grid = document.getElementById("archive-image-picker-grid");
       if (!grid) return;
 
       const images = AdminData.REPOSITORY_IMAGES || [];
-      grid.innerHTML = images.map(img => `
-        <div class="image-picker-item ${selectedPath === img.path ? 'selected' : ''}"
-             data-image-path="${img.path.replace(/"/g, '&quot;')}"
+      grid.innerHTML = images
+        .map(
+          (img) => `
+        <div class="image-picker-item ${selectedPath === img.path ? "selected" : ""}"
+             data-image-path="${img.path.replace(/"/g, "&quot;")}"
              title="${img.name}">
           <img src="${img.path}" alt="${img.name}" onerror="this.parentElement.style.display='none'">
           <span class="image-picker-name">${img.name}</span>
         </div>
-      `).join('');
+      `,
+        )
+        .join("");
 
       // Add click handlers
-      grid.querySelectorAll('.image-picker-item').forEach(item => {
-        item.addEventListener('click', () => {
-          this.selectArchiveImage(item.getAttribute('data-image-path'));
+      grid.querySelectorAll(".image-picker-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          this.selectArchiveImage(item.getAttribute("data-image-path"));
         });
       });
     },
 
-    selectArchiveImage: function(path) {
-      document.getElementById('edit-archive-image').value = path;
+    selectArchiveImage: function (path) {
+      document.getElementById("edit-archive-image").value = path;
       this.renderArchiveImagePicker(path);
     },
 
-    saveArchiveProject: function() {
-      const id = document.getElementById('edit-archive-id').value;
+    saveArchiveProject: function () {
+      const id = document.getElementById("edit-archive-id").value;
 
       const projectData = {
-        id: id || AdminData.generateId('archive'),
-        title: document.getElementById('edit-archive-title').value,
-        imagePath: document.getElementById('edit-archive-image').value,
-        detailPagePath: document.getElementById('edit-archive-detail').value || '',
-        column: document.getElementById('edit-archive-column').value,
-        visible: true
+        id: id || AdminData.generateId("archive"),
+        title: document.getElementById("edit-archive-title").value,
+        imagePath: document.getElementById("edit-archive-image").value,
+        detailPagePath:
+          document.getElementById("edit-archive-detail").value || "",
+        column: document.getElementById("edit-archive-column").value,
+        visible: true,
       };
 
       const projects = AdminData.getArchiveProjects();
 
       if (id) {
-        const index = projects.findIndex(p => p.id === id);
+        const index = projects.findIndex((p) => p.id === id);
         if (index !== -1) {
           projectData.visible = projects[index].visible;
           projects[index] = projectData;
@@ -728,79 +1097,112 @@
       AdminData.saveArchiveProjects(projects);
       this.closeEditArchive();
       renderArchiveProjects();
-      if (typeof renderArchivePage === 'function') renderArchivePage();
+      if (typeof renderArchivePage === "function") renderArchivePage();
     },
 
-    deleteArchiveProject: function(id) {
-      if (confirm('Are you sure you want to delete this project?')) {
-        const projects = AdminData.getArchiveProjects().filter(p => p.id !== id);
+    deleteArchiveProject: function (id) {
+      if (confirm("Are you sure you want to delete this project?")) {
+        const projects = AdminData.getArchiveProjects().filter(
+          (p) => p.id !== id,
+        );
         AdminData.saveArchiveProjects(projects);
         renderArchiveProjects();
-        if (typeof renderArchivePage === 'function') renderArchivePage();
+        if (typeof renderArchivePage === "function") renderArchivePage();
       }
     },
 
-    closeEditArchive: function() {
-      document.getElementById('admin-edit-archive-modal').style.display = 'none';
+    closeEditArchive: function () {
+      document.getElementById("admin-edit-archive-modal").style.display =
+        "none";
     },
 
-    resetArchives: function() {
-      if (confirm('Reset all archive projects to defaults? This will remove any custom projects.')) {
-        localStorage.removeItem('charliecilla_archive_projects');
+    resetArchives: function () {
+      if (
+        confirm(
+          "Reset all archive projects to defaults? This will remove any custom projects.",
+        )
+      ) {
+        localStorage.removeItem("charliecilla_archive_projects");
         renderArchiveProjects();
-        if (typeof renderArchivePage === 'function') renderArchivePage();
+        if (typeof renderArchivePage === "function") renderArchivePage();
       }
     },
 
     // Projects Page Methods
-    toggleProjectVisibility: function(id) {
+    toggleProjectVisibility: function (id) {
       const projects = AdminData.getProjects();
-      const project = projects.find(p => p.id === id);
+      const project = projects.find((p) => p.id === id);
       if (project) {
         project.visible = !project.visible;
         AdminData.saveProjects(projects);
         renderProjects();
-        if (typeof renderProjectsPage === 'function') renderProjectsPage();
+        if (typeof renderProjectsPage === "function") renderProjectsPage();
       }
     },
 
-    toggleProjectTypeFields: function() {
-      const type = document.getElementById('edit-project-type').value;
-      document.querySelectorAll('.project-type-fields').forEach(f => f.style.display = 'none');
-      document.getElementById('project-type-' + type).style.display = 'block';
-      if (type === 'images') {
+    moveProject: function (id, direction) {
+      const projects = AdminData.getProjects();
+      const index = projects.findIndex((p) => p.id === id);
+      if (index === -1) return;
+
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= projects.length) return;
+
+      const temp = projects[targetIndex];
+      projects[targetIndex] = projects[index];
+      projects[index] = temp;
+
+      AdminData.saveProjects(projects);
+      renderProjects();
+      if (typeof renderProjectsPage === "function") renderProjectsPage();
+    },
+
+    toggleProjectTypeFields: function () {
+      const type = document.getElementById("edit-project-type").value;
+      document
+        .querySelectorAll(".project-type-fields")
+        .forEach((f) => (f.style.display = "none"));
+      document.getElementById("project-type-" + type).style.display = "block";
+      if (type === "images") {
         this.renderImagePicker();
+      } else if (type === "flipbook-images") {
+        this.renderFlipbookImagePicker();
       }
     },
 
     // Selected images for current project
     selectedImages: [],
+    selectedFlipbookImages: [],
 
-    renderImagePicker: function() {
-      const grid = document.getElementById('image-picker-grid');
+    renderImagePicker: function () {
+      const grid = document.getElementById("image-picker-grid");
       if (!grid) return;
 
       const images = AdminData.REPOSITORY_IMAGES || [];
-      grid.innerHTML = images.map(img => `
-        <div class="image-picker-item ${this.selectedImages.includes(img.path) ? 'selected' : ''}"
-             data-image-path="${img.path.replace(/"/g, '&quot;')}"
+      grid.innerHTML = images
+        .map(
+          (img) => `
+        <div class="image-picker-item ${this.selectedImages.includes(img.path) ? "selected" : ""}"
+             data-image-path="${img.path.replace(/"/g, "&quot;")}"
              title="${img.name}">
           <img src="${img.path}" alt="${img.name}" onerror="this.parentElement.style.display='none'">
           <span class="image-picker-name">${img.name}</span>
         </div>
-      `).join('');
+      `,
+        )
+        .join("");
 
       // Add click handlers
-      grid.querySelectorAll('.image-picker-item').forEach(item => {
-        item.addEventListener('click', () => {
-          this.toggleImageSelection(item.getAttribute('data-image-path'));
+      grid.querySelectorAll(".image-picker-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          this.toggleImageSelection(item.getAttribute("data-image-path"));
         });
       });
 
       this.renderSelectedImagesList();
     },
 
-    toggleImageSelection: function(path) {
+    toggleImageSelection: function (path) {
       const index = this.selectedImages.indexOf(path);
       if (index === -1) {
         this.selectedImages.push(path);
@@ -810,17 +1212,17 @@
       this.renderImagePicker();
     },
 
-    addExternalImage: function() {
-      const input = document.getElementById('edit-project-external-url');
+    addExternalImage: function () {
+      const input = document.getElementById("edit-project-external-url");
       const url = input.value.trim();
       if (url && !this.selectedImages.includes(url)) {
         this.selectedImages.push(url);
-        input.value = '';
+        input.value = "";
         this.renderSelectedImagesList();
       }
     },
 
-    removeSelectedImage: function(path) {
+    removeSelectedImage: function (path) {
       const index = this.selectedImages.indexOf(path);
       if (index !== -1) {
         this.selectedImages.splice(index, 1);
@@ -828,8 +1230,8 @@
       }
     },
 
-    renderSelectedImagesList: function() {
-      const list = document.getElementById('selected-images-list');
+    renderSelectedImagesList: function () {
+      const list = document.getElementById("selected-images-list");
       if (!list) return;
 
       if (this.selectedImages.length === 0) {
@@ -837,100 +1239,347 @@
         return;
       }
 
-      list.innerHTML = '<label>Selected Images (' + this.selectedImages.length + ')</label>' +
-        this.selectedImages.map((path, i) => `
+      list.innerHTML =
+        "<label>Selected Images (" +
+        this.selectedImages.length +
+        ")</label>" +
+        this.selectedImages
+          .map(
+            (path, i) => `
           <div class="selected-image-item">
             <span class="selected-image-order">${i + 1}.</span>
-            <span class="selected-image-path">${path.split('/').pop()}</span>
-            <button type="button" data-image-path="${path.replace(/"/g, '&quot;')}" class="admin-btn-small admin-btn-danger remove-image">×</button>
+            <span class="selected-image-path">${path.split("/").pop()}</span>
+            <button type="button" data-image-path="${path.replace(/"/g, "&quot;")}" class="admin-btn-small admin-btn-danger remove-image">×</button>
           </div>
-        `).join('');
+        `,
+          )
+          .join("");
 
       // Add click handlers to remove buttons
-      list.querySelectorAll('.remove-image').forEach(btn => {
-        btn.addEventListener('click', () => {
-          this.removeSelectedImage(btn.getAttribute('data-image-path'));
+      list.querySelectorAll(".remove-image").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          this.removeSelectedImage(btn.getAttribute("data-image-path"));
         });
       });
     },
 
-    addProject: function() {
-      document.getElementById('admin-edit-project-title').textContent = 'Add Project';
-      document.getElementById('edit-project-id').value = '';
-      document.getElementById('edit-project-title').value = '';
-      document.getElementById('edit-project-description').value = '';
-      document.getElementById('edit-project-type').value = 'images';
-      document.getElementById('edit-project-displaystyle').value = 'default';
-      document.getElementById('edit-project-basepath').value = '';
-      document.getElementById('edit-project-pagecount').value = '1';
-      document.getElementById('edit-project-extension').value = '.png';
-      document.getElementById('edit-project-pdf').value = '';
-      this.selectedImages = [];
-      this.toggleProjectTypeFields();
-      document.getElementById('admin-edit-project-modal').style.display = 'flex';
+    renderFlipbookImagePicker: function () {
+      const grid = document.getElementById("flipbook-image-picker-grid");
+      if (!grid) return;
+
+      const images =
+        AdminData.REPOSITORY_FLIPBOOK_IMAGES ||
+        (AdminData.REPOSITORY_IMAGES || []).filter((img) =>
+          /\.(png|jpg|jpeg|webp|gif)$/i.test(img.path),
+        );
+
+      grid.innerHTML = images
+        .map(
+          (img) => `
+        <div class="image-picker-item ${this.selectedFlipbookImages.includes(img.path) ? "selected" : ""}"
+             data-image-path="${img.path.replace(/"/g, "&quot;")}"
+             title="${img.name}">
+          <img src="${resolveAdminPreviewPath(img.path)}" alt="${img.name}" onerror="this.style.display='none';this.parentElement.classList.add('image-picker-item-error')">
+          <span class="image-picker-name">${img.name}</span>
+        </div>
+      `,
+        )
+        .join("");
+
+      grid.querySelectorAll(".image-picker-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          this.toggleFlipbookImageSelection(
+            item.getAttribute("data-image-path"),
+          );
+        });
+      });
+
+      this.renderSelectedFlipbookImagesList();
     },
 
-    editProject: function(id) {
-      const projects = AdminData.getProjects();
-      const project = projects.find(p => p.id === id);
-      if (project) {
-        document.getElementById('admin-edit-project-title').textContent = 'Edit Project';
-        document.getElementById('edit-project-id').value = project.id;
-        document.getElementById('edit-project-title').value = project.title;
-        document.getElementById('edit-project-description').value = project.description || '';
-        document.getElementById('edit-project-type').value = project.type || 'images';
+    toggleFlipbookImageSelection: function (path) {
+      const index = this.selectedFlipbookImages.indexOf(path);
+      if (index === -1) {
+        this.selectedFlipbookImages.push(path);
+      } else {
+        this.selectedFlipbookImages.splice(index, 1);
+      }
+      this.renderFlipbookImagePicker();
+    },
 
-        // Set fields based on type
-        if (project.type === 'images' || !project.type) {
-          this.selectedImages = [...(project.images || [])];
-          document.getElementById('edit-project-displaystyle').value = project.displayStyle || 'default';
-        } else if (project.type === 'flipbook-images') {
-          this.selectedImages = [];
-          const fb = project.flipbookImages || {};
-          document.getElementById('edit-project-basepath').value = fb.basePath || '';
-          document.getElementById('edit-project-pagecount').value = fb.pageCount || 1;
-          document.getElementById('edit-project-extension').value = fb.extension || '.png';
-        } else if (project.type === 'flipbook-pdf') {
-          this.selectedImages = [];
-          document.getElementById('edit-project-pdf').value = project.flipbookPdf || '';
-        }
-
-        this.toggleProjectTypeFields();
-        document.getElementById('admin-edit-project-modal').style.display = 'flex';
+    addFlipbookExternalImage: function () {
+      const input = document.getElementById(
+        "edit-project-flipbook-external-url",
+      );
+      if (!input) return;
+      const url = input.value.trim();
+      if (url && !this.selectedFlipbookImages.includes(url)) {
+        this.selectedFlipbookImages.push(url);
+        input.value = "";
+        this.renderSelectedFlipbookImagesList();
       }
     },
 
-    saveProject: function() {
-      const id = document.getElementById('edit-project-id').value;
-      const type = document.getElementById('edit-project-type').value;
+    removeSelectedFlipbookImage: function (path) {
+      const index = this.selectedFlipbookImages.indexOf(path);
+      if (index !== -1) {
+        this.selectedFlipbookImages.splice(index, 1);
+        this.renderFlipbookImagePicker();
+      }
+    },
+
+    moveSelectedFlipbookImage: function (path, direction) {
+      const index = this.selectedFlipbookImages.indexOf(path);
+      if (index === -1) return;
+
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (
+        targetIndex < 0 ||
+        targetIndex >= this.selectedFlipbookImages.length
+      ) {
+        return;
+      }
+
+      const temp = this.selectedFlipbookImages[targetIndex];
+      this.selectedFlipbookImages[targetIndex] =
+        this.selectedFlipbookImages[index];
+      this.selectedFlipbookImages[index] = temp;
+      this.renderSelectedFlipbookImagesList();
+    },
+
+    renderSelectedFlipbookImagesList: function () {
+      const list = document.getElementById("selected-flipbook-images-list");
+      if (!list) return;
+
+      if (this.selectedFlipbookImages.length === 0) {
+        list.innerHTML =
+          '<p class="admin-form-hint">No flipbook pages selected</p>';
+        return;
+      }
+
+      list.innerHTML =
+        "<label>Selected Flipbook Pages (" +
+        this.selectedFlipbookImages.length +
+        ")</label>" +
+        this.selectedFlipbookImages
+          .map(
+            (path, i) => `
+          <div class="selected-image-item">
+            <span class="selected-image-order">${i + 1}.</span>
+            <span class="selected-image-path">${path.split("/").pop()}</span>
+            <div class="selected-image-actions">
+              <button type="button" data-image-path="${path.replace(/"/g, "&quot;")}" class="admin-btn-small move-flipbook-up" title="Move up">↑</button>
+              <button type="button" data-image-path="${path.replace(/"/g, "&quot;")}" class="admin-btn-small move-flipbook-down" title="Move down">↓</button>
+              <button type="button" data-image-path="${path.replace(/"/g, "&quot;")}" class="admin-btn-small admin-btn-danger remove-flipbook-image" title="Remove page">×</button>
+            </div>
+          </div>
+        `,
+          )
+          .join("");
+
+      list.querySelectorAll(".move-flipbook-up").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          this.moveSelectedFlipbookImage(
+            btn.getAttribute("data-image-path"),
+            "up",
+          );
+        });
+      });
+
+      list.querySelectorAll(".move-flipbook-down").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          this.moveSelectedFlipbookImage(
+            btn.getAttribute("data-image-path"),
+            "down",
+          );
+        });
+      });
+
+      list.querySelectorAll(".remove-flipbook-image").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          this.removeSelectedFlipbookImage(btn.getAttribute("data-image-path"));
+        });
+      });
+
+      const pageCountInput = document.getElementById("edit-project-pagecount");
+      if (pageCountInput && this.selectedFlipbookImages.length > 0) {
+        pageCountInput.value = String(this.selectedFlipbookImages.length);
+      }
+    },
+
+    openFlipbookLibrary: function (context) {
+      this.libraryContext = context;
+      this.librarySelection =
+        context === "home"
+          ? [...this.selectedHomeFlipbookImages]
+          : [...this.selectedFlipbookImages];
+      this.renderFlipbookLibraryGrid();
+      document.getElementById("admin-flipbook-library-modal").style.display =
+        "flex";
+    },
+
+    closeFlipbookLibrary: function () {
+      document.getElementById("admin-flipbook-library-modal").style.display =
+        "none";
+      this.libraryContext = null;
+      this.librarySelection = [];
+    },
+
+    renderFlipbookLibraryGrid: function () {
+      const grid = document.getElementById("admin-flipbook-library-grid");
+      if (!grid) return;
+
+      const images =
+        AdminData.REPOSITORY_FLIPBOOK_IMAGES ||
+        (AdminData.REPOSITORY_IMAGES || []).filter((img) =>
+          /\.(png|jpg|jpeg|webp|gif)$/i.test(img.path),
+        );
+
+      grid.innerHTML = images
+        .map(
+          (img) => `
+        <div class="image-picker-item ${this.librarySelection.includes(img.path) ? "selected" : ""}"
+             data-image-path="${img.path.replace(/"/g, "&quot;")}"
+             title="${img.name}">
+          <img src="${resolveAdminPreviewPath(img.path)}" alt="${img.name}" onerror="this.style.display='none';this.parentElement.classList.add('image-picker-item-error')">
+          <span class="image-picker-name">${img.name}</span>
+        </div>
+      `,
+        )
+        .join("");
+
+      grid.querySelectorAll(".image-picker-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          this.toggleLibrarySelection(item.getAttribute("data-image-path"));
+        });
+      });
+    },
+
+    toggleLibrarySelection: function (path) {
+      const index = this.librarySelection.indexOf(path);
+      if (index === -1) {
+        this.librarySelection.push(path);
+      } else {
+        this.librarySelection.splice(index, 1);
+      }
+      this.renderFlipbookLibraryGrid();
+    },
+
+    applyFlipbookLibrarySelection: function () {
+      if (this.libraryContext === "home") {
+        this.selectedHomeFlipbookImages = [...this.librarySelection];
+        this.renderHomeFlipbookImagePicker();
+      } else {
+        this.selectedFlipbookImages = [...this.librarySelection];
+        this.renderFlipbookImagePicker();
+      }
+      this.closeFlipbookLibrary();
+    },
+
+    addProject: function () {
+      document.getElementById("admin-edit-project-title").textContent =
+        "Add Project";
+      document.getElementById("edit-project-id").value = "";
+      document.getElementById("edit-project-title").value = "";
+      document.getElementById("edit-project-description").value = "";
+      document.getElementById("edit-project-type").value = "images";
+      document.getElementById("edit-project-displaystyle").value = "default";
+      document.getElementById("edit-project-basepath").value = "";
+      document.getElementById("edit-project-pagecount").value = "1";
+      document.getElementById("edit-project-extension").value = ".png";
+      document.getElementById("edit-project-pdf").value = "";
+      this.selectedImages = [];
+      this.selectedFlipbookImages = [];
+      this.toggleProjectTypeFields();
+      document.getElementById("admin-edit-project-modal").style.display =
+        "flex";
+    },
+
+    editProject: function (id) {
+      const projects = AdminData.getProjects();
+      const project = projects.find((p) => p.id === id);
+      if (project) {
+        document.getElementById("admin-edit-project-title").textContent =
+          "Edit Project";
+        document.getElementById("edit-project-id").value = project.id;
+        document.getElementById("edit-project-title").value = project.title;
+        document.getElementById("edit-project-description").value =
+          project.description || "";
+        document.getElementById("edit-project-type").value =
+          project.type || "images";
+
+        // Set fields based on type
+        if (project.type === "images" || !project.type) {
+          this.selectedImages = [...(project.images || [])];
+          document.getElementById("edit-project-displaystyle").value =
+            project.displayStyle || "default";
+        } else if (project.type === "flipbook-images") {
+          this.selectedImages = [];
+          const fb = project.flipbookImages || {};
+          this.selectedFlipbookImages = Array.isArray(fb.pages)
+            ? [...fb.pages]
+            : [];
+          document.getElementById("edit-project-basepath").value =
+            fb.basePath || "";
+          document.getElementById("edit-project-pagecount").value =
+            fb.pageCount || 1;
+          document.getElementById("edit-project-extension").value =
+            fb.extension || ".png";
+        } else if (project.type === "flipbook-pdf") {
+          this.selectedImages = [];
+          this.selectedFlipbookImages = [];
+          document.getElementById("edit-project-pdf").value =
+            project.flipbookPdf || "";
+        } else {
+          this.selectedFlipbookImages = [];
+        }
+
+        this.toggleProjectTypeFields();
+        document.getElementById("admin-edit-project-modal").style.display =
+          "flex";
+      }
+    },
+
+    saveProject: function () {
+      const id = document.getElementById("edit-project-id").value;
+      const type = document.getElementById("edit-project-type").value;
 
       const projectData = {
-        id: id || AdminData.generateId('project'),
-        title: document.getElementById('edit-project-title').value,
-        description: document.getElementById('edit-project-description').value,
+        id: id || AdminData.generateId("project"),
+        title: document.getElementById("edit-project-title").value,
+        description: document.getElementById("edit-project-description").value,
         type: type,
-        displayStyle: 'default',
-        visible: true
+        displayStyle: "default",
+        visible: true,
       };
 
       // Set type-specific fields
-      if (type === 'images') {
+      if (type === "images") {
         projectData.images = [...this.selectedImages];
-        projectData.displayStyle = document.getElementById('edit-project-displaystyle').value;
-      } else if (type === 'flipbook-images') {
+        projectData.displayStyle = document.getElementById(
+          "edit-project-displaystyle",
+        ).value;
+      } else if (type === "flipbook-images") {
+        const selectedPages = [...this.selectedFlipbookImages];
         projectData.flipbookImages = {
-          basePath: document.getElementById('edit-project-basepath').value,
-          pageCount: parseInt(document.getElementById('edit-project-pagecount').value) || 1,
-          extension: document.getElementById('edit-project-extension').value || '.png'
+          basePath: document.getElementById("edit-project-basepath").value,
+          pageCount:
+            selectedPages.length ||
+            parseInt(document.getElementById("edit-project-pagecount").value) ||
+            1,
+          extension:
+            document.getElementById("edit-project-extension").value || ".png",
+          pages: selectedPages,
         };
-      } else if (type === 'flipbook-pdf') {
-        projectData.flipbookPdf = document.getElementById('edit-project-pdf').value;
+      } else if (type === "flipbook-pdf") {
+        projectData.flipbookPdf =
+          document.getElementById("edit-project-pdf").value;
       }
 
       const projects = AdminData.getProjects();
 
       if (id) {
-        const index = projects.findIndex(p => p.id === id);
+        const index = projects.findIndex((p) => p.id === id);
         if (index !== -1) {
           projectData.visible = projects[index].visible;
           projects[index] = projectData;
@@ -942,34 +1591,42 @@
       AdminData.saveProjects(projects);
       this.closeEditProject();
       renderProjects();
-      if (typeof renderProjectsPage === 'function') renderProjectsPage();
+      if (typeof renderProjectsPage === "function") renderProjectsPage();
     },
 
-    deleteProject: function(id) {
-      if (confirm('Are you sure you want to delete this project?')) {
-        const projects = AdminData.getProjects().filter(p => p.id !== id);
+    deleteProject: function (id) {
+      if (confirm("Are you sure you want to delete this project?")) {
+        const projects = AdminData.getProjects().filter((p) => p.id !== id);
         AdminData.saveProjects(projects);
         renderProjects();
-        if (typeof renderProjectsPage === 'function') renderProjectsPage();
+        if (typeof renderProjectsPage === "function") renderProjectsPage();
       }
     },
 
-    closeEditProject: function() {
-      document.getElementById('admin-edit-project-modal').style.display = 'none';
+    closeEditProject: function () {
+      document.getElementById("admin-edit-project-modal").style.display =
+        "none";
     },
 
-    resetProjects: function() {
-      if (confirm('Reset all projects to defaults? This will remove any custom projects.')) {
-        localStorage.removeItem('charliecilla_projects');
+    resetProjects: function () {
+      if (
+        confirm(
+          "Reset all projects to defaults? This will remove any custom projects.",
+        )
+      ) {
+        localStorage.removeItem("charliecilla_projects");
         renderProjects();
-        if (typeof renderProjectsPage === 'function') renderProjectsPage();
+        if (typeof renderProjectsPage === "function") renderProjectsPage();
       }
-    }
+    },
   };
 
   // Initialize when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', AdminPanel.init.bind(AdminPanel));
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      AdminPanel.init.bind(AdminPanel),
+    );
   } else {
     AdminPanel.init();
   }

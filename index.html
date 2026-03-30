@@ -1,237 +1,288 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
     <title>Charlie Cilla</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
 
-        h2 {
-            font-size: 50px;
-            color: white;
-            margin: 0;
-        }
+      h2 {
+        font-size: 50px;
+        color: white;
+        margin: 0;
+      }
 
-        h4 {
-            font-size: 35px;
-            color: white;
-            margin: 0;
-        }
+      h4 {
+        font-size: 35px;
+        color: white;
+        margin: 0;
+      }
 
-        header {
-            width: 100%;
-            background-color: rgb(0, 0, 0);
-            z-index: 11;
-            position: fixed;
-            top: 0;
-            left: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 40px;
-            box-sizing: border-box;
-        }
+      header {
+        width: 100%;
+        background-color: rgb(0, 0, 0);
+        z-index: 11;
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 40px;
+        box-sizing: border-box;
+      }
 
-        .header-content {
-            display: flex;
-            align-items: center;
-        }
+      .header-content {
+        display: flex;
+        align-items: center;
+      }
 
-        .logo {
-            max-width: 50px;
-            max-height: auto;
-            margin-right: 20px;
-        }
+      .logo {
+        max-width: 50px;
+        max-height: auto;
+        margin-right: 20px;
+      }
 
-        h1 {
-            margin: 0;
-            color: white;
-        }
+      h1 {
+        margin: 0;
+        color: white;
+      }
 
-        header ul {
-            list-style-type: none;
-            display: flex;
-            margin: 0;
-            padding: 0;
-        }
+      header ul {
+        list-style-type: none;
+        display: flex;
+        margin: 0;
+        padding: 0;
+      }
 
-        header ul li {
-            margin-left: 20px;
-        }
+      header ul li {
+        margin-left: 20px;
+      }
 
-        header ul li a {
-            color: white;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
+      header ul li a {
+        color: white;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
 
-        header ul li a:hover {
-            color: #ff4444;
-        }
+      header ul li a:hover {
+        color: #ff4444;
+      }
 
-       
-        
+      .overlay-box {
+        position: absolute;
+        top: 0;
+        right: 0;
+        max-width: 150px;
+        max-height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+        text-align: center;
+      }
 
-        .overlay-box {
-            position: absolute;
-            top: 0;
-            right: 0;
-            max-width: 150px;
-            max-height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 18px;
-            text-align: center;
-        }
+      nav {
+        color: #ffffff;
+        background-color: white;
+        height: 30px;
+        font-size: 50;
+        padding: 7px 0px 0px 0px;
+      }
 
-        nav {
-            color: #ffffff;
-            background-color: white;
-            height: 30px;
-            font-size: 50;
-            padding: 7px 0px 0px 0px;
-        }
+      #central-portfolio-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 60px;
+        padding: 100px 20px 60px;
+        max-width: 100%;
+        margin: 0 auto;
+      }
 
-        #central-portfolio-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 60px;
-            padding: 100px 20px 60px;
-            max-width: 100%;
-            margin: 0 auto;
-        }
+      #central-project {
+        width: 100%;
+        margin: 0;
+      }
 
-        #central-project {
-            width: 100%;
-            margin: 0;
-        }
+      .container {
+        display: flex;
+        max-width: 1920px;
+        margin: 0 auto;
+        padding: 20px;
+      }
 
-        .container {
-            display: flex;
-            max-width: 1920px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+      .left-column,
+      .middle-column,
+      .right-column {
+        width: 48%;
+      }
 
-        .left-column, .middle-column, .right-column {
-            width: 48%;
-        }
+      .left-column h1,
+      .middle-column h1,
+      .right-column h1 {
+        font-weight: bold;
+      }
 
-        .left-column h1, .middle-column h1, .right-column h1 {
-            font-weight: bold;
-        }
+      .left-column img,
+      .middle-column img,
+      .right-column img {
+        max-width: 100%;
+        max-width: 500px;
+        max-height: 450px;
+        display: block;
+        padding: 20px;
+      }
 
-        .left-column img, .middle-column img, .right-column img {
-            max-width: 100%;
-            max-width: 500px;
-            max-height: 450px;
-            display: block;
-            padding: 20px;
-        }
+      .video-wrapper {
+        display: flex;
+        justify-content: center;
+        margin: 0 auto;
+        width: 100%;
+        padding: 0 40px;
+        box-sizing: border-box;
+      }
 
-        .video-wrapper {
-            display: flex;
-            justify-content: center;
-            margin: 0 auto;
-            width: 100%;
-            padding: 0 40px;
-            box-sizing: border-box;
-        }
+      .video-container {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        width: 100%;
+      }
 
-        .video-container {
-            display: flex;
-            align-items: stretch;
-            gap: 0;
-            width: 100%;
-        }
+      .video-text {
+        flex: 0 0 350px;
+        color: white;
+        background-color: transparent;
+        padding: 30px 40px 30px 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
 
-        .video-text {
-            flex: 0 0 350px;
-            color: white;
-            background-color: transparent;
-            padding: 30px 40px 30px 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+      .video-text h2 {
+        font-size: 52px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 25px;
+        line-height: 1;
+      }
 
-        .video-text h2 {
-            font-size: 52px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 25px;
-            line-height: 1.0;
-        }
+      .video-text h4 {
+        font-size: 14px;
+        line-height: 1.8;
+        font-weight: 400;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
 
-        .video-text h4 {
-            font-size: 14px;
-            line-height: 1.8;
-            font-weight: 400;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+      .yt-embeded-holder {
+        flex: 1;
+        position: relative;
+        width: 100%;
+        padding-bottom: 40%;
+        overflow: hidden;
+      }
 
-        .yt-embeded-holder {
-            flex: 1;
-            position: relative;
-            width: 100%;
-            padding-bottom: 40%;
-            overflow: hidden;
-        }
+      .interactive-holder {
+        flex: 1;
+        width: 100%;
+        min-height: 520px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 15px;
+        padding: 0;
+        background: #000;
+      }
 
-    .yt-embeded-holder img {
+      .interactive-holder > [id^="flipbook-"] {
+        width: 100%;
+        max-width: none;
+        background: #000;
+      }
+
+      .home-flipbook-stage,
+      .home-flipbook-shift {
+        transform: translateX(105px);
+      }
+
+      .yt-embeded-holder img {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
 
-    .yt-embeded-holder img:hover {
+      .yt-embeded-holder img:hover {
         transform: scale(1.02);
-    }
-</style>
-</head> <body> <header> 
-    <div class="header-content"> <img src="logo.png" alt="Logo" class="logo"> 
-    <h1>CHARLIE CILLA</h1> </div> 
-    <ul> <li><a href="index.html">HOME</a></li> 
-        <li><a href="pages_code/page_portfolio.html">ARCHIVES</a></li> 
-        <li><a href="pages_code/page_contact.html">CONTACT</a></li> 
-        <li><a href="pages_code/page_about.html">ABOUT</a></li>  
-        <li><a href="pages_code/page_projects.html">PROJECTS</a></li></ul> 
+      }
+
+      @media (max-width: 1200px) {
+        .home-flipbook-stage,
+        .home-flipbook-shift {
+          transform: translateX(105px);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .home-flipbook-stage,
+        .home-flipbook-shift {
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-content">
+        <img src="logo.png" alt="Logo" class="logo" />
+        <h1>CHARLIE CILLA</h1>
+      </div>
+      <ul>
+        <li><a href="index.html">HOME</a></li>
+        <li><a href="pages_code/page_portfolio.html">ARCHIVES</a></li>
+        <li><a href="pages_code/page_contact.html">CONTACT</a></li>
+        <li><a href="pages_code/page_about.html">ABOUT</a></li>
+        <li><a href="pages_code/page_projects.html">PROJECTS</a></li>
+      </ul>
     </header>
 
     <!-- Toggle Menu Script -->
     <script>
-        function toggleMenu() {
-            document.querySelector('header ul').classList.toggle('active');
-        }
+      function toggleMenu() {
+        document.querySelector("header ul").classList.toggle("active");
+      }
     </script>
 
     <section id="central-portfolio-section">
-        <!-- Projects will be rendered dynamically -->
+      <!-- Projects will be rendered dynamically -->
     </section>
 
-    <footer style="text-align: center; padding: 30px 20px; color: #333;">
-        <span style="color: #444; font-size: 11px;">&copy; 2025 Charlie Cilla</span>
+    <footer style="text-align: center; padding: 30px 20px; color: #333">
+      <span style="color: #444; font-size: 11px"
+        >&copy; 2025 Charlie Cilla</span
+      >
     </footer>
 
     <!-- Admin Panel Scripts -->
-    <link rel="stylesheet" href="admin/admin.css">
+    <link rel="stylesheet" href="admin/admin.css" />
     <script src="admin/data.js"></script>
     <script src="admin/admin.js"></script>
 
@@ -241,26 +292,27 @@
     <script src="pages_code/Handbook_Files/flipbook-viewer-master/dist/flipbook-viewer.js"></script>
 
     <script>
-        // Set up PDF.js worker
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      // Set up PDF.js worker
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-        // Render home page projects dynamically
-        function renderHomePage() {
-            const projects = AdminData.getHomeProjects().filter(p => p.visible);
-            const container = document.getElementById('central-portfolio-section');
+      // Render home page projects dynamically
+      function renderHomePage() {
+        const projects = AdminData.getHomeProjects().filter((p) => p.visible);
+        const container = document.getElementById("central-portfolio-section");
 
-            container.innerHTML = projects.map(p => {
-                const projectType = p.type || 'video';
+        container.innerHTML = projects
+          .map((p) => {
+            const projectType = p.type || "video";
 
-                if (projectType === 'video') {
-                    return `
+            if (projectType === "video") {
+              return `
                         <div id="central-project">
                             <div class="video-wrapper">
                                 <div class="video-container">
                                     <div class="video-text">
                                         <h2>${p.title}</h2>
-                                        <h4>${p.year} ${p.category}<br><br>${p.description}${p.credit ? '<br><br>CREDIT: ' + p.credit : ''}</h4>
+                                        <h4>${p.year} ${p.category}<br><br>${p.description}${p.credit ? "<br><br>CREDIT: " + p.credit : ""}</h4>
                                     </div>
                                     <div class="yt-embeded-holder">
                                         <a href="${p.youtubeUrl}" target="_blank">
@@ -271,155 +323,357 @@
                             </div>
                         </div>
                     `;
-                } else if (projectType === 'images') {
-                    return `
+            } else if (projectType === "images") {
+              return `
                         <div id="central-project">
                             <div class="video-wrapper">
                                 <div class="video-container">
                                     <div class="video-text">
                                         <h2>${p.title}</h2>
-                                        <h4>${p.year} ${p.category}<br><br>${p.description}${p.credit ? '<br><br>CREDIT: ' + p.credit : ''}</h4>
+                                        <h4>${p.year} ${p.category}<br><br>${p.description}${p.credit ? "<br><br>CREDIT: " + p.credit : ""}</h4>
                                     </div>
                                     <div class="yt-embeded-holder">
-                                        ${(p.images || []).map(img => `
+                                        ${(p.images || [])
+                                          .map(
+                                            (img) => `
                                             <img src="${img}" alt="${p.title}" style="width: 100%; margin-bottom: 10px;">
-                                        `).join('')}
+                                        `,
+                                          )
+                                          .join("")}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     `;
-                } else if (projectType === 'flipbook-pdf') {
-                    const flipbookId = 'flipbook-' + p.id;
-                    setTimeout(() => initHomeFlipbook(p.id, p.flipbookPdf), 100);
-                    return `
+            } else if (projectType === "flipbook-pdf") {
+              const flipbookId = "flipbook-" + p.id;
+              setTimeout(() => initHomeFlipbook(p.id, p.flipbookPdf), 100);
+              return `
                         <div id="central-project">
                             <div class="video-wrapper">
                                 <div class="video-container">
                                     <div class="video-text">
                                         <h2>${p.title}</h2>
-                                        <h4>${p.year} ${p.category}<br><br>${p.description}${p.credit ? '<br><br>CREDIT: ' + p.credit : ''}</h4>
+                                        <h4>${p.year} ${p.category}<br><br>${p.description}${p.credit ? "<br><br>CREDIT: " + p.credit : ""}</h4>
                                     </div>
-                                    <div class="yt-embeded-holder" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                                        <div id="${flipbookId}" style="width: 100%;"></div>
-                                        <div style="display: flex; gap: 10px; justify-content: center;">
+                                    <div class="interactive-holder">
+                                        <div id="${flipbookId}" class="home-flipbook-stage"></div>
+                                        <div class="home-flipbook-shift" style="display: flex; gap: 10px; justify-content: center;">
                                             <button onclick="flipPrev('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">← Previous</button>
                                             <button onclick="flipNext('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">Next →</button>
+                                            <button onclick="flipZoom('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">Zoom</button>
                                         </div>
-                                        <div id="${flipbookId}-info" style="color: #ccc; font-size: 14px;">Loading...</div>
+                                        <div id="${flipbookId}-info" class="home-flipbook-shift" style="color: #ccc; font-size: 14px;">Loading...</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     `;
-                }
-                return '';
-            }).join('');
+            } else if (projectType === "flipbook-images") {
+              const flipbookId = "flipbook-" + p.id;
+              setTimeout(
+                () => initHomeFlipbookImages(p.id, p.flipbookImages || {}),
+                100,
+              );
+              return `
+                        <div id="central-project">
+                            <div class="video-wrapper">
+                                <div class="video-container">
+                                    <div class="video-text">
+                                        <h2>${p.title}</h2>
+                                        <h4>${p.year} ${p.category}<br><br>${p.description}${p.credit ? "<br><br>CREDIT: " + p.credit : ""}</h4>
+                                    </div>
+                                    <div class="interactive-holder">
+                                        <div id="${flipbookId}" class="home-flipbook-stage"></div>
+                                        <div class="home-flipbook-shift" style="display: flex; gap: 10px; justify-content: center;">
+                                            <button onclick="flipPrev('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">← Previous</button>
+                                            <button onclick="flipNext('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">Next →</button>
+                                            <button onclick="flipZoom('${flipbookId}')" style="padding: 8px 16px; background: white; color: #111; border: none; border-radius: 4px; cursor: pointer;">Zoom</button>
+                                        </div>
+                                        <div id="${flipbookId}-info" class="home-flipbook-shift" style="color: #ccc; font-size: 14px;">Loading...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+            }
+            return "";
+          })
+          .join("");
+      }
+
+      // Store flipbook viewers
+      const homeViewers = {};
+
+      // Initialize flipbook for home page
+      function initHomeFlipbook(projectId, pdfPath) {
+        const flipbookId = "flipbook-" + projectId;
+        const flipViewerEl = document.getElementById(flipbookId);
+        const pageInfo = document.getElementById(flipbookId + "-info");
+
+        if (!flipViewerEl || !pageInfo) return;
+
+        pageInfo.textContent = "Loading PDF...";
+
+        const cache = [];
+
+        function renderPage(pdf, n, cb) {
+          pdf
+            .getPage(n)
+            .then((page) => {
+              const scale = 1.0;
+              const viewport = page.getViewport({ scale });
+              const canvas = document.createElement("canvas");
+              canvas.width = viewport.width;
+              canvas.height = viewport.height;
+              const context = canvas.getContext("2d");
+
+              page
+                .render({
+                  canvasContext: context,
+                  viewport: viewport,
+                })
+                .promise.then(() => {
+                  const img = new Image();
+                  img.onload = () => {
+                    cache[n] = {
+                      img,
+                      num: n,
+                      width: img.width,
+                      height: img.height,
+                    };
+                    cb(null, cache[n]);
+                  };
+                  img.src = canvas.toDataURL("image/jpeg", 0.85);
+                })
+                .catch(cb);
+            })
+            .catch(cb);
         }
 
-        // Store flipbook viewers
-        const homeViewers = {};
+        pdfjsLib
+          .getDocument(pdfPath)
+          .promise.then((pdf) => {
+            const book = {
+              pdf: pdf,
+              numPages: () => pdf.numPages,
+              getPage: (n, cb) => {
+                if (!n || n > pdf.numPages) return cb();
+                if (cache[n]) return cb(null, cache[n]);
+                renderPage(pdf, n, cb);
+              },
+            };
 
-        // Initialize flipbook for home page
-        function initHomeFlipbook(projectId, pdfPath) {
-            const flipbookId = 'flipbook-' + projectId;
-            const flipViewerEl = document.getElementById(flipbookId);
-            const pageInfo = document.getElementById(flipbookId + '-info');
+            const containerWidth = Math.max(320, flipViewerEl.offsetWidth || 0);
+            const width = Math.max(320, Math.min(1200, containerWidth));
+            const height = Math.floor(width * 0.58);
 
-            if (!flipViewerEl || !pageInfo) return;
-
-            pageInfo.textContent = "Loading PDF...";
-
-            const cache = [];
-
-            function renderPage(pdf, n, cb) {
-                pdf.getPage(n).then((page) => {
-                    const scale = 1.0;
-                    const viewport = page.getViewport({ scale });
-                    const canvas = document.createElement("canvas");
-                    canvas.width = viewport.width;
-                    canvas.height = viewport.height;
-                    const context = canvas.getContext("2d");
-
-                    page.render({
-                        canvasContext: context,
-                        viewport: viewport
-                    }).promise.then(() => {
-                        const img = new Image();
-                        img.onload = () => {
-                            cache[n] = {
-                                img,
-                                num: n,
-                                width: img.width,
-                                height: img.height
-                            };
-                            cb(null, cache[n]);
-                        };
-                        img.src = canvas.toDataURL("image/jpeg", 0.85);
-                    }).catch(cb);
-                }).catch(cb);
-            }
-
-            pdfjsLib.getDocument(pdfPath).promise.then((pdf) => {
-                const book = {
-                    pdf: pdf,
-                    numPages: () => pdf.numPages,
-                    getPage: (n, cb) => {
-                        if (!n || n > pdf.numPages) return cb();
-                        if (cache[n]) return cb(null, cache[n]);
-                        renderPage(pdf, n, cb);
+            // Preload first 2 pages
+            renderPage(pdf, 1, () => {
+              renderPage(pdf, 2, () => {
+                flipbook.init(
+                  book,
+                  flipViewerEl,
+                  {
+                    width: width,
+                    height: height,
+                    backgroundColor: "#000000",
+                    boxColor: "#000000",
+                    boxBorder: 0,
+                  },
+                  (err, viewer) => {
+                    if (err) {
+                      console.error(err);
+                      pageInfo.textContent = "Error loading PDF";
+                      return;
                     }
-                };
 
-                const containerWidth = flipViewerEl.offsetWidth;
-                const width = Math.min(700, containerWidth - 40);
-                const height = Math.floor(width * 0.7);
+                    homeViewers[flipbookId] = viewer;
+                    pageInfo.textContent = `Page 1 of ${pdf.numPages}`;
 
-                // Preload first 2 pages
-                renderPage(pdf, 1, () => {
-                    renderPage(pdf, 2, () => {
-                        flipbook.init(book, flipViewerEl, {
-                            width: width,
-                            height: height,
-                            backgroundColor: "#111111",
-                            boxColor: "#111111",
-                            boxBorder: 0
-                        }, (err, viewer) => {
-                            if (err) {
-                                console.error(err);
-                                pageInfo.textContent = "Error loading PDF";
-                                return;
-                            }
-
-                            homeViewers[flipbookId] = viewer;
-                            pageInfo.textContent = `Page 1 of ${pdf.numPages}`;
-
-                            viewer.on("seen", (n) => {
-                                pageInfo.textContent = `Page ${n} of ${pdf.numPages}`;
-                            });
-                        });
+                    viewer.on("seen", (n) => {
+                      pageInfo.textContent = `Page ${n} of ${pdf.numPages}`;
                     });
-                });
-            }).catch((err) => {
-                console.error("Failed to load PDF:", err);
-                pageInfo.textContent = "Failed to load PDF";
+                  },
+                );
+              });
             });
+          })
+          .catch((err) => {
+            console.error("Failed to load PDF:", err);
+            pageInfo.textContent = "Failed to load PDF";
+          });
+      }
+
+      function initHomeFlipbookImages(projectId, config) {
+        const flipbookId = "flipbook-" + projectId;
+        const flipViewerEl = document.getElementById(flipbookId);
+        const pageInfo = document.getElementById(flipbookId + "-info");
+
+        if (!flipViewerEl || !pageInfo) return;
+
+        const selectedPages = Array.isArray(config.pages)
+          ? config.pages.filter((p) => typeof p === "string" && p.trim())
+          : [];
+        const useSelectedPages = selectedPages.length > 0;
+        const rawBasePath =
+          config.basePath || "pages_code/Handbook_Files/handbook-pages/page-";
+        const extension = config.extension || ".png";
+        const fallbackCount = parseInt(config.pageCount, 10) || 1;
+        const sourceTotalPages = useSelectedPages
+          ? selectedPages.length
+          : fallbackCount;
+        const shouldSkipFirstPage = config.skipFirstPage === true;
+        const sourceStartIndex =
+          shouldSkipFirstPage && sourceTotalPages > 1 ? 1 : 0;
+        const contentTotalPages = Math.max(
+          1,
+          sourceTotalPages - sourceStartIndex,
+        );
+        const virtualTotalPages = contentTotalPages + 2;
+
+        pageInfo.textContent = "Loading images...";
+
+        const cache = [];
+
+        function normalizeFlipbookPath(path) {
+          if (!path) return path;
+          if (/^(https?:|data:|blob:)/i.test(path)) return path;
+          if (path.startsWith("/")) return path;
+          if (path.startsWith("pages_code/")) return path;
+          if (path.startsWith("Handbook_Files/")) return `pages_code/${path}`;
+          if (path.startsWith("../")) return path.replace(/^\.\.\//, "");
+          if (path.startsWith("./")) return path.replace(/^\.\//, "");
+          return path;
         }
 
-        function flipPrev(flipbookId) {
-            if (homeViewers[flipbookId]) {
-                homeViewers[flipbookId].flip_back();
-            }
+        const basePath = normalizeFlipbookPath(rawBasePath);
+
+        function getImageSrc(pageNum) {
+          if (useSelectedPages) {
+            return normalizeFlipbookPath(
+              selectedPages[sourceStartIndex + pageNum - 1],
+            );
+          }
+          const filePageNum = sourceStartIndex + pageNum;
+          const paddedNum = String(filePageNum).padStart(2, "0");
+          return `${basePath}${paddedNum}${extension}`;
         }
 
-        function flipNext(flipbookId) {
-            if (homeViewers[flipbookId]) {
-                homeViewers[flipbookId].flip_forward();
-            }
+        function mapDisplayToSourcePage(displayPageNum) {
+          return sourceStartIndex + displayPageNum;
         }
 
-        // Initial render
-        renderHomePage();
+        function mapVirtualToContentPage(virtualPageNum) {
+          if (virtualPageNum <= 0) return null;
+          if (virtualPageNum >= virtualTotalPages - 1) return null;
+          return virtualPageNum;
+        }
+
+        function loadImagePage(n, cb) {
+          if (!n || n > contentTotalPages) return cb();
+          if (cache[n]) return cb(null, cache[n]);
+
+          const img = new Image();
+          img.onload = () => {
+            cache[n] = {
+              img,
+              num: n,
+              width: img.width,
+              height: img.height,
+            };
+            cb(null, cache[n]);
+          };
+          img.onerror = () => cb(new Error(`Failed to load page ${n}`));
+          img.src = getImageSrc(n);
+        }
+
+        const book = {
+          numPages: () => virtualTotalPages,
+          getPage: (n, cb) => {
+            if (n < 0 || n >= virtualTotalPages) return cb();
+            const contentPage = mapVirtualToContentPage(n);
+            if (!contentPage) return cb();
+            loadImagePage(contentPage, cb);
+          },
+        };
+
+        const containerWidth = Math.max(320, flipViewerEl.offsetWidth || 0);
+        const width = Math.max(320, Math.min(1200, containerWidth));
+        const height = Math.floor(width * 0.58);
+
+        const secondPage = contentTotalPages > 1 ? 2 : 1;
+        loadImagePage(1, (err) => {
+          if (err) {
+            console.error(err);
+            pageInfo.textContent = "Failed to load flipbook images";
+            return;
+          }
+
+          loadImagePage(secondPage, () => {
+            flipbook.init(
+              book,
+              flipViewerEl,
+              {
+                width: width,
+                height: height,
+                backgroundColor: "#000000",
+                boxColor: "#000000",
+                boxBorder: 0,
+              },
+              (initErr, viewer) => {
+                if (initErr) {
+                  console.error(initErr);
+                  pageInfo.textContent = "Error loading flipbook";
+                  return;
+                }
+
+                homeViewers[flipbookId] = viewer;
+                pageInfo.textContent = `Page ${mapDisplayToSourcePage(1)} of ${sourceTotalPages}`;
+
+                viewer.on("seen", (n) => {
+                  const contentPage = mapVirtualToContentPage(n);
+                  if (!contentPage) return;
+                  pageInfo.textContent = `Page ${mapDisplayToSourcePage(contentPage)} of ${sourceTotalPages}`;
+                  for (let i = 1; i <= 3; i++) {
+                    const nextContentPage = contentPage + i;
+                    if (
+                      nextContentPage <= contentTotalPages &&
+                      !cache[nextContentPage]
+                    ) {
+                      loadImagePage(nextContentPage, () => {});
+                    }
+                  }
+                });
+              },
+            );
+          });
+        });
+      }
+
+      function flipPrev(flipbookId) {
+        if (homeViewers[flipbookId]) {
+          homeViewers[flipbookId].flip_back();
+        }
+      }
+
+      function flipNext(flipbookId) {
+        if (homeViewers[flipbookId]) {
+          homeViewers[flipbookId].flip_forward();
+        }
+      }
+
+      function flipZoom(flipbookId) {
+        if (
+          homeViewers[flipbookId] &&
+          typeof homeViewers[flipbookId].zoom === "function"
+        ) {
+          homeViewers[flipbookId].zoom();
+        }
+      }
+
+      // Initial render
+      renderHomePage();
     </script>
     <!-- </section> 
     <section id="photography-gallery">
@@ -553,5 +807,5 @@ function changeImage(direction) {
     document.getElementById("lightbox-img").src = images[currentImageIndex];
 }
 </script> -->
-</body>
+  </body>
 </html>

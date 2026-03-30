@@ -245,17 +245,7 @@
     </header>
 
     <section>
-      <div class="project-list">
-        <button onclick="showProject('project1')">
-          Student Meal Plan App Prototype
-        </button>
-        <button onclick="showProject('project2')">Brand Identity System</button>
-        <button onclick="showProject('project3')">
-          Editorial Layout Project
-        </button>
-        <button onclick="showProject('project4')">Designer Handbook</button>
-        <button onclick="showProject('project5')">Voices 2026</button>
-      </div>
+      <div class="project-list" id="project-list"></div>
       <div class="project-display">
         <div class="project-description" id="description"></div>
         <div class="project-images" id="images">
@@ -268,21 +258,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <!-- Flipbook viewer library -->
     <script src="Handbook_Files/flipbook-viewer-master/dist/flipbook-viewer.js"></script>
+    <!-- Admin panel scripts -->
+    <link rel="stylesheet" href="../admin/admin.css" />
+    <script src="../admin/data.js"></script>
+    <script src="../admin/admin.js"></script>
     <script>
       // Set up PDF.js worker
       pdfjsLib.GlobalWorkerOptions.workerSrc =
         "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-      const projects = {
-        project1: {
+      const fallbackProjects = [
+        {
+          id: "project-1",
           title: "Student Meal Plan App Prototype",
           description: `University students face considerable difficulty when trying to manage their meal plans efficiently.<br> <br>
         Meal plans provide convenience but they fail to supply students with essential budgeting tools throughout an academic semester.<br> <br>
         Students frequently believe their meal plan money will last through the semester but unexpectedly find their funds depleted before the end.<br> <br>
         This leads to financial stress and dependence on expensive or low-nutrition food alternatives.`,
+          type: "images",
           images: ["../Mealplan.jpg"],
         },
-        project2: {
+        {
+          id: "project-2",
           title: "POWERADE Rebrand",
           description: `Powerade isn’t just a drink—it’s fuel for champions. But to lead the sports drink market, it must rediscover its roots. Athletes and sports enthusiasts may be the audience, but inspiration is missing. A brand without a story is a name without a legacy. <br> <br>
 
@@ -290,16 +287,19 @@ Born from the relentless spirit of runners—the athletes of speed and endurance
 
 The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, and the unbreakable will to go further. This isn’t just about hydration; it’s about igniting the fire of movement, the passion of pursuit, the thrill of crossing the finish line. The visual language will be daring, expressive, and explosive—a call to action for all who strive for greatness.
 `,
+          type: "images",
           images: [
             "../[GBDA 202] Rebranding Pitch-1_page-0001.jpg",
             "../[GBDA 202] Part 3 Rebranding Pitch-12 (1).jpg",
             "../[GBDA 202] Rebranding Pitch-16_page-0001.jpg",
           ],
         },
-        project3: {
+        {
+          id: "project-3",
           title: "WYAWYG?",
           description: `Posters that demonstrate my <br> creativity as a desinger and artist. Each <br> poster is a digitization of a peice of art
         I <br>created in a physical medium. <br> <br> Each piece displays my ability to mold the <br> digital and physical worlds of design together, <br> creating something new .`,
+          type: "images",
           images: [
             "../POSTER1 (1).jpg",
             "../POSTER1 (5).jpg",
@@ -307,32 +307,130 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
             "../POSTER1 (3).jpg",
             "../POSTER1 (4).jpg",
           ],
+          displayStyle: "grid-5",
         },
-        project4: {
+        {
+          id: "project-4",
           title: "Designer Handbook",
           description: `A comprehensive visual guide exploring the fundamental principles of design.<br><br>
         This handbook serves as both a personal reference and a creative exploration of typography, color theory, composition, and visual hierarchy.<br><br>
         Each spread demonstrates practical applications of design principles through carefully crafted layouts and thoughtful use of whitespace.`,
+          type: "flipbook-images",
           flipbookImages: {
             basePath: "Handbook_Files/handbook-pages/page-",
             pageCount: 22,
             extension: ".png",
           },
         },
-        project5: {
+        {
+          id: "project-5",
           title: "Voices 2026",
           description: `An immersive multimedia project capturing diverse perspectives and stories for the future.<br><br>
         Voices 2026 combines visual storytelling with audio narratives to create a time capsule of contemporary experiences.<br><br>
         The project explores themes of identity, community, and aspiration through a series of interviews and artistic interpretations.`,
+          type: "images",
           images: ["../Mealplan.jpg"],
         },
+      ];
+
+      let projectsById = {};
+
+      function normalizeProject(project) {
+        const normalized = {
+          id: project.id,
+          title: project.title || "Untitled Project",
+          description: project.description || "",
+          displayStyle: project.displayStyle || "default",
+          type: project.type || "images",
+        };
+
+        if (normalized.type === "images") {
+          normalized.images = Array.isArray(project.images)
+            ? project.images
+            : [];
+        } else if (normalized.type === "flipbook-images") {
+          const fb = project.flipbookImages || {};
+          normalized.flipbookImages = {
+            basePath: "",
+            pageCount: 1,
+            extension: ".png",
+            pdfPath: "",
+            pages: [],
+            ...fb,
+          };
+        } else if (normalized.type === "flipbook-pdf") {
+          normalized.flipbook = project.flipbookPdf || project.flipbook || "";
+        } else {
+          normalized.images = Array.isArray(project.images)
+            ? project.images
+            : [];
+        }
+
+        return normalized;
+      }
+
+      function getProjectsData() {
+        if (
+          typeof AdminData !== "undefined" &&
+          typeof AdminData.getProjects === "function"
+        ) {
+          return AdminData.getProjects().filter((p) => p.visible !== false);
+        }
+        return fallbackProjects;
+      }
+
+      function renderProjectButtons(projects) {
+        const listEl = document.getElementById("project-list");
+        if (!listEl) return;
+
+        if (!projects.length) {
+          listEl.innerHTML = "<p>No projects available.</p>";
+          return;
+        }
+
+        listEl.innerHTML = projects
+          .map(
+            (p) =>
+              `<button type="button" data-project-id="${p.id}">${p.title}</button>`,
+          )
+          .join("");
+
+        listEl.querySelectorAll("button[data-project-id]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            showProject(btn.getAttribute("data-project-id"));
+          });
+        });
+      }
+
+      window.renderProjectsPage = function renderProjectsPage() {
+        const sourceProjects = getProjectsData();
+        const normalizedProjects = sourceProjects.map(normalizeProject);
+
+        projectsById = normalizedProjects.reduce((acc, p) => {
+          acc[p.id] = p;
+          return acc;
+        }, {});
+
+        renderProjectButtons(normalizedProjects);
+
+        if (normalizedProjects.length > 0) {
+          showProject(normalizedProjects[0].id);
+        } else {
+          document.getElementById("description").innerHTML =
+            "<h2>No projects</h2>";
+          document.getElementById("images").innerHTML =
+            "<p>No visuals available.</p>";
+        }
       };
 
       // Global variable to track current flipbook viewer
       let currentViewer = null;
 
       function showProject(key) {
-        const project = projects[key];
+        const project = projectsById[key];
+        if (!project) {
+          return;
+        }
         const imagesContainer = document.getElementById("images");
 
         // Clean up previous flipbook viewer if exists
@@ -346,7 +444,7 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
         // Reset images container classes
         imagesContainer.className = "project-images";
 
-        if (key === "project3") {
+        if (project.displayStyle === "grid-5") {
           imagesContainer.classList.add("grid-5");
         }
 
@@ -401,16 +499,24 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
         const flipViewerEl = document.getElementById("flipbook-viewer");
         pageInfo.textContent = "Loading...";
 
-        const { basePath, pageCount, extension } = config;
+        const { basePath, pageCount, extension, pdfPath } = config;
+        const selectedPages = Array.isArray(config.pages)
+          ? config.pages.filter((p) => typeof p === "string" && p.trim())
+          : [];
+        const useSelectedPages = selectedPages.length > 0;
+        const parsedPageCount = parseInt(pageCount, 10) || 1;
+        const totalContentPages = useSelectedPages
+          ? selectedPages.length
+          : parsedPageCount;
         const cache = [];
 
         // Add empty page at start, black page at end
         // Index 0 = empty, Index 1-pageCount = actual pages, Index pageCount+1 = black
-        const totalPages = pageCount + 2;
+        const totalPages = totalContentPages + 2;
 
         // Create a black page image
         let blackPageCache = null;
-        function getBlackPage() {
+        function getBlackPage(totalContentPagesForNumber = totalContentPages) {
           if (blackPageCache) return blackPageCache;
           const canvas = document.createElement("canvas");
           canvas.width = 1200;
@@ -422,7 +528,7 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
           img.src = canvas.toDataURL();
           blackPageCache = {
             img,
-            num: pageCount + 1,
+            num: totalContentPagesForNumber + 1,
             width: canvas.width,
             height: canvas.height,
           };
@@ -441,12 +547,15 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
               return resolve(null);
             }
 
-            // File pages are 1-based (page-01.png)
-            const filePageNum = bookPageIndex;
-
             const img = new Image();
-            const paddedNum = String(filePageNum).padStart(2, "0");
-            img.src = `${basePath}${paddedNum}${extension}`;
+            if (useSelectedPages) {
+              img.src = selectedPages[bookPageIndex - 1];
+            } else {
+              // File pages are 1-based (page-01.png)
+              const filePageNum = bookPageIndex;
+              const paddedNum = String(filePageNum).padStart(2, "0");
+              img.src = `${basePath}${paddedNum}${extension}`;
+            }
 
             img.onload = () => {
               cache[bookPageIndex] = {
@@ -457,7 +566,47 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
               };
               resolve(cache[bookPageIndex]);
             };
-            img.onerror = () => reject(`Failed to load page ${filePageNum}`);
+            img.onerror = () => reject(`Failed to load page ${bookPageIndex}`);
+          });
+        }
+
+        // Pre-render a PDF page to a PNG data URL image for fast flipping.
+        function renderPdfPageToImage(pdf, pdfPageNum) {
+          return new Promise((resolve, reject) => {
+            if (cache[pdfPageNum] !== undefined) {
+              return resolve(cache[pdfPageNum]);
+            }
+
+            pdf
+              .getPage(pdfPageNum)
+              .then((page) => {
+                const viewport = page.getViewport({ scale: 1.0 });
+                const canvas = document.createElement("canvas");
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                return page
+                  .render({
+                    canvasContext: canvas.getContext("2d"),
+                    viewport,
+                  })
+                  .promise.then(() => {
+                    const img = new Image();
+                    img.onload = () => {
+                      cache[pdfPageNum] = {
+                        img,
+                        num: pdfPageNum,
+                        width: img.width,
+                        height: img.height,
+                      };
+                      resolve(cache[pdfPageNum]);
+                    };
+                    img.onerror = () =>
+                      reject(`Failed to prerender page ${pdfPageNum}`);
+                    img.src = canvas.toDataURL("image/png");
+                  });
+              })
+              .catch((err) => reject(err));
           });
         }
 
@@ -468,7 +617,7 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
             // Return nothing for empty slots or out of bounds
             if (n < 0 || n >= totalPages) return cb();
             if (n === 0) return cb(); // Empty slot at start
-            if (n > pageCount) return cb(null, getBlackPage()); // Black page at end
+            if (n > totalContentPages) return cb(null, getBlackPage()); // Black page at end
 
             if (cache[n]) return cb(null, cache[n]);
 
@@ -481,66 +630,109 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
           },
         };
 
-        // Preload first few pages (skip index 0 since it's empty)
-        const initialPages = Math.min(5, pageCount);
-        const preloadPromises = [];
-        for (let i = 1; i <= initialPages; i++) {
-          preloadPromises.push(preloadImage(i));
-        }
+        function initViewerWithPreparedPages(totalContentPages, preloadFn) {
+          const initialPages = Math.min(5, totalContentPages);
+          const preloadPromises = [];
+          for (let i = 1; i <= initialPages; i++) {
+            preloadPromises.push(preloadFn(i));
+          }
 
-        Promise.all(preloadPromises)
-          .then(() => {
-            // Calculate responsive size
-            const containerWidth = flipViewerEl.parentElement.offsetWidth;
-            const width = Math.min(900, containerWidth - 40);
-            const height = Math.floor(width * 0.7);
+          Promise.all(preloadPromises)
+            .then(() => {
+              // Calculate responsive size
+              const containerWidth = flipViewerEl.parentElement.offsetWidth;
+              const width = Math.min(900, containerWidth - 40);
+              const height = Math.floor(width * 0.7);
 
-            const opts = {
-              width: width,
-              height: height,
-              backgroundColor: "#111111",
-              boxColor: "#111111",
-              boxBorder: 0,
-            };
+              const opts = {
+                width: width,
+                height: height,
+                backgroundColor: "#111111",
+                boxColor: "#111111",
+                boxBorder: 0,
+              };
 
-            flipbook.init(book, flipViewerEl, opts, (err, viewer) => {
-              if (err) {
-                console.error(err);
-                pageInfo.textContent = "Error loading flipbook";
-                return;
-              }
+              flipbook.init(book, flipViewerEl, opts, (err, viewer) => {
+                if (err) {
+                  console.error(err);
+                  pageInfo.textContent = "Error loading flipbook";
+                  return;
+                }
 
-              currentViewer = viewer;
-              pageInfo.textContent = `Page 1 of ${pageCount}`;
+                currentViewer = viewer;
+                pageInfo.textContent = `Page 1 of ${totalContentPages}`;
 
-              // Track page views
-              viewer.on("seen", (n) => {
-                const displayPage = Math.max(1, Math.min(n, pageCount));
-                pageInfo.textContent = `Page ${displayPage} of ${pageCount}`;
-                // Preload next pages when viewing
-                for (let i = 1; i <= 4; i++) {
-                  if (n + i <= pageCount) preloadImage(n + i);
+                // Track page views
+                viewer.on("seen", (n) => {
+                  const displayPage = Math.max(
+                    1,
+                    Math.min(n, totalContentPages),
+                  );
+                  pageInfo.textContent = `Page ${displayPage} of ${totalContentPages}`;
+                  // Preload next pages when viewing
+                  for (let i = 1; i <= 4; i++) {
+                    if (n + i <= totalContentPages) preloadFn(n + i);
+                  }
+                });
+
+                // Set up controls
+                document.getElementById("flip-next").onclick = () =>
+                  viewer.flip_forward();
+                document.getElementById("flip-prev").onclick = () =>
+                  viewer.flip_back();
+                document.getElementById("flip-zoom").onclick = () =>
+                  viewer.zoom();
+
+                // Preload remaining pages in background
+                for (let i = initialPages + 1; i <= totalContentPages; i++) {
+                  setTimeout(() => preloadFn(i), (i - initialPages) * 100);
                 }
               });
-
-              // Set up controls
-              document.getElementById("flip-next").onclick = () =>
-                viewer.flip_forward();
-              document.getElementById("flip-prev").onclick = () =>
-                viewer.flip_back();
-              document.getElementById("flip-zoom").onclick = () =>
-                viewer.zoom();
-
-              // Preload remaining pages in background
-              for (let i = initialPages + 1; i <= pageCount; i++) {
-                setTimeout(() => preloadImage(i), (i - initialPages) * 100);
-              }
+            })
+            .catch((err) => {
+              console.error("Failed to load images:", err);
+              pageInfo.textContent = "Failed to load handbook";
             });
-          })
-          .catch((err) => {
-            console.error("Failed to load images:", err);
-            pageInfo.textContent = "Failed to load handbook";
-          });
+        }
+
+        if (pdfPath) {
+          pageInfo.textContent = "Loading PDF and prerendering pages...";
+          pdfjsLib
+            .getDocument(pdfPath)
+            .promise.then((pdf) => {
+              const totalPdfPages = pdf.numPages;
+              const totalPdfBookPages = totalPdfPages + 2;
+
+              const pdfBook = {
+                numPages: () => totalPdfBookPages,
+                getPage: (n, cb) => {
+                  if (n < 0 || n >= totalPdfBookPages) return cb();
+                  if (n === 0) return cb();
+                  if (n > totalPdfPages)
+                    return cb(null, getBlackPage(totalPdfPages));
+
+                  if (cache[n]) return cb(null, cache[n]);
+
+                  renderPdfPageToImage(pdf, n)
+                    .then((result) => cb(null, result))
+                    .catch((err) => cb(err));
+                },
+              };
+
+              book.numPages = pdfBook.numPages;
+              book.getPage = pdfBook.getPage;
+              initViewerWithPreparedPages(totalPdfPages, (n) =>
+                renderPdfPageToImage(pdf, n),
+              );
+            })
+            .catch((err) => {
+              console.error("Failed to load PDF for prerender:", err);
+              pageInfo.textContent = "Failed to prerender PDF";
+            });
+          return;
+        }
+
+        initViewerWithPreparedPages(totalContentPages, preloadImage);
       }
 
       // Initialize flipbook viewer with PDF
@@ -707,6 +899,9 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
             pageInfo.textContent = "Failed to load PDF";
           });
       }
+
+      // Initial render
+      window.renderProjectsPage();
     </script>
   </body>
 </html>
