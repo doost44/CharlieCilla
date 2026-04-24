@@ -73,6 +73,36 @@ const REPOSITORY_FLIPBOOK_IMAGES = [
 const DEFAULT_HOME_PROJECTS = [
   {
     id: "home-1",
+    title: "DESIGNER HANDBOOK",
+    year: "2025",
+    category: "PRINT / EDITORIAL",
+    description: "A VISUAL GUIDE TO THE FUNDAMENTALS OF DESIGN",
+    credit: "",
+    type: "flipbook-images",
+    flipbookImages: {
+      basePath: "Handbook_Files/handbook-pages/page-",
+      pageCount: 22,
+      extension: ".png",
+    },
+    visible: true,
+  },
+  {
+    id: "home-2",
+    title: "VOICES 2025",
+    year: "2025",
+    category: "PUBLICATION",
+    description: "A MULTIMEDIA EXPLORATION OF CONTEMPORARY VOICES",
+    credit: "",
+    type: "flipbook-images",
+    flipbookImages: {
+      basePath: "Handbook_Files/handbook-pages/voices-",
+      pageCount: 36,
+      extension: ".png",
+    },
+    visible: true,
+  },
+  {
+    id: "home-3",
     title: "THE GOATMAN",
     year: "2025",
     category: "SHORT FILM",
@@ -84,19 +114,7 @@ const DEFAULT_HOME_PROJECTS = [
     visible: true,
   },
   {
-    id: "home-2",
-    title: "THE CALL",
-    year: "2024",
-    category: "SHORT FILM",
-    description: "A KAFKAESQUE REFLECTION OF MODERN DIGITAL LIFE",
-    credit: "",
-    type: "video",
-    youtubeUrl: "https://www.youtube.com/watch?v=85gvlt7RyTA",
-    youtubeId: "85gvlt7RyTA",
-    visible: true,
-  },
-  {
-    id: "home-3",
+    id: "home-4",
     title: "BOUND BY BOARDS",
     year: "2025",
     category: "SHORT DOC",
@@ -249,12 +267,16 @@ Each spread demonstrates practical applications of design principles through car
   },
   {
     id: "project-5",
-    title: "Voices 2026",
-    description: `An immersive multimedia project capturing diverse perspectives and stories for the future.<br><br>
-Voices 2026 combines visual storytelling with audio narratives to create a time capsule of contemporary experiences.<br><br>
+    title: "Voices 2025",
+    description: `An immersive multimedia project capturing diverse perspectives and stories.<br><br>
+Voices combines visual storytelling with audio narratives to create a time capsule of contemporary experiences.<br><br>
 The project explores themes of identity, community, and aspiration through a series of interviews and artistic interpretations.`,
-    type: "images",
-    images: ["../Mealplan.jpg"],
+    type: "flipbook-images",
+    flipbookImages: {
+      basePath: "Handbook_Files/handbook-pages/voices-",
+      pageCount: 36,
+      extension: ".png",
+    },
     displayStyle: "default",
     visible: true,
   },

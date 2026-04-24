@@ -1,103 +1,129 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Huh UOW Works 1 - Portfolio</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Huh UOW Works 1 - Charlie Cilla</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="../site-theme.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Archivo+Black&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+      .detail-layout {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 20px;
+      }
+
+      .detail-image {
+        border: 1px solid var(--line);
+        background: #060606;
+        overflow: hidden;
+      }
+
+      .detail-image img {
+        width: 100%;
+        height: 100%;
+        min-height: 520px;
+        object-fit: cover;
+      }
+
+      .detail-info {
+        border: 1px solid var(--line);
+        background: linear-gradient(160deg, rgba(14, 14, 14, 0.95), rgba(4, 4, 4, 0.94));
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+        align-content: start;
+      }
+
+      .detail-title {
+        margin: 0;
+        font-family: "Archivo Black", "Arial Black", Impact, sans-serif;
+        text-transform: uppercase;
+        line-height: 0.95;
+        font-size: clamp(26px, 4vw, 54px);
+      }
+
+      .detail-text {
+        margin: 0;
+        color: #c5c5c5;
+        line-height: 1.7;
+        white-space: pre-line;
+      }
+
+      .detail-back {
+        width: fit-content;
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        padding: 9px 16px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 11px;
+        text-decoration: none;
+        color: white;
+      }
+
+      .detail-back:hover {
+        border-color: white;
+      }
+
+      @media (max-width: 980px) {
+        .detail-layout {
+          grid-template-columns: 1fr;
         }
 
-        body {
-            font-family: 'Century Gothic', sans-serif;
-            background-color: black;
-            color: white;
+        .detail-image img {
+          min-height: 280px;
+          max-height: 500px;
         }
-
-        header {
-            width: 100%;
-            background-color: black;
-            padding: 20px 0;
-            position: fixed;
-            top: 0;
-            z-index: 11;
-        }
-
-        header h1 {
-            text-align: center;
-            font-size: 2rem;
-            color: white;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px 0;
-            background-color: black;
-            color: white;
-        }
-
-        footer a {
-            color: white;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            color: red;
-        }
-
-        main {
-            padding: 80px 20px 20px; /* Add space to account for fixed header */
-        }
-
-        .project-detail {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .project-detail img {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 20px;
-        }
-
-        @media screen and (max-width: 600px) {
-            body {
-                font-size: 0.875em;
-            }
-
-            header h1 {
-                font-size: 1.5rem;
-            }
-
-            .project-detail img {
-                margin-bottom: 10px;
-            }
-        }
+      }
     </style>
-</head>
-<body>
-    <header>
-        <h1>Huh UOW Works 1</h1>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-content">
+        <img src="../logo.png" alt="Logo" class="logo" />
+        <h1 class="brand-title">CHARLIE CILLA</h1>
+      </div>
+      <ul class="site-nav">
+        <li><a href="../index.html">HOME</a></li>
+        <li><a href="../pages_code/page_portfolio.html" class="is-active">ARCHIVES</a></li>
+        <li><a href="../pages_code/page_contact.html">CONTACT</a></li>
+        <li><a href="../pages_code/page_about.html">ABOUT</a></li>
+        <li><a href="../pages_code/page_projects.html">PROJECTS</a></li>
+      </ul>
     </header>
-    <main>
-        <section class="project-detail">
-            <img src="../huh_UOW_Works1.jpg" alt="Huh UOW Works 1 Image">
-            <p>I undertook this project without any specific goals in mind, driven solely by a desire to convey my personal expression. I aimed to create something deeply personal and intentionally complex, both for interpretation and my own understanding. I allowed the creative process to flow naturally, observing where it would take me.
 
-Despite this, I can provide a technical overview of the project. It began by layering and blending various images to create an abstract composition. I used images from different sources, including a summer painting, a scene of pollen on water, a waterfront with a boat, a chalk wall, and pumpkins. These layers were subjected to the mosaic filter, with varying levels of pixelation applied. A layer of grain was added to all elements for texture.
+    <main class="page-shell">
+      <div class="meta-strip">
+        <div>Archive Detail<br />Single Project</div>
+        <div>Visual Study<br />Charlie Cilla</div>
+        <div>Context and process notes for this selected piece.</div>
+      </div>
 
-Continuing the process, I applied different colour overlays to each image and merged the layers to create the background. I also manipulated an image of myself using content-aware scaling to alter proportions and dimensions. I traced my facial features on paper and incorporated this as an overlay on my face.
+      <section class="detail-layout">
+        <article class="detail-image">
+          <img src="../huh_UOW_Works1.jpg" alt="Huh UOW Works 1" />
+        </article>
+        <article class="detail-info">
+          <h2 class="detail-title">Huh UOW Works 1</h2>
+          <p class="detail-text">I undertook this project without specific goals, driven by expression and complexity in interpretation. I let the process guide the result.
 
-Finally, I added the text "huh." at the top and introduced red and yellow pixelation on the far left using an image of apple bins. My main source of inspiration for this project was an art piece featured in Atlanta's S1: E9 at the 7:26 mark. I also drew some influence from the work of Jean-Michel Basquiat.
-..</p>
-        </section>
+Technically, I layered and blended source images including a summer painting, pollen on water, a waterfront boat scene, a chalk wall, and pumpkins. I then applied mosaic with varied pixelation and added grain texture across elements.
+
+I used color overlays and merged layers into one background, then manipulated a self portrait with content-aware scaling to distort dimensions. I traced facial features on paper and overlaid that drawing.
+
+The text element and left-side red/yellow pixelation came last. The main spark was an art piece in Atlanta S1:E9, alongside influence from Jean-Michel Basquiat.</p>
+          <a class="detail-back" href="../pages_code/page_portfolio.html">Back to archives</a>
+        </article>
+      </section>
     </main>
-    <footer>
-         <p><a href="../pages_code/page_portfolio.html">Back to Portfolio</a></p>
-    </footer>
-</body>
+
+    <footer class="site-footer">&copy; 2026 Charlie Cilla</footer>
+  </body>
 </html>

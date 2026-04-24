@@ -3,318 +3,390 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Projects – Charlie Cilla</title>
+    <title>Projects - Charlie Cilla</title>
     <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="../site-theme.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, sans-serif;
-        background: #111;
-        color: white;
+      .projects-hero {
+        margin: 8px 0 32px;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: clamp(32px, 10vw, 150px);
+        line-height: 0.9;
+        letter-spacing: -3px;
+        text-transform: uppercase;
+        font-weight: 900;
+        color: #fff;
+        white-space: nowrap;
       }
 
-      header {
+      .projects-hero .accent-stroke {
+        -webkit-text-stroke: 1.5px var(--accent);
+        color: transparent;
+      }
+
+      .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 28px;
+      }
+
+      .project-card {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(8, 8, 8, 0.42);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
         width: 100%;
-        background-color: black;
-        z-index: 11;
-        position: fixed;
-        top: 0;
-        left: 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 40px;
-        box-sizing: border-box;
-      }
-
-      .header-content {
-        display: flex;
-        align-items: center;
-      }
-
-      .logo {
-        max-width: 50px;
-        height: auto;
-        margin-right: 20px;
-      }
-
-      h1 {
-        margin: 0;
-        color: white;
-      }
-
-      header ul {
-        list-style-type: none;
-        display: flex;
-        margin: 0;
         padding: 0;
-      }
-
-      header ul li {
-        margin-left: 20px;
-      }
-
-      header ul li a {
-        color: white;
-        text-decoration: none;
-        transition: color 0.3s ease;
-      }
-
-      header ul li a:hover {
-        color: #ff4444;
-      }
-
-      section {
-        padding: 100px 20px 40px;
-        max-width: 100%;
-        margin: 0 auto;
-        min-height: 100vh;
-      }
-
-      .project-list {
-        text-align: center;
-        margin-bottom: 50px;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-      }
-
-      .project-list button {
-        background: none;
-        color: white;
-        border: 2px solid white;
-        padding: 12px 24px;
-        margin: 8px;
-        font-size: 16px;
+        text-align: left;
+        color: inherit;
+        font: inherit;
         cursor: pointer;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        font-weight: 500;
-        letter-spacing: 0.5px;
+        transition:
+          border-color 0.25s ease,
+          transform 0.25s ease,
+          background 0.2s ease;
       }
 
-      .project-list button:hover {
-        background: white;
-        color: #111;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+      .project-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-3px);
+        background: rgba(12, 12, 12, 0.6);
       }
 
-      .project-list button:active {
-        transform: translateY(0);
+      .project-media {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        border-bottom: 1px solid var(--line);
+        background: #040404;
+        overflow: hidden;
       }
 
-      .project-display {
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        gap: 60px;
-        padding: 0 40px;
-        max-width: 1800px;
-        margin: 0 auto;
+      .project-media img,
+      .project-media iframe {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border: 0;
+      }
+
+      .project-media-fallback {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        place-items: center;
+        color: #c9c9c9;
+        font-size: 12px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+
+      .project-content {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+      }
+
+      .project-title {
+        margin: 0;
+        font-size: clamp(22px, 2.8vw, 34px);
+        line-height: 1;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        text-transform: uppercase;
+        font-weight: 900;
+        letter-spacing: -0.5px;
       }
 
       .project-description {
-        flex: 1;
-        max-width: 400px;
-        min-width: 300px;
-      }
-
-      .project-description h2 {
-        font-size: 36px;
-        margin-bottom: 10px;
-      }
-
-      .project-description p {
-        font-size: 18px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
         line-height: 1.5;
       }
 
-      .project-images {
-        flex: 3;
+      .project-meta {
         display: flex;
-        flex-direction: column;
-        gap: 20px;
-        max-width: 1200px;
+        gap: 10px;
+        flex-wrap: wrap;
       }
 
-      .project-images img,
-      .project-images iframe {
-        width: 100%;
-        height: auto;
-        max-height: 700px;
-        object-fit: contain;
-        border-radius: 8px;
+      .project-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 120;
+        background: rgba(0, 0, 0, 0.92);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: grid;
+        place-items: start center;
+        padding: clamp(20px, 3vh, 40px) clamp(16px, 2vw, 32px);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        overflow-y: auto;
       }
 
-      /* Special grid for Project 3 (WYAWYG) - overlapping poster style */
-      .project-images.grid-5 {
+      .project-modal.is-open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      .project-modal-panel {
+        width: min(1480px, 100%);
+        background: rgba(6, 6, 6, 0.5);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: clamp(16px, 1.8vw, 24px) clamp(16px, 1.8vw, 24px) clamp(20px, 2.4vw, 32px);
+        margin: auto;
+      }
+
+      .project-modal-close {
+        position: fixed;
+        top: 24px;
+        right: 28px;
+        width: 44px;
+        height: 44px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 0;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.65);
+        font-size: 14px;
+        cursor: pointer;
+        font-family: var(--mono);
+        z-index: 130;
+      }
+
+      .project-modal-close:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .project-modal-header {
+        margin-bottom: clamp(24px, 3vw, 44px);
+        padding-bottom: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      }
+
+      .project-modal-title {
+        margin: 0 0 6px;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: clamp(22px, 2.8vw, 42px);
+        line-height: 1;
+        text-transform: uppercase;
+        font-weight: 900;
+        letter-spacing: -1px;
+      }
+
+      .project-modal-description {
+        margin: 0;
+        color: #c8c8c8;
+        line-height: 1.32;
+      }
+
+      .project-modal-description br + br {
+        display: none;
+      }
+
+      .project-modal-media {
+        display: grid;
+        gap: 10px;
+      }
+
+      .project-modal-media.grid-5 {
         display: flex;
         flex-direction: row;
         justify-content: flex-start;
         align-items: center;
         gap: 0;
-        padding: 20px 0;
-        margin-left: 0;
+        padding: 24px 0 12px;
+        overflow-x: auto;
       }
 
-      .project-images.grid-5 img {
-        width: 320px;
-        height: auto;
-        aspect-ratio: 1 / 1.5;
+      .project-modal-media.grid-5 img {
+        width: 280px;
+        max-width: none;
+        aspect-ratio: 1 / 1.45;
         object-fit: cover;
-        border-radius: 4px;
-        margin-left: -120px;
-        box-shadow: -5px 5px 25px rgba(0, 0, 0, 0.6);
-        transition:
-          transform 0.3s ease,
-          box-shadow 0.3s ease,
-          z-index 0s;
-        position: relative;
+        margin-left: -92px;
+        box-shadow: -4px 6px 24px rgba(0, 0, 0, 0.5);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
       }
 
-      .project-images.grid-5 img:first-child {
+      .project-modal-media.grid-5 img:first-child {
         margin-left: 0;
       }
 
-      .project-images.grid-5 img:hover {
-        transform: scale(1.2) translateY(-10px);
-        box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
-        z-index: 10;
+      .project-modal-media.grid-5 img:hover {
+        transform: translateY(-8px) scale(1.05);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.62);
+        z-index: 2;
       }
 
-      /* Flipbook viewer styles */
-      .flipbook-container {
+      .project-modal-media img,
+      .project-modal-media iframe {
         width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
+        display: block;
+        background: #000;
+        border: 0;
       }
 
-      #flipbook-viewer {
-        border-radius: 8px;
-        overflow: hidden;
+      .project-modal-media iframe {
+        min-height: 520px;
       }
 
-      .flipbook-controls {
+      .project-modal-note {
+        margin-top: 8px;
+        color: #9e9e9e;
+        font-size: 13px;
+      }
+
+      .project-flipbook-wrap {
+        display: grid;
+        gap: 12px;
+      }
+
+      #project-flipbook {
+        max-width: 100%;
+        margin: 0 auto;
+      }
+
+      .project-flipbook-controls {
         display: flex;
-        gap: 15px;
-        justify-content: center;
+        gap: 10px;
         flex-wrap: wrap;
       }
 
-      .flipbook-controls button {
-        background: none;
-        color: white;
-        border: 2px solid white;
-        padding: 10px 20px;
-        font-size: 14px;
+      .project-flipbook-controls button {
+        border: none;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        padding: 8px 14px;
+        font-size: 12px;
         cursor: pointer;
-        border-radius: 6px;
-        transition: all 0.3s ease;
       }
 
-      .flipbook-controls button:hover {
-        background: white;
-        color: #111;
+      .project-flipbook-info {
+        color: #b8b8b8;
+        font-size: 13px;
       }
 
-      .flipbook-page-info {
-        color: #ccc;
-        font-size: 14px;
-        text-align: center;
+      body.project-modal-open {
+        overflow: hidden;
+      }
+
+      @media (max-width: 900px) {
+        .projects-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .project-modal-panel {
+          padding: 16px;
+        }
+
+        .project-modal-media iframe {
+          min-height: 360px;
+        }
+
+        .project-modal-media.grid-5 img {
+          width: 220px;
+          margin-left: -60px;
+        }
       }
     </style>
   </head>
   <body>
-    <header>
+    <div class="site-bg" aria-hidden="true">
+      <video class="site-bg-video" autoplay muted loop playsinline>
+        <source src="../Assets/tree-background.mp4" type="video/mp4" />
+      </video>
+      <div class="site-bg-overlay"></div>
+      <div class="site-bg-grain"></div>
+      <div class="site-bg-fade"></div>
+    </div>
+
+    <header class="site-header">
       <div class="header-content">
         <img src="../logo.png" alt="Logo" class="logo" />
-        <h1>CHARLIE CILLA</h1>
+        <h1 class="brand-title">CHARLIE CILLA</h1>
       </div>
-      <ul>
+      <ul class="site-nav">
         <li><a href="../index.html">HOME</a></li>
         <li><a href="page_portfolio.html">ARCHIVES</a></li>
         <li><a href="page_contact.html">CONTACT</a></li>
         <li><a href="page_about.html">ABOUT</a></li>
-        <li><a href="page_projects.html">PROJECTS</a></li>
+        <li><a href="page_projects.html" class="is-active">PROJECTS</a></li>
       </ul>
     </header>
 
-    <section>
-      <div class="project-list" id="project-list"></div>
-      <div class="project-display">
-        <div class="project-description" id="description"></div>
-        <div class="project-images" id="images">
-          <!-- Visuals go here -->
-        </div>
+    <main class="page-shell">
+      <div class="meta-strip">
+        <div>Charlie Cilla / Projects<br />Full Catalog 2022—Present</div>
+        <div>Visual Design<br />Editorial + Brand + Motion</div>
+        <div>Built for motion, print, and systems thinking.</div>
       </div>
-    </section>
 
-    <!-- PDF.js library for rendering PDFs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <!-- Flipbook viewer library -->
-    <script src="Handbook_Files/flipbook-viewer-master/dist/flipbook-viewer.js"></script>
-    <!-- Admin panel scripts -->
+      <h2 class="projects-hero"><span class="accent-stroke">All</span> Projects</h2>
+
+      <section class="projects-grid" id="projects-grid"></section>
+    </main>
+
+    <div id="project-modal" class="project-modal" onclick="if (event.target === this) closeProjectModal()">
+      <button class="project-modal-close" type="button" onclick="closeProjectModal()" aria-label="Close">
+        X
+      </button>
+      <div class="project-modal-panel" id="project-modal-panel"></div>
+    </div>
+
+    <footer class="site-footer">&copy; 2026 Charlie Cilla</footer>
+
     <link rel="stylesheet" href="../admin/admin.css" />
     <script src="../admin/data.js"></script>
     <script src="../admin/admin.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="Handbook_Files/flipbook-viewer-master/dist/flipbook-viewer.js"></script>
     <script>
-      // Set up PDF.js worker
-      pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
       const fallbackProjects = [
         {
           id: "project-1",
           title: "Student Meal Plan App Prototype",
-          description: `University students face considerable difficulty when trying to manage their meal plans efficiently.<br> <br>
-        Meal plans provide convenience but they fail to supply students with essential budgeting tools throughout an academic semester.<br> <br>
-        Students frequently believe their meal plan money will last through the semester but unexpectedly find their funds depleted before the end.<br> <br>
-        This leads to financial stress and dependence on expensive or low-nutrition food alternatives.`,
+          description:
+            "A budgeting-first student meal planner focused on reducing financial stress over a full semester.",
           type: "images",
           images: ["../Mealplan.jpg"],
         },
         {
           id: "project-2",
           title: "POWERADE Rebrand",
-          description: `Powerade isn’t just a drink—it’s fuel for champions. But to lead the sports drink market, it must rediscover its roots. Athletes and sports enthusiasts may be the audience, but inspiration is missing. A brand without a story is a name without a legacy. <br> <br>
-
-Born from the relentless spirit of runners—the athletes of speed and endurance—Powerade was once the pulse of those who lived to push limits. Young, driven, and unyielding, they found solace in a drink that matched their pace. But as Powerade expanded, its essence blurred, leaving behind the runners who first made it great. <br> <br>
-
-The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, and the unbreakable will to go further. This isn’t just about hydration; it’s about igniting the fire of movement, the passion of pursuit, the thrill of crossing the finish line. The visual language will be daring, expressive, and explosive—a call to action for all who strive for greatness.
-`,
+          description:
+            "A high-energy brand reset rooted in endurance culture and runner-first storytelling.",
           type: "images",
-          images: [
-            "../[GBDA 202] Rebranding Pitch-1_page-0001.jpg",
-            "../[GBDA 202] Part 3 Rebranding Pitch-12 (1).jpg",
-            "../[GBDA 202] Rebranding Pitch-16_page-0001.jpg",
-          ],
+          images: ["../[GBDA 202] Rebranding Pitch-1_page-0001.jpg"],
         },
         {
           id: "project-3",
           title: "WYAWYG?",
-          description: `Posters that demonstrate my <br> creativity as a desinger and artist. Each <br> poster is a digitization of a peice of art
-        I <br>created in a physical medium. <br> <br> Each piece displays my ability to mold the <br> digital and physical worlds of design together, <br> creating something new .`,
+          description:
+            "A poster series blending handmade processes and digital composition into one visual language.",
           type: "images",
-          images: [
-            "../POSTER1 (1).jpg",
-            "../POSTER1 (5).jpg",
-            "../POSTER1 (2).jpg",
-            "../POSTER1 (3).jpg",
-            "../POSTER1 (4).jpg",
-          ],
-          displayStyle: "grid-5",
+          images: ["../POSTER1 (1).jpg"],
         },
         {
           id: "project-4",
           title: "Designer Handbook",
-          description: `A comprehensive visual guide exploring the fundamental principles of design.<br><br>
-        This handbook serves as both a personal reference and a creative exploration of typography, color theory, composition, and visual hierarchy.<br><br>
-        Each spread demonstrates practical applications of design principles through carefully crafted layouts and thoughtful use of whitespace.`,
+          description:
+            "An educational handbook exploring typography, hierarchy, and visual systems through page design.",
           type: "flipbook-images",
           flipbookImages: {
             basePath: "Handbook_Files/handbook-pages/page-",
@@ -322,52 +394,7 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
             extension: ".png",
           },
         },
-        {
-          id: "project-5",
-          title: "Voices 2026",
-          description: `An immersive multimedia project capturing diverse perspectives and stories for the future.<br><br>
-        Voices 2026 combines visual storytelling with audio narratives to create a time capsule of contemporary experiences.<br><br>
-        The project explores themes of identity, community, and aspiration through a series of interviews and artistic interpretations.`,
-          type: "images",
-          images: ["../Mealplan.jpg"],
-        },
       ];
-
-      let projectsById = {};
-
-      function normalizeProject(project) {
-        const normalized = {
-          id: project.id,
-          title: project.title || "Untitled Project",
-          description: project.description || "",
-          displayStyle: project.displayStyle || "default",
-          type: project.type || "images",
-        };
-
-        if (normalized.type === "images") {
-          normalized.images = Array.isArray(project.images)
-            ? project.images
-            : [];
-        } else if (normalized.type === "flipbook-images") {
-          const fb = project.flipbookImages || {};
-          normalized.flipbookImages = {
-            basePath: "",
-            pageCount: 1,
-            extension: ".png",
-            pdfPath: "",
-            pages: [],
-            ...fb,
-          };
-        } else if (normalized.type === "flipbook-pdf") {
-          normalized.flipbook = project.flipbookPdf || project.flipbook || "";
-        } else {
-          normalized.images = Array.isArray(project.images)
-            ? project.images
-            : [];
-        }
-
-        return normalized;
-      }
 
       function getProjectsData() {
         if (
@@ -379,529 +406,377 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
         return fallbackProjects;
       }
 
-      function renderProjectButtons(projects) {
-        const listEl = document.getElementById("project-list");
-        if (!listEl) return;
+      const projectsById = {};
+      let currentProjectViewer = null;
 
-        if (!projects.length) {
-          listEl.innerHTML = "<p>No projects available.</p>";
+      function stripHtml(input) {
+        return (input || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+      }
+
+      function youtubeIdFromUrl(url) {
+        if (!url) return "";
+        const match = String(url).match(
+          /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{6,})/,
+        );
+        return match ? match[1] : "";
+      }
+
+      function isVoicesProject(project) {
+        const title = String(project.title || "").toLowerCase();
+        return title.includes("voices") || project.id === "project-5";
+      }
+
+      function getEffectiveFlipbookImages(project) {
+        if (project && project.flipbookImages) {
+          return project.flipbookImages;
+        }
+
+        if (isVoicesProject(project)) {
+          return {
+            basePath: "Handbook_Files/handbook-pages/voices-",
+            pageCount: 36,
+            extension: ".png",
+          };
+        }
+
+        return null;
+      }
+
+      function getPreviewSrc(project) {
+        if (project.type === "video") {
+          const id = youtubeIdFromUrl(project.youtubeUrl || project.youtube);
+          return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "";
+        }
+
+        const flipbookImages = getEffectiveFlipbookImages(project);
+        if (flipbookImages) {
+          const pages = Array.isArray(flipbookImages.pages)
+            ? flipbookImages.pages.filter((p) => typeof p === "string" && p.trim())
+            : [];
+
+          if (pages.length > 0) return pages[0];
+
+          const basePath = flipbookImages.basePath || "";
+          const ext = flipbookImages.extension || ".png";
+          return `${basePath}01${ext}`;
+        }
+
+        if (Array.isArray(project.images) && project.images.length > 0) {
+          return project.images[0];
+        }
+
+        return "";
+      }
+
+      function getTypeLabel(project) {
+        if (project.type === "flipbook-images" || isVoicesProject(project)) return "Flipbook";
+        if (project.type === "flipbook-pdf") return "PDF";
+        if (project.type === "video") return "Video";
+        return "Image Series";
+      }
+
+      function projectCountLabel(project) {
+        const effectiveFlipbook = getEffectiveFlipbookImages(project);
+        if (effectiveFlipbook && effectiveFlipbook.pageCount) {
+          return `${effectiveFlipbook.pageCount} Pages`;
+        }
+
+        const imageCount = Array.isArray(project.images) ? project.images.length : 0;
+        if (imageCount > 1) return `${imageCount} Visuals`;
+        return "Featured Work";
+      }
+
+      function getFlipbookPreviewImages(flipbookImages) {
+        if (!flipbookImages) return [];
+
+        const selectedPages = Array.isArray(flipbookImages.pages)
+          ? flipbookImages.pages.filter((p) => typeof p === "string" && p.trim())
+          : [];
+
+        if (selectedPages.length > 0) {
+          return selectedPages.slice(0, 8);
+        }
+
+        const basePath = flipbookImages.basePath || "";
+        const ext = flipbookImages.extension || ".png";
+        const count = Math.max(1, parseInt(flipbookImages.pageCount, 10) || 1);
+        const previewCount = Math.min(8, count);
+        const generated = [];
+
+        for (let i = 1; i <= previewCount; i++) {
+          const padded = String(i).padStart(2, "0");
+          generated.push(`${basePath}${padded}${ext}`);
+        }
+
+        return generated;
+      }
+
+      function normalizeProjectAssetPath(path) {
+        if (!path) return "";
+        if (/^(https?:|data:|blob:)/i.test(path)) return path;
+        if (path.startsWith("../")) return path;
+        if (path.startsWith("./")) return path;
+        if (path.startsWith("/")) return path;
+        return path;
+      }
+
+      function isWyawygProject(project) {
+        const title = String(project.title || "").toLowerCase();
+        return project.displayStyle === "grid-5" || title.includes("wyawyg") || project.id === "project-3";
+      }
+
+      function initProjectFlipbookImages(config) {
+        const root = document.getElementById("project-flipbook");
+        const info = document.getElementById("project-flipbook-info");
+        if (!root || !info || typeof flipbook === "undefined") {
+          if (info) info.textContent = "Flipbook viewer is unavailable.";
           return;
         }
 
-        listEl.innerHTML = projects
-          .map(
-            (p) =>
-              `<button type="button" data-project-id="${p.id}">${p.title}</button>`,
-          )
+        const selectedPages = Array.isArray(config.pages)
+          ? config.pages.filter((p) => typeof p === "string" && p.trim())
+          : [];
+
+        const useSelectedPages = selectedPages.length > 0;
+        const basePath = normalizeProjectAssetPath(config.basePath || "Handbook_Files/handbook-pages/page-");
+        const extension = config.extension || ".png";
+        const pageCount = Math.max(1, parseInt(config.pageCount, 10) || 1);
+        const totalPages = useSelectedPages ? selectedPages.length : pageCount;
+        const cache = [];
+
+        function getSrc(pageNum) {
+          if (useSelectedPages) {
+            return normalizeProjectAssetPath(selectedPages[pageNum - 1]);
+          }
+          const padded = String(pageNum).padStart(2, "0");
+          return `${basePath}${padded}${extension}`;
+        }
+
+        function loadPage(n, cb) {
+          if (!n || n > totalPages) return cb();
+          if (cache[n]) return cb(null, cache[n]);
+
+          const img = new Image();
+          img.onload = () => {
+            cache[n] = {
+              img,
+              num: n,
+              width: img.width,
+              height: img.height,
+            };
+            cb(null, cache[n]);
+          };
+          img.onerror = () => cb(new Error(`Failed to load page ${n}`));
+          img.src = getSrc(n);
+        }
+
+        const book = {
+          numPages: () => totalPages,
+          getPage: (n, cb) => {
+            if (!n || n > totalPages) return cb();
+            loadPage(n, cb);
+          },
+        };
+
+        info.textContent = "Loading flipbook...";
+        loadPage(1, (err) => {
+          if (err) {
+            info.textContent = "Failed to load flipbook pages.";
+            return;
+          }
+
+          const viewportW = window.innerWidth || 1200;
+          const viewportH = window.innerHeight || 800;
+          const availableW = Math.max(360, Math.min(1420, viewportW - 80));
+          const availableH = Math.max(380, viewportH - 320);
+          const widthFromH = Math.floor(availableH / 0.72);
+          const width = Math.min(availableW, widthFromH);
+          const height = Math.floor(width * 0.72);
+
+          flipbook.init(
+            book,
+            root,
+            {
+              width,
+              height,
+              backgroundColor: "#000000",
+              boxColor: "#000000",
+              boxBorder: 0,
+            },
+            (initErr, viewer) => {
+              if (initErr) {
+                console.error(initErr);
+                info.textContent = "Failed to initialize flipbook.";
+                return;
+              }
+
+              currentProjectViewer = viewer;
+              info.textContent = `Page 1 of ${totalPages}`;
+
+              viewer.on("seen", (n) => {
+                info.textContent = `Page ${n} of ${totalPages}`;
+              });
+            },
+          );
+        });
+      }
+
+      function flipbookPrev() {
+        if (currentProjectViewer) currentProjectViewer.flip_back();
+      }
+
+      function flipbookNext() {
+        if (currentProjectViewer) currentProjectViewer.flip_forward();
+      }
+
+      function flipbookZoom() {
+        if (currentProjectViewer && typeof currentProjectViewer.zoom === "function") {
+          currentProjectViewer.zoom();
+        }
+      }
+
+      window.flipbookPrev = flipbookPrev;
+      window.flipbookNext = flipbookNext;
+      window.flipbookZoom = flipbookZoom;
+
+      function openProjectModal(projectId) {
+        const project = projectsById[projectId];
+        if (!project) return;
+
+        const modal = document.getElementById("project-modal");
+        const panel = document.getElementById("project-modal-panel");
+        const effectiveFlipbook = getEffectiveFlipbookImages(project);
+
+        let mediaHtml = "<p class=\"project-modal-note\">No media available for this project yet.</p>";
+
+        if (project.type === "video") {
+          const id = youtubeIdFromUrl(project.youtubeUrl || project.youtube || "") || project.youtubeId || "";
+          if (id) {
+            mediaHtml = `
+              <div class="project-modal-media">
+                <iframe
+                  src="https://www.youtube.com/embed/${id}?rel=0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                ></iframe>
+              </div>
+            `;
+          }
+        } else if (effectiveFlipbook && (project.type === "flipbook-images" || isVoicesProject(project))) {
+          mediaHtml = `
+            <div class="project-flipbook-wrap">
+              <div id="project-flipbook"></div>
+              <div class="project-flipbook-controls">
+                <button type="button" onclick="flipbookPrev()">Previous</button>
+                <button type="button" onclick="flipbookNext()">Next</button>
+                <button type="button" onclick="flipbookZoom()">Zoom</button>
+              </div>
+              <div class="project-flipbook-info" id="project-flipbook-info">Loading...</div>
+            </div>
+          `;
+        } else if (Array.isArray(project.images) && project.images.length > 0) {
+          const mediaClass = isWyawygProject(project) ? "project-modal-media grid-5" : "project-modal-media";
+          mediaHtml = `
+            <div class="${mediaClass}">
+              ${project.images.map((src) => `<img src="${src}" alt="${project.title || "Project image"}" loading="lazy" />`).join("")}
+            </div>
+          `;
+        } else if (project.type === "flipbook-pdf" || project.flipbookPdf || project.flipbook || project.pdf) {
+          const pdfSrc = project.flipbookPdf || project.flipbook || project.pdf || "";
+          if (pdfSrc) {
+            mediaHtml = `
+              <div class="project-modal-media">
+                <iframe src="${pdfSrc}"></iframe>
+              </div>
+            `;
+          }
+        }
+
+        panel.innerHTML = `
+          <div class="project-modal-header">
+            <h2 class="project-modal-title">${project.title || "Untitled Project"}</h2>
+            <p class="project-modal-description">${project.description || "Project details coming soon."}</p>
+          </div>
+          ${mediaHtml}
+        `;
+
+        modal.classList.add("is-open");
+        document.body.classList.add("project-modal-open");
+
+        if (effectiveFlipbook && (project.type === "flipbook-images" || isVoicesProject(project))) {
+          setTimeout(() => initProjectFlipbookImages(effectiveFlipbook), 40);
+        }
+      }
+
+      function closeProjectModal() {
+        const modal = document.getElementById("project-modal");
+        modal.classList.remove("is-open");
+        document.body.classList.remove("project-modal-open");
+        currentProjectViewer = null;
+      }
+
+      window.closeProjectModal = closeProjectModal;
+
+      function renderProjectsPage() {
+        const projects = getProjectsData();
+        const grid = document.getElementById("projects-grid");
+
+        projects.forEach((project) => {
+          projectsById[project.id] = project;
+        });
+
+        if (!projects.length) {
+          grid.innerHTML = '<p class="project-description">No projects available right now.</p>';
+          return;
+        }
+
+        grid.innerHTML = projects
+          .map((project) => {
+            const preview = getPreviewSrc(project);
+            const excerpt = stripHtml(project.description).slice(0, 170);
+            const readableExcerpt = excerpt.length > 0 ? `${excerpt}${excerpt.length >= 170 ? "..." : ""}` : "Project details coming soon.";
+
+            const media = preview
+              ? `<img src="${preview}" alt="${project.title || "Project preview"}" loading="lazy" />`
+              : '<div class="project-media-fallback">Preview Pending</div>';
+
+            return `
+              <button class="project-card" type="button" data-project-id="${project.id}">
+                <div class="project-media">${media}</div>
+                <div class="project-content">
+                  <h3 class="project-title">${project.title || "Untitled Project"}</h3>
+                  <p class="project-description">${readableExcerpt}</p>
+                  <div class="project-meta">
+                    <span class="pill accent">${getTypeLabel(project)}</span>
+                    <span class="pill">${projectCountLabel(project)}</span>
+                  </div>
+                </div>
+              </button>
+            `;
+          })
           .join("");
 
-        listEl.querySelectorAll("button[data-project-id]").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            showProject(btn.getAttribute("data-project-id"));
+        grid.querySelectorAll(".project-card[data-project-id]").forEach((card) => {
+          card.addEventListener("click", () => {
+            const projectId = card.getAttribute("data-project-id");
+            const project = projectsById[projectId];
+            if (project && project.detailPagePath) {
+              window.location.href = project.detailPagePath;
+              return;
+            }
+            openProjectModal(projectId);
           });
         });
       }
 
-      window.renderProjectsPage = function renderProjectsPage() {
-        const sourceProjects = getProjectsData();
-        const normalizedProjects = sourceProjects.map(normalizeProject);
-
-        projectsById = normalizedProjects.reduce((acc, p) => {
-          acc[p.id] = p;
-          return acc;
-        }, {});
-
-        renderProjectButtons(normalizedProjects);
-
-        if (normalizedProjects.length > 0) {
-          showProject(normalizedProjects[0].id);
-        } else {
-          document.getElementById("description").innerHTML =
-            "<h2>No projects</h2>";
-          document.getElementById("images").innerHTML =
-            "<p>No visuals available.</p>";
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeProjectModal();
         }
-      };
+      });
 
-      // Global variable to track current flipbook viewer
-      let currentViewer = null;
-
-      function showProject(key) {
-        const project = projectsById[key];
-        if (!project) {
-          return;
-        }
-        const imagesContainer = document.getElementById("images");
-
-        // Clean up previous flipbook viewer if exists
-        if (currentViewer) {
-          currentViewer = null;
-        }
-
-        document.getElementById("description").innerHTML =
-          `<h2>${project.title}</h2><p>${project.description}</p>`;
-
-        // Reset images container classes
-        imagesContainer.className = "project-images";
-
-        if (project.displayStyle === "grid-5") {
-          imagesContainer.classList.add("grid-5");
-        }
-
-        if (project.flipbookImages) {
-          // Create flipbook viewer using pre-rendered images (fast!)
-          imagesContainer.innerHTML = `
-            <div class="flipbook-container">
-              <div id="flipbook-viewer"></div>
-              <div class="flipbook-controls">
-                <button id="flip-prev">← Previous</button>
-                <button id="flip-next">Next →</button>
-                <button id="flip-zoom">Zoom</button>
-              </div>
-              <div class="flipbook-page-info" id="page-info">Loading...</div>
-            </div>
-          `;
-
-          // Initialize the flipbook with images
-          initFlipbookImages(project.flipbookImages);
-        } else if (project.flipbook) {
-          // Create flipbook viewer for PDF
-          imagesContainer.innerHTML = `
-            <div class="flipbook-container">
-              <div id="flipbook-viewer"></div>
-              <div class="flipbook-controls">
-                <button id="flip-prev">← Previous</button>
-                <button id="flip-next">Next →</button>
-                <button id="flip-zoom">Zoom</button>
-              </div>
-              <div class="flipbook-page-info" id="page-info">Loading...</div>
-            </div>
-          `;
-
-          // Initialize the flipbook
-          initFlipbook(project.flipbook);
-        } else if (project.images) {
-          imagesContainer.innerHTML = project.images
-            .map((src) => `<img src="${src}" alt="${project.title}">`)
-            .join("");
-        } else if (project.pdf) {
-          imagesContainer.innerHTML = `
-          <iframe src="${project.pdf}" type="application/pdf"></iframe>
-        `;
-        } else {
-          imagesContainer.innerHTML = `<p>No visuals available.</p>`;
-        }
-      }
-
-      // Initialize flipbook viewer with pre-rendered images (FAST!)
-      function initFlipbookImages(config) {
-        const pageInfo = document.getElementById("page-info");
-        const flipViewerEl = document.getElementById("flipbook-viewer");
-        pageInfo.textContent = "Loading...";
-
-        const { basePath, pageCount, extension, pdfPath } = config;
-        const selectedPages = Array.isArray(config.pages)
-          ? config.pages.filter((p) => typeof p === "string" && p.trim())
-          : [];
-        const useSelectedPages = selectedPages.length > 0;
-        const parsedPageCount = parseInt(pageCount, 10) || 1;
-        const totalContentPages = useSelectedPages
-          ? selectedPages.length
-          : parsedPageCount;
-        const cache = [];
-
-        // Add empty page at start, black page at end
-        // Index 0 = empty, Index 1-pageCount = actual pages, Index pageCount+1 = black
-        const totalPages = totalContentPages + 2;
-
-        // Create a black page image
-        let blackPageCache = null;
-        function getBlackPage(totalContentPagesForNumber = totalContentPages) {
-          if (blackPageCache) return blackPageCache;
-          const canvas = document.createElement("canvas");
-          canvas.width = 1200;
-          canvas.height = 1553;
-          const ctx = canvas.getContext("2d");
-          ctx.fillStyle = "#111111";
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          const img = new Image();
-          img.src = canvas.toDataURL();
-          blackPageCache = {
-            img,
-            num: totalContentPagesForNumber + 1,
-            width: canvas.width,
-            height: canvas.height,
-          };
-          return blackPageCache;
-        }
-
-        // Preload page images
-        function preloadImage(bookPageIndex) {
-          return new Promise((resolve, reject) => {
-            if (cache[bookPageIndex] !== undefined)
-              return resolve(cache[bookPageIndex]);
-
-            // Index 0 = empty (no page)
-            if (bookPageIndex === 0) {
-              cache[bookPageIndex] = null;
-              return resolve(null);
-            }
-
-            const img = new Image();
-            if (useSelectedPages) {
-              img.src = selectedPages[bookPageIndex - 1];
-            } else {
-              // File pages are 1-based (page-01.png)
-              const filePageNum = bookPageIndex;
-              const paddedNum = String(filePageNum).padStart(2, "0");
-              img.src = `${basePath}${paddedNum}${extension}`;
-            }
-
-            img.onload = () => {
-              cache[bookPageIndex] = {
-                img,
-                num: bookPageIndex,
-                width: img.width,
-                height: img.height,
-              };
-              resolve(cache[bookPageIndex]);
-            };
-            img.onerror = () => reject(`Failed to load page ${bookPageIndex}`);
-          });
-        }
-
-        // Pre-render a PDF page to a PNG data URL image for fast flipping.
-        function renderPdfPageToImage(pdf, pdfPageNum) {
-          return new Promise((resolve, reject) => {
-            if (cache[pdfPageNum] !== undefined) {
-              return resolve(cache[pdfPageNum]);
-            }
-
-            pdf
-              .getPage(pdfPageNum)
-              .then((page) => {
-                const viewport = page.getViewport({ scale: 1.0 });
-                const canvas = document.createElement("canvas");
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-
-                return page
-                  .render({
-                    canvasContext: canvas.getContext("2d"),
-                    viewport,
-                  })
-                  .promise.then(() => {
-                    const img = new Image();
-                    img.onload = () => {
-                      cache[pdfPageNum] = {
-                        img,
-                        num: pdfPageNum,
-                        width: img.width,
-                        height: img.height,
-                      };
-                      resolve(cache[pdfPageNum]);
-                    };
-                    img.onerror = () =>
-                      reject(`Failed to prerender page ${pdfPageNum}`);
-                    img.src = canvas.toDataURL("image/png");
-                  });
-              })
-              .catch((err) => reject(err));
-          });
-        }
-
-        // Create book interface
-        const book = {
-          numPages: () => totalPages,
-          getPage: (n, cb) => {
-            // Return nothing for empty slots or out of bounds
-            if (n < 0 || n >= totalPages) return cb();
-            if (n === 0) return cb(); // Empty slot at start
-            if (n > totalContentPages) return cb(null, getBlackPage()); // Black page at end
-
-            if (cache[n]) return cb(null, cache[n]);
-
-            preloadImage(n)
-              .then((result) => {
-                if (result) cb(null, result);
-                else cb();
-              })
-              .catch((err) => cb(err));
-          },
-        };
-
-        function initViewerWithPreparedPages(totalContentPages, preloadFn) {
-          const initialPages = Math.min(5, totalContentPages);
-          const preloadPromises = [];
-          for (let i = 1; i <= initialPages; i++) {
-            preloadPromises.push(preloadFn(i));
-          }
-
-          Promise.all(preloadPromises)
-            .then(() => {
-              // Calculate responsive size
-              const containerWidth = flipViewerEl.parentElement.offsetWidth;
-              const width = Math.min(900, containerWidth - 40);
-              const height = Math.floor(width * 0.7);
-
-              const opts = {
-                width: width,
-                height: height,
-                backgroundColor: "#111111",
-                boxColor: "#111111",
-                boxBorder: 0,
-              };
-
-              flipbook.init(book, flipViewerEl, opts, (err, viewer) => {
-                if (err) {
-                  console.error(err);
-                  pageInfo.textContent = "Error loading flipbook";
-                  return;
-                }
-
-                currentViewer = viewer;
-                pageInfo.textContent = `Page 1 of ${totalContentPages}`;
-
-                // Track page views
-                viewer.on("seen", (n) => {
-                  const displayPage = Math.max(
-                    1,
-                    Math.min(n, totalContentPages),
-                  );
-                  pageInfo.textContent = `Page ${displayPage} of ${totalContentPages}`;
-                  // Preload next pages when viewing
-                  for (let i = 1; i <= 4; i++) {
-                    if (n + i <= totalContentPages) preloadFn(n + i);
-                  }
-                });
-
-                // Set up controls
-                document.getElementById("flip-next").onclick = () =>
-                  viewer.flip_forward();
-                document.getElementById("flip-prev").onclick = () =>
-                  viewer.flip_back();
-                document.getElementById("flip-zoom").onclick = () =>
-                  viewer.zoom();
-
-                // Preload remaining pages in background
-                for (let i = initialPages + 1; i <= totalContentPages; i++) {
-                  setTimeout(() => preloadFn(i), (i - initialPages) * 100);
-                }
-              });
-            })
-            .catch((err) => {
-              console.error("Failed to load images:", err);
-              pageInfo.textContent = "Failed to load handbook";
-            });
-        }
-
-        if (pdfPath) {
-          pageInfo.textContent = "Loading PDF and prerendering pages...";
-          pdfjsLib
-            .getDocument(pdfPath)
-            .promise.then((pdf) => {
-              const totalPdfPages = pdf.numPages;
-              const totalPdfBookPages = totalPdfPages + 2;
-
-              const pdfBook = {
-                numPages: () => totalPdfBookPages,
-                getPage: (n, cb) => {
-                  if (n < 0 || n >= totalPdfBookPages) return cb();
-                  if (n === 0) return cb();
-                  if (n > totalPdfPages)
-                    return cb(null, getBlackPage(totalPdfPages));
-
-                  if (cache[n]) return cb(null, cache[n]);
-
-                  renderPdfPageToImage(pdf, n)
-                    .then((result) => cb(null, result))
-                    .catch((err) => cb(err));
-                },
-              };
-
-              book.numPages = pdfBook.numPages;
-              book.getPage = pdfBook.getPage;
-              initViewerWithPreparedPages(totalPdfPages, (n) =>
-                renderPdfPageToImage(pdf, n),
-              );
-            })
-            .catch((err) => {
-              console.error("Failed to load PDF for prerender:", err);
-              pageInfo.textContent = "Failed to prerender PDF";
-            });
-          return;
-        }
-
-        initViewerWithPreparedPages(totalContentPages, preloadImage);
-      }
-
-      // Initialize flipbook viewer with PDF
-      function initFlipbook(pdfPath) {
-        const pageInfo = document.getElementById("page-info");
-        const flipViewerEl = document.getElementById("flipbook-viewer");
-        pageInfo.textContent = "Loading PDF...";
-
-        // Page cache and render queue
-        const cache = [];
-        const pendingCallbacks = {};
-        let isRendering = false;
-        const renderQueue = [];
-
-        // Process render queue one at a time to avoid overwhelming the browser
-        function processRenderQueue() {
-          if (isRendering || renderQueue.length === 0) return;
-          isRendering = true;
-          const { pdf, n, cb } = renderQueue.shift();
-
-          renderPage(pdf, n, (err, result) => {
-            isRendering = false;
-            if (cb) cb(err, result);
-            // Continue processing queue
-            setTimeout(processRenderQueue, 10);
-          });
-        }
-
-        // Render a single page
-        function renderPage(pdf, n, cb) {
-          pdf
-            .getPage(n)
-            .then((page) => {
-              // Use lower scale for faster rendering
-              const scale = 1.0;
-              const viewport = page.getViewport({ scale });
-
-              const canvas = document.createElement("canvas");
-              canvas.width = viewport.width;
-              canvas.height = viewport.height;
-
-              const context = canvas.getContext("2d");
-              const renderContext = {
-                canvasContext: context,
-                viewport,
-              };
-
-              page
-                .render(renderContext)
-                .promise.then(() => {
-                  // Create image from canvas
-                  const img = new Image();
-                  img.onload = () => {
-                    cache[n] = {
-                      img,
-                      num: n,
-                      width: img.width,
-                      height: img.height,
-                    };
-                    cb(null, cache[n]);
-                  };
-                  img.onerror = () => cb("Failed to load image");
-                  img.src = canvas.toDataURL("image/jpeg", 0.85); // JPEG is faster than PNG
-                })
-                .catch((err) => cb(err));
-            })
-            .catch((err) => cb(err));
-        }
-
-        // Pre-cache pages in background
-        function precachePages(pdf, startPage, count) {
-          for (let i = 0; i < count && startPage + i <= pdf.numPages; i++) {
-            const pageNum = startPage + i;
-            if (!cache[pageNum] && !pendingCallbacks[pageNum]) {
-              pendingCallbacks[pageNum] = true;
-              renderQueue.push({
-                pdf,
-                n: pageNum,
-                cb: () => {
-                  delete pendingCallbacks[pageNum];
-                },
-              });
-            }
-          }
-          processRenderQueue();
-        }
-
-        pdfjsLib
-          .getDocument(pdfPath)
-          .promise.then((pdf) => {
-            const book = {
-              pdf: pdf,
-              numPages: () => pdf.numPages,
-              getPage: (n, cb) => {
-                if (!n || n > pdf.numPages) return cb();
-                if (cache[n]) return cb(null, cache[n]);
-
-                // Priority render for requested page
-                renderPage(pdf, n, (err, result) => {
-                  cb(err, result);
-                  // Pre-cache next few pages
-                  precachePages(pdf, n + 1, 4);
-                });
-              },
-            };
-
-            // Calculate responsive size
-            const containerWidth = flipViewerEl.parentElement.offsetWidth;
-            const width = Math.min(900, containerWidth - 40);
-            const height = Math.floor(width * 0.7);
-
-            const opts = {
-              width: width,
-              height: height,
-              backgroundColor: "#353535",
-            };
-
-            // Pre-cache first few pages before initializing
-            pageInfo.textContent = "Preparing pages...";
-
-            // Render first 4 pages, then initialize flipbook
-            let pagesReady = 0;
-            const pagesToPreload = Math.min(4, pdf.numPages);
-
-            for (let i = 1; i <= pagesToPreload; i++) {
-              renderPage(pdf, i, () => {
-                pagesReady++;
-                pageInfo.textContent = `Loading page ${pagesReady}/${pagesToPreload}...`;
-
-                if (pagesReady === pagesToPreload) {
-                  // All initial pages ready, start flipbook
-                  flipbook.init(book, flipViewerEl, opts, (err, viewer) => {
-                    if (err) {
-                      console.error(err);
-                      pageInfo.textContent = "Error loading flipbook";
-                      return;
-                    }
-
-                    currentViewer = viewer;
-                    pageInfo.textContent = `Page 1 of ${viewer.page_count}`;
-
-                    // Track page views
-                    viewer.on("seen", (n) => {
-                      pageInfo.textContent = `Page ${n} of ${viewer.page_count}`;
-                    });
-
-                    // Set up controls
-                    document.getElementById("flip-next").onclick = () =>
-                      viewer.flip_forward();
-                    document.getElementById("flip-prev").onclick = () =>
-                      viewer.flip_back();
-                    document.getElementById("flip-zoom").onclick = () =>
-                      viewer.zoom();
-
-                    // Continue pre-caching remaining pages in background
-                    precachePages(pdf, 5, pdf.numPages - 4);
-                  });
-                }
-              });
-            }
-          })
-          .catch((err) => {
-            console.error("Failed to load PDF:", err);
-            pageInfo.textContent = "Failed to load PDF";
-          });
-      }
-
-      // Initial render
-      window.renderProjectsPage();
+      window.renderProjectsPage = renderProjectsPage;
+      renderProjectsPage();
     </script>
   </body>
 </html>

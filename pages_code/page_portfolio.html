@@ -3,185 +3,192 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Archives - Charlie Cilla</title>
     <link rel="stylesheet" href="../styles.css" />
-    <title>Charlie Cilla - Archives</title>
+    <link rel="stylesheet" href="../site-theme.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, sans-serif;
-        background-color: #000;
+      .archive-hero {
+        margin: 8px 0 32px;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: clamp(32px, 10vw, 150px);
+        line-height: 0.9;
+        letter-spacing: -3px;
+        text-transform: uppercase;
+        font-weight: 900;
         color: #fff;
+        white-space: nowrap;
       }
 
-      header {
-        width: 100%;
-        background-color: black;
-        z-index: 11;
-        position: fixed;
-        top: 0;
-        left: 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 40px;
-        box-sizing: border-box;
+      .archive-hero .accent-stroke {
+        -webkit-text-stroke: 1.5px var(--accent);
+        color: transparent;
       }
 
-      .header-content {
-        display: flex;
-        align-items: center;
+      .archive-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 22px;
       }
 
-      .logo {
-        max-width: 50px;
-        height: auto;
-        margin-right: 20px;
-      }
-
-      h1 {
-        margin: 0;
-        color: white;
-      }
-
-      header ul {
-        list-style-type: none;
-        display: flex;
-        margin: 0;
-        padding: 0;
-      }
-
-      header ul li {
-        margin-left: 20px;
-      }
-
-      header ul li a {
-        color: white;
+      .archive-card {
+        display: grid;
+        gap: 12px;
         text-decoration: none;
-        transition: color 0.3s ease;
-      }
-
-      header ul li a:hover {
-        color: #ff4444;
-      }
-
-      .container {
-        display: flex;
-        max-width: 1400px;
-        margin: 100px auto 40px;
-        padding: 20px 40px;
-        gap: 30px;
-        justify-content: center;
-      }
-
-      .left-column,
-      .middle-column,
-      .right-column {
-        flex: 1;
-        max-width: 400px;
-        display: flex;
-        flex-direction: column;
-        gap: 30px;
-      }
-
-      .left-column a,
-      .middle-column a,
-      .right-column a {
-        display: block;
-        overflow: visible;
+        color: inherit;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(8, 8, 8, 0.42);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        padding: 14px;
         transition:
-          transform 0.3s ease,
-          box-shadow 0.3s ease;
-        position: relative;
+          border-color 0.2s ease,
+          transform 0.2s ease,
+          background 0.2s ease;
       }
 
-      .left-column a:hover,
-      .middle-column a:hover,
-      .right-column a:hover {
-        transform: scale(1.2);
-        z-index: 10;
-        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.2);
+      .archive-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        background: rgba(12, 12, 12, 0.6);
       }
 
-      .left-column img,
-      .middle-column img,
-      .right-column img {
+      .archive-card-media {
         width: 100%;
-        height: auto;
-        max-height: 500px;
+        aspect-ratio: 4 / 5;
+        overflow: hidden;
+        background: #050505;
+      }
+
+      .archive-card-media img {
+        width: 100%;
+        height: 100%;
         object-fit: cover;
-        display: block;
       }
 
-      .left-column a:hover img,
-      .middle-column a:hover img,
-      .right-column a:hover img {
-        transform: scale(1.05);
-      }
-
-      .page-title {
-        text-align: center;
-        margin-top: 100px;
-        margin-bottom: -40px;
-        font-size: 36px;
+      .archive-card-idx {
+        font-family: var(--mono);
+        font-size: 10px;
         letter-spacing: 2px;
+        color: var(--accent);
+        text-transform: uppercase;
+      }
+
+      .archive-card-title {
+        margin: 0;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: clamp(16px, 2vw, 22px);
+        line-height: 1.06;
+        text-transform: uppercase;
+        font-weight: 900;
+        letter-spacing: -0.3px;
+      }
+
+      .archive-empty {
+        border: 1px dashed rgba(255, 255, 255, 0.2);
+        padding: 40px;
+        text-align: center;
+        color: #9a9a9a;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 12px;
+        font-family: var(--mono);
+        grid-column: 1 / -1;
+      }
+
+      @media (max-width: 980px) {
+        .archive-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 650px) {
+        .archive-grid {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
-    <header>
+    <div class="site-bg" aria-hidden="true">
+      <video class="site-bg-video" autoplay muted loop playsinline>
+        <source src="../Assets/tree-background.mp4" type="video/mp4" />
+      </video>
+      <div class="site-bg-overlay"></div>
+      <div class="site-bg-grain"></div>
+      <div class="site-bg-fade"></div>
+    </div>
+
+    <header class="site-header">
       <div class="header-content">
         <img src="../logo.png" alt="Logo" class="logo" />
-        <h1>CHARLIE CILLA</h1>
+        <h1 class="brand-title">CHARLIE CILLA</h1>
       </div>
-      <ul>
+      <ul class="site-nav">
         <li><a href="../index.html">HOME</a></li>
-        <li><a href="page_portfolio.html">ARCHIVES</a></li>
+        <li><a href="page_portfolio.html" class="is-active">ARCHIVES</a></li>
         <li><a href="page_contact.html">CONTACT</a></li>
         <li><a href="page_about.html">ABOUT</a></li>
         <li><a href="page_projects.html">PROJECTS</a></li>
       </ul>
     </header>
 
-    <h2 class="page-title">ARCHIVES</h2>
+    <main class="page-shell">
+      <div class="meta-strip">
+        <div>Charlie Cilla / Archives<br />Image + Print + Mixed Media</div>
+        <div>Selected Experiments<br />Visual Studies 2022—Present</div>
+        <div>A curated stream of poster, collage, and mixed media work.</div>
+      </div>
 
-    <div class="container">
-      <div class="left-column" id="archive-left"></div>
-      <div class="middle-column" id="archive-middle"></div>
-      <div class="right-column" id="archive-right"></div>
-    </div>
+      <h2 class="archive-hero">
+        <span class="accent-stroke">The</span> Archives
+      </h2>
 
-    <footer style="text-align: center; padding: 30px 20px; color: #333;">
-      <span style="color: #444; font-size: 11px;">&copy; 2025 Charlie Cilla</span>
-    </footer>
+      <section class="archive-grid" id="archive-grid"></section>
+    </main>
 
-    <!-- Admin Panel Scripts -->
-    <link rel="stylesheet" href="../admin/admin.css">
+    <footer class="site-footer">&copy; 2026 Charlie Cilla</footer>
+
+    <link rel="stylesheet" href="../admin/admin.css" />
     <script src="../admin/data.js"></script>
     <script src="../admin/admin.js"></script>
     <script>
-      // Render archive page projects dynamically
       function renderArchivePage() {
-        const projects = AdminData.getArchiveProjects().filter(p => p.visible);
+        const projects = AdminData.getArchiveProjects().filter(
+          (p) => p.visible !== false,
+        );
+        const grid = document.getElementById("archive-grid");
 
-        const leftProjects = projects.filter(p => p.column === 'left');
-        const middleProjects = projects.filter(p => p.column === 'middle');
-        const rightProjects = projects.filter(p => p.column === 'right');
-
-        function renderColumn(columnProjects) {
-          return columnProjects.map(p => `
-            <a href="${p.detailPagePath}">
-              <img src="${p.imagePath}" alt="${p.title}" />
-            </a>
-          `).join('');
+        if (!projects.length) {
+          grid.innerHTML =
+            '<div class="archive-empty">No archive projects available.</div>';
+          return;
         }
 
-        document.getElementById('archive-left').innerHTML = renderColumn(leftProjects);
-        document.getElementById('archive-middle').innerHTML = renderColumn(middleProjects);
-        document.getElementById('archive-right').innerHTML = renderColumn(rightProjects);
+        grid.innerHTML = projects
+          .map((project, idx) => {
+            const href = project.detailPagePath || "#";
+            const target = href === "#" ? "" : `href="${href}"`;
+            const idxLabel = String(idx + 1).padStart(2, "0");
+            const totalLabel = String(projects.length).padStart(2, "0");
+            return `
+              <a class="archive-card" ${target}>
+                <div class="archive-card-media">
+                  <img src="${project.imagePath}" alt="${project.title || "Archive image"}" loading="lazy" />
+                </div>
+                <span class="archive-card-idx">${idxLabel} / ${totalLabel}</span>
+                <h3 class="archive-card-title">${project.title || "Untitled"}</h3>
+              </a>
+            `;
+          })
+          .join("");
       }
 
-      // Initial render
       renderArchivePage();
     </script>
   </body>

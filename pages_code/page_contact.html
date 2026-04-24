@@ -3,277 +3,267 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact - Charlie Cilla</title>
     <link rel="stylesheet" href="../styles.css" />
-    <title>Charlie Cilla - Contact</title>
+    <link rel="stylesheet" href="../site-theme.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, sans-serif;
-        background-color: #000;
+      .contact-hero {
+        margin: 8px 0 28px;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: clamp(32px, 10vw, 150px);
+        line-height: 0.9;
+        letter-spacing: -3px;
+        text-transform: uppercase;
+        font-weight: 900;
         color: #fff;
+        white-space: nowrap;
       }
 
-      header {
+      .contact-hero .accent-stroke {
+        -webkit-text-stroke: 1.5px var(--accent);
+        color: transparent;
+      }
+
+      .contact-layout {
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 28px;
+      }
+
+      .contact-image {
+        overflow: hidden;
+      }
+
+      .contact-image img {
         width: 100%;
-        background-color: black;
-        z-index: 11;
-        position: fixed;
-        top: 0;
-        left: 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 40px;
-        box-sizing: border-box;
+        height: 100%;
+        min-height: 560px;
+        object-fit: cover;
       }
 
-      .header-content {
-        display: flex;
-        align-items: center;
+      .contact-panel {
+        padding: 22px;
+        display: grid;
+        gap: 20px;
       }
 
-      .logo {
-        max-width: 50px;
-        height: auto;
-        margin-right: 20px;
-      }
-
-      h1 {
+      .contact-panel h3 {
         margin: 0;
-        color: white;
+        font-family: var(--mono);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 2.2px;
+        color: var(--accent);
       }
 
-      header ul {
-        list-style-type: none;
-        display: flex;
+      .contact-panel p {
         margin: 0;
-        padding: 0;
-      }
-
-      header ul li {
-        margin-left: 20px;
-      }
-
-      header ul li a {
-        color: white;
-        text-decoration: none;
-        transition: color 0.3s ease;
-      }
-
-      header ul li a:hover {
-        color: #ff4444;
-      }
-
-      .container {
-        display: flex;
-        max-width: 1200px;
-        margin: 100px auto 0;
-        padding: 40px;
-        gap: 60px;
-        justify-content: center;
-        align-items: flex-start;
-      }
-
-      .left-column {
-        flex: 1;
-        max-width: 450px;
-      }
-
-      .right-column {
-        flex: 1;
-        max-width: 500px;
-      }
-
-      .left-column img {
-        width: 100%;
-        height: auto;
-        border-radius: 12px;
-        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
-      }
-
-      .right-column h2 {
-        text-align: left;
-        margin-bottom: 20px;
-        font-size: 28px;
-        border-bottom: 2px solid #333;
-        padding-bottom: 10px;
-      }
-
-      .right-column p {
-        color: #ddd;
-        margin-bottom: 10px;
-      }
-
-      .right-column a {
-        color: #ffffff;
-        text-decoration: none;
-        transition: color 0.3s ease;
-      }
-
-      .right-column a:hover {
-        color: #ff4444;
+        color: #c7c7c7;
+        line-height: 1.65;
       }
 
       .social-icons {
         display: flex;
-        gap: 15px;
-        margin-top: 15px;
-        margin-bottom: 40px;
-      }
-
-      .social-icons a {
-        display: inline-block;
-        transition: transform 0.3s ease;
-      }
-
-      .social-icons a:hover {
-        transform: scale(1.1);
+        gap: 12px;
       }
 
       .social-icons img {
-        width: 35px;
-        height: 35px;
+        width: 34px;
+        height: 34px;
         border-radius: 8px;
       }
 
-      .right-column form {
-        display: flex;
-        flex-direction: column;
+      .social-icons a {
+        transition: transform 0.2s ease;
       }
 
-      .right-column form label {
-        margin: 15px 0 8px;
-        font-size: 14px;
-        color: #aaa;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-
-      .right-column form input,
-      .right-column form textarea {
-        padding: 14px 16px;
-        border: none;
-        margin-bottom: 5px;
-        border-radius: 8px;
-        background-color: #1a1a1a;
-        color: #fff;
-        font-size: 16px;
-        border: 1px solid #333;
-        transition:
-          border-color 0.3s ease,
-          box-shadow 0.3s ease;
-      }
-
-      .right-column form input:focus,
-      .right-column form textarea:focus {
-        outline: none;
-        border-color: #ff4444;
-        box-shadow: 0 0 10px rgba(255, 68, 68, 0.2);
-      }
-
-      .right-column form textarea {
-        resize: vertical;
-        min-height: 120px;
-      }
-
-      .right-column form button {
-        margin-top: 20px;
-        padding: 14px 30px;
-        background-color: #ff4444;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: all 0.3s ease;
-      }
-
-      .right-column form button:hover {
-        background-color: #cc3333;
+      .social-icons a:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(255, 68, 68, 0.3);
       }
 
-      .right-column form button:active {
-        transform: translateY(0);
+      .contact-form {
+        display: grid;
+        gap: 10px;
+      }
+
+      .contact-form label {
+        font-family: var(--mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 2.2px;
+        color: #c4c4c4;
+      }
+
+      .contact-form input,
+      .contact-form textarea {
+        background: rgba(0, 0, 0, 0.55);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        padding: 12px 14px;
+        font-family: inherit;
+        border-radius: 2px;
+      }
+
+      .contact-form input:focus,
+      .contact-form textarea:focus {
+        outline: none;
+        border-color: var(--line-strong);
+      }
+
+      .contact-form textarea {
+        resize: vertical;
+        min-height: 130px;
+      }
+
+      .contact-form button {
+        margin-top: 8px;
+        width: fit-content;
+        border: 1px solid var(--accent);
+        background: rgba(232, 51, 31, 0.08);
+        color: white;
+        border-radius: 2px;
+        padding: 10px 18px;
+        text-transform: uppercase;
+        letter-spacing: 1.8px;
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 11px;
+      }
+
+      .contact-form button:hover {
+        background: var(--accent);
+        color: #000;
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      @media (max-width: 980px) {
+        .contact-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .contact-image img {
+          min-height: 300px;
+          max-height: 460px;
+        }
       }
     </style>
   </head>
   <body>
-    <header>
+    <div class="site-bg" aria-hidden="true">
+      <video class="site-bg-video" autoplay muted loop playsinline>
+        <source src="../Assets/tree-background.mp4" type="video/mp4" />
+      </video>
+      <div class="site-bg-overlay"></div>
+      <div class="site-bg-grain"></div>
+      <div class="site-bg-fade"></div>
+    </div>
+
+    <header class="site-header">
       <div class="header-content">
         <img src="../logo.png" alt="Logo" class="logo" />
-        <h1>CHARLIE CILLA</h1>
+        <h1 class="brand-title">CHARLIE CILLA</h1>
       </div>
-      <ul>
+      <ul class="site-nav">
         <li><a href="../index.html">HOME</a></li>
         <li><a href="page_portfolio.html">ARCHIVES</a></li>
-        <li><a href="page_contact.html">CONTACT</a></li>
+        <li><a href="page_contact.html" class="is-active">CONTACT</a></li>
         <li><a href="page_about.html">ABOUT</a></li>
         <li><a href="page_projects.html">PROJECTS</a></li>
       </ul>
     </header>
 
-    <div class="container">
-      <div class="left-column">
-        <img src="../A5_Charlie_Cilla_Paradox.jpg" alt="Profile" />
-      </div>
-
-      <div class="right-column">
-        <h2>Contact Information</h2>
-        <p>
-          Email:
-          <a href="mailto:charlievcilla@gmail.com">charlievcilla@gmail.com</a>
-        </p>
-        <p>Follow me on social media:</p>
-        <div class="social-icons">
-          <a href="https://www.instagram.com/charlie_cilla/" target="_blank">
-            <img src="../instagram.png" alt="Instagram" />
-          </a>
-          <a
-            href="https://www.linkedin.com/in/charlie-cilla-122038243/"
-            target="_blank"
-          >
-            <img src="../linkedin.webp" alt="LinkedIn" />
-          </a>
+    <main class="page-shell">
+      <div class="meta-strip">
+        <div>
+          Open For Collaborations<br />Creative Commissions + Commissions
         </div>
-
-        <h2>Send a Message</h2>
-        <form action="submit_form.php" method="post">
-          <label for="name">Name</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            placeholder="Your name"
-            required
-          />
-
-          <label for="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="your@email.com"
-            required
-          />
-
-          <label for="message">Message</label>
-          <textarea
-            id="message"
-            name="message"
-            rows="5"
-            placeholder="Your message..."
-            required
-          ></textarea>
-
-          <button type="submit">Send Message</button>
-        </form>
+        <div>Toronto / Waterloo<br />Remote Friendly — Worldwide</div>
+        <div>Let us build something with a strong visual point of view.</div>
       </div>
-    </div>
+
+      <h2 class="contact-hero">
+        <span class="accent-stroke">Get</span> In Touch
+      </h2>
+
+      <section class="contact-layout">
+        <article class="contact-image panel">
+          <img src="../A5_Charlie_Cilla_Paradox.jpg" alt="Contact visual" />
+        </article>
+
+        <article class="contact-panel panel">
+          <section>
+            <h3>Reach Out</h3>
+            <p>
+              Email:
+              <a href="mailto:charlievcilla@gmail.com"
+                >charlievcilla@gmail.com</a
+              >
+            </p>
+            <p>Find me on social platforms:</p>
+            <div class="social-icons">
+              <a
+                href="https://www.instagram.com/charlie_cilla/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img src="../instagram.png" alt="Instagram" />
+              </a>
+              <a
+                href="https://www.linkedin.com/in/charlie-cilla-122038243/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img src="../linkedin.webp" alt="LinkedIn" />
+              </a>
+            </div>
+          </section>
+
+          <section>
+            <h3>Send Message</h3>
+            <form class="contact-form" action="submit_form.php" method="post">
+              <label for="name">Name</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Your name"
+                required
+              />
+
+              <label for="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="your@email.com"
+                required
+              />
+
+              <label for="message">Message</label>
+              <textarea
+                id="message"
+                name="message"
+                rows="5"
+                placeholder="Your message..."
+                required
+              ></textarea>
+
+              <button type="submit">Send Message</button>
+            </form>
+          </section>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">&copy; 2026 Charlie Cilla</footer>
   </body>
 </html>
