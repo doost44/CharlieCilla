@@ -3,7 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Projects - Charlie Cilla</title>
+    <title>Case Studies - Charlie Cilla</title>
+    <meta
+      name="description"
+      content="Case studies and project outcomes by Charlie Cilla across product, brand, publication, and film."
+    />
+    <meta property="og:title" content="Case Studies | Charlie Cilla" />
+    <meta
+      property="og:description"
+      content="Explore structured project case studies with role, process, and outcomes."
+    />
+    <meta property="og:type" content="website" />
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="../site-theme.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -116,6 +126,25 @@
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
+      }
+
+      .project-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .project-link {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        color: #ececec;
+      }
+
+      .project-link:hover,
+      .project-link:focus-visible {
+        color: var(--accent);
       }
 
       .project-modal {
@@ -323,27 +352,27 @@
       </div>
       <ul class="site-nav">
         <li><a href="../index.html">HOME</a></li>
-        <li><a href="page_portfolio.html">ARCHIVES</a></li>
-        <li><a href="page_contact.html">CONTACT</a></li>
+        <li><a href="page_projects.html" class="is-active">CASE STUDIES</a></li>
+        <li><a href="page_portfolio.html">WORK</a></li>
         <li><a href="page_about.html">ABOUT</a></li>
-        <li><a href="page_projects.html" class="is-active">PROJECTS</a></li>
+        <li><a href="page_contact.html">CONTACT</a></li>
       </ul>
     </header>
 
     <main class="page-shell">
       <div class="meta-strip">
-        <div>Charlie Cilla / Projects<br />Full Catalog 2022—Present</div>
-        <div>Visual Design<br />Editorial + Brand + Motion</div>
-        <div>Built for motion, print, and systems thinking.</div>
+        <div>Charlie Cilla / Case Studies<br />Project Outcomes 2022—Present</div>
+        <div>Visual Design + Film<br />Editorial + Brand + Motion</div>
+        <div>Structured project overviews for hiring managers and collaborators.</div>
       </div>
 
-      <h2 class="projects-hero"><span class="accent-stroke">All</span> Projects</h2>
+      <h2 class="projects-hero"><span class="accent-stroke">Case</span> Studies</h2>
 
       <section class="projects-grid" id="projects-grid"></section>
     </main>
 
-    <div id="project-modal" class="project-modal" onclick="if (event.target === this) closeProjectModal()">
-      <button class="project-modal-close" type="button" onclick="closeProjectModal()" aria-label="Close">
+    <div id="project-modal" class="project-modal" role="dialog" aria-modal="true" aria-label="Project preview" onclick="if (event.target === this) closeProjectModal()">
+      <button id="project-modal-close-btn" class="project-modal-close" type="button" onclick="closeProjectModal()" aria-label="Close">
         X
       </button>
       <div class="project-modal-panel" id="project-modal-panel"></div>
@@ -361,33 +390,49 @@
         {
           id: "project-1",
           title: "Student Meal Plan App Prototype",
+          year: "2024",
+          role: "Product Designer",
+          contribution: "UX research and prototyping",
           description:
             "A budgeting-first student meal planner focused on reducing financial stress over a full semester.",
           type: "images",
           images: ["../Mealplan.jpg"],
+          detailPagePath: "../projects_code/project1.html",
         },
         {
           id: "project-2",
           title: "POWERADE Rebrand",
+          year: "2024",
+          role: "Brand Designer",
+          contribution: "Campaign concept and visual system",
           description:
             "A high-energy brand reset rooted in endurance culture and runner-first storytelling.",
           type: "images",
           images: ["../[GBDA 202] Rebranding Pitch-1_page-0001.jpg"],
+          detailPagePath: "../projects_code/project2.html",
         },
         {
           id: "project-3",
           title: "WYAWYG?",
+          year: "2024",
+          role: "Visual Designer",
+          contribution: "Analog-to-digital poster workflow",
           description:
             "A poster series blending handmade processes and digital composition into one visual language.",
           type: "images",
           images: ["../POSTER1 (1).jpg"],
+          detailPagePath: "../projects_code/project3.html",
         },
         {
           id: "project-4",
           title: "Designer Handbook",
+          year: "2025",
+          role: "Editorial Designer",
+          contribution: "Page system and publication design",
           description:
             "An educational handbook exploring typography, hierarchy, and visual systems through page design.",
           type: "flipbook-images",
+          detailPagePath: "../projects_code/project4.html",
           flipbookImages: {
             basePath: "Handbook_Files/handbook-pages/page-",
             pageCount: 22,
@@ -694,14 +739,20 @@
 
         panel.innerHTML = `
           <div class="project-modal-header">
+            <p class="project-link" style="margin:0 0 8px;color:var(--accent);">
+              ${(project.year || "Current")} · ${(project.role || getTypeLabel(project))}
+            </p>
             <h2 class="project-modal-title">${project.title || "Untitled Project"}</h2>
             <p class="project-modal-description">${project.description || "Project details coming soon."}</p>
+            ${project.contribution ? `<p class="project-link" style="margin-top:8px;color:#aaa;">${project.contribution}</p>` : ""}
           </div>
           ${mediaHtml}
         `;
 
         modal.classList.add("is-open");
         document.body.classList.add("project-modal-open");
+        const closeButton = document.getElementById("project-modal-close-btn");
+        if (closeButton) closeButton.focus();
 
         if (effectiveFlipbook && (project.type === "flipbook-images" || isVoicesProject(project))) {
           setTimeout(() => initProjectFlipbookImages(effectiveFlipbook), 40);
@@ -741,17 +792,24 @@
               : '<div class="project-media-fallback">Preview Pending</div>';
 
             return `
-              <button class="project-card" type="button" data-project-id="${project.id}">
+              <article class="project-card" data-project-id="${project.id}" role="button" tabindex="0">
                 <div class="project-media">${media}</div>
                 <div class="project-content">
                   <h3 class="project-title">${project.title || "Untitled Project"}</h3>
                   <p class="project-description">${readableExcerpt}</p>
                   <div class="project-meta">
-                    <span class="pill accent">${getTypeLabel(project)}</span>
+                    <span class="pill accent">${project.year || "Current"}</span>
+                    <span class="pill">${getTypeLabel(project)}</span>
                     <span class="pill">${projectCountLabel(project)}</span>
+                    ${project.role ? `<span class="pill">${project.role}</span>` : ""}
+                  </div>
+                  <div class="project-actions">
+                    ${project.detailPagePath ? `<a class="project-link" href="${project.detailPagePath}">View case study</a>` : ""}
+                    <a class="project-link" href="#" data-open-modal="${project.id}">Quick preview</a>
+                    ${project.contribution ? `<span class="project-link" style="pointer-events:none;color:#8f8f8f;">${project.contribution}</span>` : ""}
                   </div>
                 </div>
-              </button>
+              </article>
             `;
           })
           .join("");
@@ -759,19 +817,50 @@
         grid.querySelectorAll(".project-card[data-project-id]").forEach((card) => {
           card.addEventListener("click", () => {
             const projectId = card.getAttribute("data-project-id");
-            const project = projectsById[projectId];
-            if (project && project.detailPagePath) {
-              window.location.href = project.detailPagePath;
-              return;
-            }
             openProjectModal(projectId);
           });
+          card.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              const projectId = card.getAttribute("data-project-id");
+              openProjectModal(projectId);
+            }
+          });
+        });
+
+        grid.querySelectorAll("[data-open-modal]").forEach((link) => {
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            openProjectModal(link.dataset.openModal);
+          });
+        });
+
+        grid.querySelectorAll(".project-link[href]").forEach((link) => {
+          link.addEventListener("click", (event) => event.stopPropagation());
         });
       }
 
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           closeProjectModal();
+        }
+        if (event.key === "Tab") {
+          const modal = document.getElementById("project-modal");
+          if (!modal.classList.contains("is-open")) return;
+          const focusable = modal.querySelectorAll(
+            'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])',
+          );
+          if (!focusable.length) return;
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
         }
       });
 

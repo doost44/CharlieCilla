@@ -3,7 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Archives - Charlie Cilla</title>
+    <title>Work Archive - Charlie Cilla</title>
+    <meta
+      name="description"
+      content="Browse visual design, print, and mixed-media work by Charlie Cilla."
+    />
+    <meta property="og:title" content="Work Archive | Charlie Cilla" />
+    <meta
+      property="og:description"
+      content="A curated archive of visual, editorial, and mixed-media work."
+    />
+    <meta property="og:type" content="website" />
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="../site-theme.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -89,6 +99,19 @@
         letter-spacing: -0.3px;
       }
 
+      .archive-card-link {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        color: #ececec;
+      }
+
+      .archive-card-link:hover,
+      .archive-card-link:focus-visible {
+        color: var(--accent);
+      }
+
       .archive-empty {
         border: 1px dashed rgba(255, 255, 255, 0.2);
         padding: 40px;
@@ -131,22 +154,22 @@
       </div>
       <ul class="site-nav">
         <li><a href="../index.html">HOME</a></li>
-        <li><a href="page_portfolio.html" class="is-active">ARCHIVES</a></li>
-        <li><a href="page_contact.html">CONTACT</a></li>
+        <li><a href="page_projects.html">CASE STUDIES</a></li>
+        <li><a href="page_portfolio.html" class="is-active">WORK</a></li>
         <li><a href="page_about.html">ABOUT</a></li>
-        <li><a href="page_projects.html">PROJECTS</a></li>
+        <li><a href="page_contact.html">CONTACT</a></li>
       </ul>
     </header>
 
     <main class="page-shell">
       <div class="meta-strip">
-        <div>Charlie Cilla / Archives<br />Image + Print + Mixed Media</div>
-        <div>Selected Experiments<br />Visual Studies 2022—Present</div>
-        <div>A curated stream of poster, collage, and mixed media work.</div>
+        <div>Charlie Cilla / Work Archive<br />Visual Design + Print + Mixed Media</div>
+        <div>Selected Visual Studies<br />2022—Present</div>
+        <div>Direct links to project case studies and expanded context.</div>
       </div>
 
       <h2 class="archive-hero">
-        <span class="accent-stroke">The</span> Archives
+        <span class="accent-stroke">Work</span> Archive
       </h2>
 
       <section class="archive-grid" id="archive-grid"></section>
@@ -183,6 +206,7 @@
                 </div>
                 <span class="archive-card-idx">${idxLabel} / ${totalLabel}</span>
                 <h3 class="archive-card-title">${project.title || "Untitled"}</h3>
+                <span class="archive-card-link">View case study</span>
               </a>
             `;
           })

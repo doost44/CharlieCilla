@@ -1,22 +1,26 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>A5 Charlie Cilla Paradox - Charlie Cilla</title>
+    <title>WYAWYG? Poster Series - Charlie Cilla</title>
+    <meta name="description" content="Case study for WYAWYG? Poster Series by Charlie Cilla." />
+    <meta property="og:title" content="WYAWYG? Poster Series | Charlie Cilla" />
+    <meta property="og:description" content="Context, process, role, and outcomes for WYAWYG? Poster Series." />
+    <meta property="og:type" content="article" />
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="../site-theme.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Archivo+Black&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
       .detail-layout {
         display: grid;
-        grid-template-columns: 1.15fr 0.85fr;
-        gap: 20px;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 24px;
       }
 
       .detail-image {
@@ -34,26 +38,34 @@
 
       .detail-info {
         border: 1px solid var(--line);
-        background: linear-gradient(160deg, rgba(14, 14, 14, 0.95), rgba(4, 4, 4, 0.94));
+        background: rgba(8, 8, 8, 0.55);
         padding: 20px;
         display: grid;
-        gap: 16px;
+        gap: 14px;
         align-content: start;
       }
 
       .detail-title {
         margin: 0;
-        font-family: "Archivo Black", "Arial Black", Impact, sans-serif;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         text-transform: uppercase;
         line-height: 0.95;
         font-size: clamp(26px, 4vw, 54px);
       }
 
-      .detail-text {
+      .detail-block h3 {
+        margin: 0 0 6px;
+        font-family: var(--mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--accent);
+      }
+
+      .detail-block p {
         margin: 0;
-        color: #c5c5c5;
-        line-height: 1.7;
-        white-space: pre-line;
+        color: #cfcfcf;
+        line-height: 1.6;
       }
 
       .detail-back {
@@ -66,10 +78,13 @@
         font-size: 11px;
         text-decoration: none;
         color: white;
+        font-family: var(--mono);
       }
 
-      .detail-back:hover {
-        border-color: white;
+      .detail-back:hover,
+      .detail-back:focus-visible {
+        border-color: var(--accent);
+        color: var(--accent);
       }
 
       @media (max-width: 980px) {
@@ -92,28 +107,33 @@
       </div>
       <ul class="site-nav">
         <li><a href="../index.html">HOME</a></li>
-        <li><a href="../pages_code/page_portfolio.html" class="is-active">ARCHIVES</a></li>
-        <li><a href="../pages_code/page_contact.html">CONTACT</a></li>
+        <li><a href="../pages_code/page_projects.html" class="is-active">CASE STUDIES</a></li>
+        <li><a href="../pages_code/page_portfolio.html">WORK</a></li>
         <li><a href="../pages_code/page_about.html">ABOUT</a></li>
-        <li><a href="../pages_code/page_projects.html">PROJECTS</a></li>
+        <li><a href="../pages_code/page_contact.html">CONTACT</a></li>
       </ul>
     </header>
 
     <main class="page-shell">
       <div class="meta-strip">
-        <div>Archive Detail<br />Single Project</div>
-        <div>Visual Study<br />Charlie Cilla</div>
-        <div>Context and process notes for this selected piece.</div>
+        <div>Case Study<br />WYAWYG? Poster Series</div>
+        <div>Role<br />Visual Designer</div>
+        <div>Structured summary for employer review.</div>
       </div>
 
       <section class="detail-layout">
-        <article class="detail-image">
-          <img src="../A5_Charlie_Cilla_Paradox.jpg" alt="A5 Charlie Cilla Paradox" />
+        <article class="detail-image panel">
+          <img src="../POSTER1 (1).jpg" alt="WYAWYG? Poster Series" loading="lazy" />
         </article>
-        <article class="detail-info">
-          <h2 class="detail-title">A5 Charlie Cilla Paradox</h2>
-          <p class="detail-text">The idea of a paradox was paradoxical to me for a while. This piece led me in many directions and left me aimlessly searching for ideas. These pieces encapsulate the process that led to this artwork and the pieces that encompass the journey. Each piece on the walls surrounding the figure represented ideas that I felt did not entirely satisfy the concept of a paradox. I knew I wanted to create something related to the human form, emphasizing either its exaggeration or disintegration. This inspiration comes from Francis Bacon and his style, with the main figure bearing a resemblance to Bacon's deformation of the human body. For this figure, I took multiple shots of myself in a chair and then merged them using a lighter colour filter. This approach allowed each position to remain completely visible without affecting one another. I was also interested in David Lynch's ability to create a surreal liminal space. Therefore, I made the colour of the wall in this piece to the likeliness of the Red Room in Twin Peaks. I appreciate this piece; it is weird and somewhat unsettling.</p>
-          <a class="detail-back" href="../pages_code/page_portfolio.html">Back to archives</a>
+        <article class="detail-info panel">
+          <h2 class="detail-title">WYAWYG? Poster Series</h2>
+          <section class="detail-block"><h3>Context</h3><p>An experimental poster series combining hand-made mark-making with digital composition.</p></section>
+          <section class="detail-block"><h3>Problem</h3><p>I wanted to preserve tactile qualities of physical art while still achieving polish and structure in digital outputs.</p></section>
+          <section class="detail-block"><h3>Role</h3><p>Visual Designer</p></section>
+          <section class="detail-block"><h3>Process</h3><p>Created physical textures first, digitized source material, and iterated on layering, contrast, and rhythm across a five-poster set.</p></section>
+          <section class="detail-block"><h3>Outcome</h3><p>Built a distinct mixed-media visual system that demonstrates style range and composition control.</p></section>
+          <section class="detail-block"><h3>Tools</h3><p>Adobe Photoshop, Scanned textures, Composition studies</p></section>
+          <a class="detail-back" href="../pages_code/page_portfolio.html">Back to work archive</a>
         </article>
       </section>
     </main>

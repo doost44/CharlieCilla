@@ -76,9 +76,14 @@ const DEFAULT_HOME_PROJECTS = [
     title: "DESIGNER HANDBOOK",
     year: "2025",
     category: "PRINT / EDITORIAL",
-    description: "A VISUAL GUIDE TO THE FUNDAMENTALS OF DESIGN",
+    description:
+      "A visual handbook translating core design principles into practical editorial systems.",
     credit: "",
+    role: "Visual Designer",
+    contribution: "Concept, layout, and typography system",
     type: "flipbook-images",
+    detailPagePath: "../projects_code/project4.html",
+    featuredRank: 2,
     flipbookImages: {
       basePath: "Handbook_Files/handbook-pages/page-",
       pageCount: 22,
@@ -91,9 +96,14 @@ const DEFAULT_HOME_PROJECTS = [
     title: "VOICES 2025",
     year: "2025",
     category: "PUBLICATION",
-    description: "A MULTIMEDIA EXPLORATION OF CONTEMPORARY VOICES",
+    description:
+      "A publication-led storytelling project exploring identity and community through visual narrative.",
     credit: "",
+    role: "Creative Director",
+    contribution: "Story curation and visual direction",
     type: "flipbook-images",
+    detailPagePath: "../projects_code/project5.html",
+    featuredRank: 4,
     flipbookImages: {
       basePath: "Handbook_Files/handbook-pages/voices-",
       pageCount: 36,
@@ -106,9 +116,14 @@ const DEFAULT_HOME_PROJECTS = [
     title: "THE GOATMAN",
     year: "2025",
     category: "SHORT FILM",
-    description: "A PAINTED JOURNEY THROUGH A STRANGE WORLD",
+    description:
+      "A stylized short film blending painted aesthetics and surreal narrative pacing.",
     credit: "",
+    role: "Director + Editor",
+    contribution: "Concept, cinematography, and final edit",
     type: "video",
+    detailPagePath: "../projects_code/goatman_case_study.html",
+    featuredRank: 1,
     youtubeUrl: "https://www.youtube.com/watch?v=_8m2P_TAWSE",
     youtubeId: "_8m2P_TAWSE",
     visible: true,
@@ -118,9 +133,14 @@ const DEFAULT_HOME_PROJECTS = [
     title: "BOUND BY BOARDS",
     year: "2025",
     category: "SHORT DOC",
-    description: "CONNECTIONS MADE THROUGH GRIPTAPE",
+    description:
+      "A short documentary focused on community, movement, and identity in skate culture.",
     credit: "DP",
+    role: "Director of Photography",
+    contribution: "Interview framing and motion capture",
     type: "video",
+    detailPagePath: "../projects_code/bound_by_boards_case_study.html",
+    featuredRank: 3,
     youtubeUrl: "https://www.youtube.com/watch?v=84KcwAFeiZg",
     youtubeId: "84KcwAFeiZg",
     visible: true,
@@ -208,23 +228,25 @@ const DEFAULT_PROJECTS = [
   {
     id: "project-1",
     title: "Student Meal Plan App Prototype",
-    description: `University students face considerable difficulty when trying to manage their meal plans efficiently.<br> <br>
-Meal plans provide convenience but they fail to supply students with essential budgeting tools throughout an academic semester.<br> <br>
-Students frequently believe their meal plan money will last through the semester but unexpectedly find their funds depleted before the end.<br> <br>
-This leads to financial stress and dependence on expensive or low-nutrition food alternatives.`,
+    year: "2024",
+    role: "Product Designer",
+    contribution: "UX research, wireframes, and interaction design",
+    description: `A budgeting-first meal plan prototype designed for university students.<br><br>
+The concept helps students track meal credits over time, prevent overspending, and make informed food decisions throughout a semester.`,
     type: "images",
     images: ["../Mealplan.jpg"],
     displayStyle: "default",
+    detailPagePath: "../projects_code/project1.html",
     visible: true,
   },
   {
     id: "project-2",
     title: "POWERADE Rebrand",
-    description: `Powerade isn't just a drink—it's fuel for champions. But to lead the sports drink market, it must rediscover its roots. Athletes and sports enthusiasts may be the audience, but inspiration is missing. A brand without a story is a name without a legacy. <br> <br>
-
-Born from the relentless spirit of runners—the athletes of speed and endurance—Powerade was once the pulse of those who lived to push limits. Young, driven, and unyielding, they found solace in a drink that matched their pace. But as Powerade expanded, its essence blurred, leaving behind the runners who first made it great. <br> <br>
-
-The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, and the unbreakable will to go further. This isn't just about hydration; it's about igniting the fire of movement, the passion of pursuit, the thrill of crossing the finish line. The visual language will be daring, expressive, and explosive—a call to action for all who strive for greatness.`,
+    year: "2024",
+    role: "Brand Designer",
+    contribution: "Narrative positioning and visual identity concepts",
+    description: `A strategy-led brand refresh that reconnects POWERADE with endurance-first athletic culture.<br><br>
+The system emphasizes momentum, grit, and performance through expressive typography and high-energy composition.`,
     type: "images",
     images: [
       "../[GBDA 202] Rebranding Pitch-1_page-0001.jpg",
@@ -232,13 +254,17 @@ The BIG IDEA is a return to origin—a bold resurgence of endurance, momentum, a
       "../[GBDA 202] Rebranding Pitch-16_page-0001.jpg",
     ],
     displayStyle: "default",
+    detailPagePath: "../projects_code/project2.html",
     visible: true,
   },
   {
     id: "project-3",
     title: "WYAWYG?",
-    description: `Posters that demonstrate my <br> creativity as a desinger and artist. Each <br> poster is a digitization of a peice of art
-I <br>created in a physical medium. <br> <br> Each piece displays my ability to mold the <br> digital and physical worlds of design together, <br> creating something new .`,
+    year: "2024",
+    role: "Visual Designer",
+    contribution: "Analog experiments translated into digital posters",
+    description: `A poster series where physical art-making techniques are digitized into a cohesive visual language.<br><br>
+The work explores texture, composition, and contrast between tactile and digital processes.`,
     type: "images",
     images: [
       "../POSTER1 (1).jpg",
@@ -248,11 +274,15 @@ I <br>created in a physical medium. <br> <br> Each piece displays my ability to 
       "../POSTER1 (4).jpg",
     ],
     displayStyle: "grid-5",
+    detailPagePath: "../projects_code/project3.html",
     visible: true,
   },
   {
     id: "project-4",
     title: "Designer Handbook",
+    year: "2025",
+    role: "Editorial Designer",
+    contribution: "Information architecture and page system design",
     description: `A comprehensive visual guide exploring the fundamental principles of design.<br><br>
 This handbook serves as both a personal reference and a creative exploration of typography, color theory, composition, and visual hierarchy.<br><br>
 Each spread demonstrates practical applications of design principles through carefully crafted layouts and thoughtful use of whitespace.`,
@@ -263,11 +293,15 @@ Each spread demonstrates practical applications of design principles through car
       extension: ".png",
     },
     displayStyle: "default",
+    detailPagePath: "../projects_code/project4.html",
     visible: true,
   },
   {
     id: "project-5",
     title: "Voices 2025",
+    year: "2025",
+    role: "Creative Director",
+    contribution: "Editorial narrative and visual storytelling",
     description: `An immersive multimedia project capturing diverse perspectives and stories.<br><br>
 Voices combines visual storytelling with audio narratives to create a time capsule of contemporary experiences.<br><br>
 The project explores themes of identity, community, and aspiration through a series of interviews and artistic interpretations.`,
@@ -278,6 +312,7 @@ The project explores themes of identity, community, and aspiration through a ser
       extension: ".png",
     },
     displayStyle: "default",
+    detailPagePath: "../projects_code/project5.html",
     visible: true,
   },
 ];

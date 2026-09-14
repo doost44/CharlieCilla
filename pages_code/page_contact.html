@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Contact - Charlie Cilla</title>
+    <meta
+      name="description"
+      content="Contact Charlie Cilla for design, film, and creative collaboration opportunities."
+    />
+    <meta property="og:title" content="Contact | Charlie Cilla" />
+    <meta
+      property="og:description"
+      content="Reach out for portfolio discussions, opportunities, and collaborations."
+    />
+    <meta property="og:type" content="website" />
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="../site-theme.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -87,58 +97,9 @@
         transform: translateY(-2px);
       }
 
-      .contact-form {
+      .contact-cta {
         display: grid;
-        gap: 10px;
-      }
-
-      .contact-form label {
-        font-family: var(--mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 2.2px;
-        color: #c4c4c4;
-      }
-
-      .contact-form input,
-      .contact-form textarea {
-        background: rgba(0, 0, 0, 0.55);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        padding: 12px 14px;
-        font-family: inherit;
-        border-radius: 2px;
-      }
-
-      .contact-form input:focus,
-      .contact-form textarea:focus {
-        outline: none;
-        border-color: var(--line-strong);
-      }
-
-      .contact-form textarea {
-        resize: vertical;
-        min-height: 130px;
-      }
-
-      .contact-form button {
-        margin-top: 8px;
-        width: fit-content;
-        border: 1px solid var(--accent);
-        background: rgba(232, 51, 31, 0.08);
-        color: white;
-        border-radius: 2px;
-        padding: 10px 18px;
-        text-transform: uppercase;
-        letter-spacing: 1.8px;
-        cursor: pointer;
-        font-family: var(--mono);
-        font-size: 11px;
-      }
-
-      .contact-form button:hover {
-        background: var(--accent);
-        color: #000;
+        gap: 12px;
       }
 
       a {
@@ -174,20 +135,18 @@
       </div>
       <ul class="site-nav">
         <li><a href="../index.html">HOME</a></li>
-        <li><a href="page_portfolio.html">ARCHIVES</a></li>
-        <li><a href="page_contact.html" class="is-active">CONTACT</a></li>
+        <li><a href="page_projects.html">CASE STUDIES</a></li>
+        <li><a href="page_portfolio.html">WORK</a></li>
         <li><a href="page_about.html">ABOUT</a></li>
-        <li><a href="page_projects.html">PROJECTS</a></li>
+        <li><a href="page_contact.html" class="is-active">CONTACT</a></li>
       </ul>
     </header>
 
     <main class="page-shell">
       <div class="meta-strip">
-        <div>
-          Open For Collaborations<br />Creative Commissions + Commissions
-        </div>
+        <div>Open For Opportunities<br />Internships + Junior Design Roles</div>
         <div>Toronto / Waterloo<br />Remote Friendly — Worldwide</div>
-        <div>Let us build something with a strong visual point of view.</div>
+        <div>Let’s discuss projects, role fit, and collaboration needs.</div>
       </div>
 
       <h2 class="contact-hero">
@@ -225,40 +184,34 @@
                 <img src="../linkedin.webp" alt="LinkedIn" />
               </a>
             </div>
+            <div class="cta-row" style="margin-top:10px;">
+              <a
+                class="button-cta primary"
+                href="mailto:charlievcilla@gmail.com?subject=Portfolio%20Inquiry"
+                >Email Directly</a
+              >
+              <a
+                class="button-cta"
+                href="https://www.linkedin.com/in/charlie-cilla-122038243/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >View Resume (LinkedIn)</a
+              >
+            </div>
           </section>
 
           <section>
-            <h3>Send Message</h3>
-            <form class="contact-form" action="submit_form.php" method="post">
-              <label for="name">Name</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Your name"
-                required
-              />
-
-              <label for="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="your@email.com"
-                required
-              />
-
-              <label for="message">Message</label>
-              <textarea
-                id="message"
-                name="message"
-                rows="5"
-                placeholder="Your message..."
-                required
-              ></textarea>
-
-              <button type="submit">Send Message</button>
-            </form>
+            <h3>Preferred Contact Flow</h3>
+            <div class="contact-cta">
+              <p>
+                For hiring inquiries, please email with your role, team, and
+                expected timeline. I typically respond within 24–48 hours.
+              </p>
+              <p>
+                If you prefer LinkedIn, send a short message and include the
+                role title so I can follow up quickly.
+              </p>
+            </div>
           </section>
         </article>
       </section>

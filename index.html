@@ -3,7 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Charlie Cilla</title>
+    <title>Charlie Cilla | Designer & Filmmaker Portfolio</title>
+    <meta
+      name="description"
+      content="Portfolio of Charlie Cilla, a designer and filmmaker focused on visual storytelling, brand systems, and editorial experiences."
+    />
+    <meta property="og:title" content="Charlie Cilla | Designer & Filmmaker" />
+    <meta
+      property="og:description"
+      content="Explore selected case studies and visual projects by Charlie Cilla."
+    />
+    <meta property="og:type" content="website" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="site-theme.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -144,6 +154,26 @@
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
+      }
+
+      .home-card-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+      }
+
+      .home-card-link {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        color: #ececec;
+      }
+
+      .home-card-link:hover,
+      .home-card-link:focus-visible {
+        color: var(--accent);
       }
 
       .home-card-title {
@@ -367,10 +397,10 @@
       </div>
       <ul class="site-nav">
         <li><a href="index.html" class="is-active">HOME</a></li>
-        <li><a href="pages_code/page_portfolio.html">ARCHIVES</a></li>
-        <li><a href="pages_code/page_contact.html">CONTACT</a></li>
+        <li><a href="pages_code/page_projects.html">CASE STUDIES</a></li>
+        <li><a href="pages_code/page_portfolio.html">WORK</a></li>
         <li><a href="pages_code/page_about.html">ABOUT</a></li>
-        <li><a href="pages_code/page_projects.html">PROJECTS</a></li>
+        <li><a href="pages_code/page_contact.html">CONTACT</a></li>
       </ul>
     </header>
 
@@ -379,9 +409,13 @@
     <div
       id="project-modal"
       class="project-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Project details"
       onclick="if (event.target === this) closeProject();"
     >
       <button
+        id="home-modal-close"
         class="modal-close"
         type="button"
         onclick="closeProject()"
@@ -488,6 +522,9 @@
         const projects = AdminData.getHomeProjects().filter(
           (p) => p.visible !== false,
         );
+        projects.sort(
+          (a, b) => (a.featuredRank || 999) - (b.featuredRank || 999),
+        );
         homeProjectCache = {};
         projects.forEach((p) => {
           homeProjectCache[p.id] = p;
@@ -505,10 +542,19 @@
         const shell = document.getElementById("central-portfolio-section");
         shell.innerHTML = `
           <div class="meta-strip">
-            <div>Charlie Cilla / Designer + Filmmaker<br />Featured Selection 2026</div>
-            <div>Film / Publication<br />Creative Direction</div>
-            <div>Stories and systems told through visual form.</div>
+            <div>Charlie Cilla / Hiring Portfolio<br />Designer + Filmmaker</div>
+            <div>Toronto / Waterloo<br />Open to internships and junior roles</div>
+            <div>Focused on visual storytelling, editorial systems, and branded motion.</div>
           </div>
+          <section class="recruiter-intro">
+            <span class="recruiter-kicker">Employer Overview</span>
+            <p class="recruiter-copy">I design visual systems and stories across film, publication, and brand work. Start with selected case studies, then review role fit and contact details.</p>
+            <div class="cta-row">
+              <a class="button-cta primary" href="pages_code/page_projects.html">View Case Studies</a>
+              <a class="button-cta" href="pages_code/page_about.html">View Resume</a>
+              <a class="button-cta" href="pages_code/page_contact.html">Contact</a>
+            </div>
+          </section>
           <h2 class="hero-wordmark"><span class="accent-stroke">Selected</span> Works</h2>
           <div class="home-controls">
             <div class="filter-tabs">
@@ -566,7 +612,7 @@
             const idxLabel = String(idx + 1).padStart(2, "0");
 
             return `
-              <button type="button" class="home-card" data-project-id="${project.id}">
+              <article class="home-card" data-project-id="${project.id}" role="button" tabindex="0">
                 <div class="home-card-media">
                   ${
                     preview
@@ -579,11 +625,17 @@
                     <span class="home-card-index">${idxLabel} / ${String(visibleProjects.length).padStart(2, "0")}</span>
                     <span class="pill accent">${project.year || "Current"}</span>
                     <span class="pill">${project.category || "Project"}</span>
+                    ${project.role ? `<span class="pill">${project.role}</span>` : ""}
                   </div>
                   <h3 class="home-card-title">${project.title || "Untitled"}</h3>
                   <p class="home-card-text">${shortText}</p>
+                  <div class="home-card-actions">
+                    ${project.detailPagePath ? `<a class="home-card-link" href="${project.detailPagePath}">View case study</a>` : ""}
+                    <a class="home-card-link" href="#" data-open-modal="${project.id}">Quick preview</a>
+                    ${project.contribution ? `<span class="home-card-link" style="pointer-events:none;color:#8f8f8f;">${project.contribution}</span>` : ""}
+                  </div>
                 </div>
-              </button>
+              </article>
             `;
           })
           .join("");
@@ -592,6 +644,26 @@
           button.addEventListener("click", () =>
             openProject(button.dataset.projectId),
           );
+          button.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              openProject(button.dataset.projectId);
+            }
+          });
+        });
+
+        gridEl.querySelectorAll("[data-open-modal]").forEach((link) => {
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            openProject(link.dataset.openModal);
+          });
+        });
+
+        gridEl.querySelectorAll(".home-card-link[href]").forEach((link) => {
+          link.addEventListener("click", (event) => {
+            event.stopPropagation();
+          });
         });
       }
 
@@ -646,6 +718,8 @@
 
         modal.classList.add("is-open");
         document.body.classList.add("modal-open");
+        const closeButton = document.getElementById("home-modal-close");
+        if (closeButton) closeButton.focus();
 
         if (type === "flipbook-pdf") {
           setTimeout(() => initHomeFlipbook(p.id, p.flipbookPdf), 60);
@@ -670,6 +744,23 @@
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           closeProject();
+        }
+        if (event.key === "Tab") {
+          const modal = document.getElementById("project-modal");
+          if (!modal.classList.contains("is-open")) return;
+          const focusable = modal.querySelectorAll(
+            'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])',
+          );
+          if (!focusable.length) return;
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
         }
       });
 

@@ -1,22 +1,26 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AHFTW UOW Works 2 - Charlie Cilla</title>
+    <title>Designer Handbook - Charlie Cilla</title>
+    <meta name="description" content="Case study for Designer Handbook by Charlie Cilla." />
+    <meta property="og:title" content="Designer Handbook | Charlie Cilla" />
+    <meta property="og:description" content="Context, process, role, and outcomes for Designer Handbook." />
+    <meta property="og:type" content="article" />
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="../site-theme.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Archivo+Black&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
       .detail-layout {
         display: grid;
-        grid-template-columns: 1.15fr 0.85fr;
-        gap: 20px;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 24px;
       }
 
       .detail-image {
@@ -34,26 +38,34 @@
 
       .detail-info {
         border: 1px solid var(--line);
-        background: linear-gradient(160deg, rgba(14, 14, 14, 0.95), rgba(4, 4, 4, 0.94));
+        background: rgba(8, 8, 8, 0.55);
         padding: 20px;
         display: grid;
-        gap: 16px;
+        gap: 14px;
         align-content: start;
       }
 
       .detail-title {
         margin: 0;
-        font-family: "Archivo Black", "Arial Black", Impact, sans-serif;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         text-transform: uppercase;
         line-height: 0.95;
         font-size: clamp(26px, 4vw, 54px);
       }
 
-      .detail-text {
+      .detail-block h3 {
+        margin: 0 0 6px;
+        font-family: var(--mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--accent);
+      }
+
+      .detail-block p {
         margin: 0;
-        color: #c5c5c5;
-        line-height: 1.7;
-        white-space: pre-line;
+        color: #cfcfcf;
+        line-height: 1.6;
       }
 
       .detail-back {
@@ -66,10 +78,13 @@
         font-size: 11px;
         text-decoration: none;
         color: white;
+        font-family: var(--mono);
       }
 
-      .detail-back:hover {
-        border-color: white;
+      .detail-back:hover,
+      .detail-back:focus-visible {
+        border-color: var(--accent);
+        color: var(--accent);
       }
 
       @media (max-width: 980px) {
@@ -92,34 +107,33 @@
       </div>
       <ul class="site-nav">
         <li><a href="../index.html">HOME</a></li>
-        <li><a href="../pages_code/page_portfolio.html" class="is-active">ARCHIVES</a></li>
-        <li><a href="../pages_code/page_contact.html">CONTACT</a></li>
+        <li><a href="../pages_code/page_projects.html" class="is-active">CASE STUDIES</a></li>
+        <li><a href="../pages_code/page_portfolio.html">WORK</a></li>
         <li><a href="../pages_code/page_about.html">ABOUT</a></li>
-        <li><a href="../pages_code/page_projects.html">PROJECTS</a></li>
+        <li><a href="../pages_code/page_contact.html">CONTACT</a></li>
       </ul>
     </header>
 
     <main class="page-shell">
       <div class="meta-strip">
-        <div>Archive Detail<br />Single Project</div>
-        <div>Visual Study<br />Charlie Cilla</div>
-        <div>Context and process notes for this selected piece.</div>
+        <div>Case Study<br />Designer Handbook</div>
+        <div>Role<br />Editorial Designer</div>
+        <div>Structured summary for employer review.</div>
       </div>
 
       <section class="detail-layout">
-        <article class="detail-image">
-          <img src="../ahftw_UOW_works2.jpg" alt="AHFTW UOW Works 2" />
+        <article class="detail-image panel">
+          <img src="../page-01.png" alt="Designer Handbook" loading="lazy" />
         </article>
-        <article class="detail-info">
-          <h2 class="detail-title">AHFTW UOW Works 2</h2>
-          <p class="detail-text">Going home for the weekend after school is a bit funny. You get this overwhelming sense of familiarity like you never really left. Trying to put that feeling into words is tough, so I explored that in these pieces: a space that is real but also surreal.
-
-I wanted texture in my work. Photoshop brushes often felt too smooth, so I leaned into texture filters including texturizer, oil paint, mosaic, and glass. Gaussian blur became central to the second piece.
-
-I have also been drawn to hard edges, outlining elements with the lasso tool and filling shapes manually. Framing mattered too: one piece spills beyond its frame, while the second references a Polaroid holding a surreal scene.
-
-I have been reading Matisse lately, and while his style is not directly visible here, I am channeling his focus on expression.</p>
-          <a class="detail-back" href="../pages_code/page_portfolio.html">Back to archives</a>
+        <article class="detail-info panel">
+          <h2 class="detail-title">Designer Handbook</h2>
+          <section class="detail-block"><h3>Context</h3><p>A publication project translating design fundamentals into an applied editorial guide.</p></section>
+          <section class="detail-block"><h3>Problem</h3><p>Students need practical, visual explanations of core design principles that can be used during real project work.</p></section>
+          <section class="detail-block"><h3>Role</h3><p>Editorial Designer</p></section>
+          <section class="detail-block"><h3>Process</h3><p>Developed page structures, typographic hierarchy, and visual examples across a multi-page sequence to balance instruction and aesthetics.</p></section>
+          <section class="detail-block"><h3>Outcome</h3><p>Produced a cohesive handbook with reusable design references and strong visual clarity.</p></section>
+          <section class="detail-block"><h3>Tools</h3><p>Adobe InDesign, Adobe Illustrator, Typography systems</p></section>
+          <a class="detail-back" href="../pages_code/page_portfolio.html">Back to work archive</a>
         </article>
       </section>
     </main>
