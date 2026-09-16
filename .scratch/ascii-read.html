@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Reading the ASCII Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --bg:#FFFFFF;
+    --text:#0D0D0D;
+    --muted:#3A3A3A;
+    --line:#DADADA;
+    --link-blue:#1237C4;
+    --link-purple:#63239E;
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+    --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--serif);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .annot-bar{
+    background:var(--text);
+    color:#fff;
+    font-size:12px;
+    padding:10px 24px;
+    text-align:center;
+    font-family:var(--mono);
+  }
+  .annot-bar b{color:#9ecbff;}
+  .annot-bar.fix{background:#63239E;}
+
+  .page{
+    position:relative;
+    max-width:1400px;
+    margin:0 auto;
+    padding:36px 32px 60px;
+  }
+  .corner-label{
+    position:absolute;
+    top:34px;right:32px;
+    font-size:0.8rem;
+    font-style:italic;
+    color:var(--muted);
+  }
+  .corner-label sup{font-size:0.65rem;}
+
+  .cols{
+    display:grid;
+    grid-template-columns:0.85fr 1.05fr 1.5fr;
+    gap:40px;
+    margin-top:70px;
+  }
+
+  /* ===== col 1: bio ===== */
+  .bio p{font-size:0.92rem;line-height:1.6;margin-bottom:16px;max-width:32ch;}
+  .bio b{font-weight:600;}
+  .bio .gap{height:10px;}
+  .bio a{color:var(--link-blue);}
+  .archive{margin-top:8px;color:var(--text);text-decoration:none;font-size:0.9rem;}
+
+  /* ===== col 2: chronological list ===== */
+  .entry{margin-bottom:20px;}
+  .entry .yr{font-weight:600;font-size:0.92rem;}
+  .entry .yr a{color:var(--link-purple);text-decoration:underline;}
+  .entry .yr a.blue{color:var(--link-blue);}
+  .entry p{font-style:italic;font-size:0.88rem;color:var(--muted);line-height:1.5;margin-top:2px;max-width:34ch;}
+
+  /* ===== col 3: ascii render ===== */
+  .ascii-wrap{display:flex;justify-content:flex-end;align-items:flex-start;}
+  canvas#asciiCanvas{max-width:100%;image-rendering:pixelated;}
+
+  .notes{
+    max-width:1180px;margin:0 auto;
+    padding:10px 32px 60px;
+    font-family:var(--mono);
+  }
+  .notes h2{
+    font-family:var(--serif);
+    font-size:1.5rem;
+    margin-bottom:14px;
+  }
+  .notes-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:16px;
+  }
+  .note-card{
+    background:#FAFAF9;border:1px solid var(--line);border-radius:4px;
+    padding:16px 18px;
+  }
+  .note-card .k{
+    font-size:0.68rem;letter-spacing:0.06em;text-transform:uppercase;
+    color:var(--link-purple);margin-bottom:6px;
+  }
+  .note-card .v{font-size:0.83rem;color:var(--text);line-height:1.6;font-family:var(--serif);}
+  .note-card code{background:#EFEFEC;padding:1px 5px;border-radius:3px;font-size:0.78rem;font-family:var(--mono);}
+
+  @media (max-width:900px){
+    .cols{grid-template-columns:1fr;}
+    .ascii-wrap{justify-content:flex-start;}
+    .notes-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="annot-bar fix">Correction from the screenshot — plain serif "unstyled HTML" style, not a terminal/mono style</div>
+
+<div class="page">
+  <span class="corner-label">portfolio <sup>(-3&deg;)</sup></span>
+
+  <div class="cols">
+    <div class="bio">
+      <p><b>English,</b> french, some spanish.</p>
+      <p><b>Good</b> with-&gt;<br/>
+      design &amp; art direction,<br/>
+      film &amp; video editing,<br/>
+      web &amp; front-end code,<br/>
+      3d modelling &amp; illustration,<br/>
+      writing.</p>
+      <p><b>Design</b> (BFA), OCAD University, 2022&ndash;26: specialised in visual identity.</p>
+      <p>Currently freelancing.</p>
+      <p>Contact:<br/>
+      <a href="#">@charliecilla</a><br/>
+      <a href="#">charlie.cilla@gmail.com</a></p>
+      <a class="archive" href="#">&rarr; archive &larr;</a>
+    </div>
+
+    <div class="list">
+      <div class="entry">
+        <div class="yr">2026. <a href="#">grate&shy;together</a></div>
+        <p>A dual-mode cheese grater, designed for safety and mastery.</p>
+      </div>
+      <div class="entry">
+        <div class="yr">2025. <a class="blue" href="#">designer handbook</a></div>
+        <p>A visual guide to the fundamentals of design.</p>
+      </div>
+      <div class="entry">
+        <div class="yr">2025. <a href="#">voices</a></div>
+        <p>A multimedia exploration of contemporary voices.</p>
+      </div>
+      <div class="entry">
+        <div class="yr">2025. <a class="blue" href="#">the goatman</a></div>
+        <p>A painted journey through a strange world.</p>
+      </div>
+      <div class="entry">
+        <div class="yr">2025. <a href="#">bound by boards</a></div>
+        <p>Connections made through griptape.</p>
+      </div>
+    </div>
+
+    <div class="ascii-wrap">
+      <canvas id="asciiCanvas" width="460" height="520"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="notes">
+  <h2>What I got wrong the first time, and what's actually there</h2>
+  <div class="notes-grid">
+    <div class="note-card">
+      <div class="k">Typography — corrected</div>
+      <div class="v">Not a terminal font. It's a <b>plain serif</b> (Times/Georgia-class) for all running text, with bold serif used for category labels — the "default browser stylesheet" look, not a styled UI. I've substituted <b>IBM Plex Serif</b> here.</div>
+    </div>
+    <div class="note-card">
+      <div class="k">Color — corrected</div>
+      <div class="v">Black text on plain white, with links left in <b>classic browser blue/purple</b> (<code>#1237c4</code> / <code>#63239e</code>) rather than a designed accent — that's what reads as "early internet": nothing was restyled away from the default.</div>
+    </div>
+    <div class="note-card">
+      <div class="k">Layout — corrected</div>
+      <div class="v">Three plain columns, no borders, no nav bar, no chrome: bio/skills, a reverse-chronological project list (year + linked title + italic one-liner), then the large ASCII illustration filling the right side. A tiny italic status label sits top-right.</div>
+    </div>
+    <div class="note-card">
+      <div class="k">The ASCII art — still holds</div>
+      <div class="v">The JS bundle still confirms a <code>.glb</code> model run through Three.js's AsciiEffect with a density-character ramp and a dedicated DOS-codepage font for the character glyphs specifically — that part of my read was right, it's just rendered in plain black-on-white here, not a colored terminal panel.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var canvas = document.getElementById('asciiCanvas');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var CELL = 7;
+  var ramp = " .:-=#";
+
+  var off = document.createElement('canvas');
+  off.width = W; off.height = H;
+  var octx = off.getContext('2d');
+
+  // procedural abstract "creature/leaf" silhouette in the spirit of the reference
+  function drawForm(t){
+    octx.clearRect(0,0,W,H);
+    octx.fillStyle = '#000';
+    octx.fillRect(0,0,W,H);
+    octx.fillStyle = '#fff';
+
+    var cx = W*0.5, topY = H*0.06;
+    octx.beginPath();
+    octx.moveTo(cx, topY);
+    var spikes = 6;
+    for(var i=0;i<=spikes;i++){
+      var a = (i/spikes) * Math.PI - Math.PI/2;
+      var wobble = Math.sin(t*0.7 + i) * 6;
+      var r = 170 + (i%2===0 ? 40 : -20) + wobble;
+      var x = cx + Math.cos(a)*r*1.15;
+      var y = topY + 60 + Math.sin(a)*r*0.9 + i*14;
+      octx.lineTo(x, y);
+    }
+    octx.lineTo(cx+120, H*0.62);
+    octx.quadraticCurveTo(cx+90, H*0.8, cx+150, H*0.98);
+    octx.lineTo(cx-40, H*0.98);
+    octx.quadraticCurveTo(cx-70, H*0.75, cx-110, H*0.6);
+    octx.closePath();
+    octx.fill();
+  }
+
+  function render(){
+    var img = octx.getImageData(0,0,W,H).data;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0,0,W,H);
+    ctx.font = CELL + 'px "IBM Plex Mono", monospace';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#0D0D0D';
+    for(var y=0; y<H; y+=CELL){
+      for(var x=0; x<W; x+=CELL){
+        var i = (y*W + x) * 4;
+        var lum = img[i] / 255;
+        if(lum < 0.5) continue;
+        var idx = Math.min(ramp.length-1, Math.floor(((lum-0.5)*2) * ramp.length));
+        var ch = ramp[idx] || '#';
+        if(ch === ' ') continue;
+        ctx.fillText(ch, x, y);
+      }
+    }
+  }
+
+  var t0 = performance.now();
+  function loop(now){
+    var t = (now - t0) / 1000;
+    drawForm(t);
+    render();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+
+</body>
+</html>

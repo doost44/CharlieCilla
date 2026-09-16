@@ -3,156 +3,213 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Archives - Charlie Cilla</title>
-    <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="../site-theme.css" />
+    <title>Archive - Charlie Cilla</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
-      .archive-hero {
-        margin: 8px 0 32px;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: clamp(32px, 10vw, 150px);
-        line-height: 0.9;
-        letter-spacing: -3px;
-        text-transform: uppercase;
-        font-weight: 900;
-        color: #fff;
-        white-space: nowrap;
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
       }
 
-      .archive-hero .accent-stroke {
-        -webkit-text-stroke: 1.5px var(--accent);
-        color: transparent;
+      :root {
+        --bg: #ffffff;
+        --text: #0d0d0d;
+        --muted: #3a3a3a;
+        --faint: #8a8a84;
+        --line: #dadada;
+        --link-blue: #1237c4;
+        --link-purple: #63239e;
+        --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+        --serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
       }
 
-      .archive-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 22px;
+      html,
+      body {
+        margin: 0;
+        padding: 0;
       }
 
-      .archive-card {
-        display: grid;
-        gap: 12px;
-        text-decoration: none;
-        color: inherit;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(8, 8, 8, 0.42);
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        padding: 14px;
-        transition:
-          border-color 0.2s ease,
-          transform 0.2s ease,
-          background 0.2s ease;
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--serif);
+        -webkit-font-smoothing: antialiased;
       }
 
-      .archive-card:hover {
-        border-color: var(--accent);
-        transform: translateY(-2px);
-        background: rgba(12, 12, 12, 0.6);
+      a {
+        color: var(--link-blue);
       }
 
-      .archive-card-media {
+      img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .page {
         width: 100%;
+        margin: 0;
+        padding: 36px clamp(24px, 4vw, 64px) 70px;
+        position: relative;
+      }
+
+      .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 6px;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+      }
+
+      .top-row a {
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .top-row a:hover {
+        color: var(--link-blue);
+      }
+
+      .corner-label {
+        font-size: 0.8rem;
+        font-style: italic;
+        color: var(--muted);
+        text-align: right;
+      }
+
+      .page-title {
+        font-size: 2.4rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 34px 0 6px;
+      }
+
+      .page-dek {
+        color: var(--muted);
+        font-size: 0.94rem;
+        max-width: 56ch;
+        margin-bottom: 14px;
+      }
+
+      .count {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--faint);
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        padding: 10px 0;
+        margin-bottom: 44px;
+      }
+
+      .cols {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 36px;
+      }
+
+      .entry {
+        margin-bottom: 30px;
+      }
+
+      .entry a.title-link {
+        display: block;
+        color: var(--link-purple);
+        text-decoration: underline;
+        font-size: 0.98rem;
+        margin-bottom: 8px;
+      }
+
+      .entry a.title-link.blue {
+        color: var(--link-blue);
+      }
+
+      .thumb {
+        border: 1px solid var(--line);
+        background: #f4f4f2;
         aspect-ratio: 4 / 5;
         overflow: hidden;
-        background: #050505;
+        margin-bottom: 6px;
       }
 
-      .archive-card-media img {
+      .thumb img {
         width: 100%;
         height: 100%;
         object-fit: cover;
       }
 
-      .archive-card-idx {
+      .idx {
         font-family: var(--mono);
-        font-size: 10px;
-        letter-spacing: 2px;
-        color: var(--accent);
-        text-transform: uppercase;
+        font-size: 0.7rem;
+        color: var(--faint);
       }
 
-      .archive-card-title {
-        margin: 0;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: clamp(16px, 2vw, 22px);
-        line-height: 1.06;
-        text-transform: uppercase;
-        font-weight: 900;
-        letter-spacing: -0.3px;
+      .page-footer {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        font-family: var(--mono);
+        font-size: 0.78rem;
       }
 
-      .archive-empty {
-        border: 1px dashed rgba(255, 255, 255, 0.2);
-        padding: 40px;
-        text-align: center;
-        color: #9a9a9a;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-size: 12px;
+      .page-footer a {
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .page-footer a:hover {
+        color: var(--link-blue);
+      }
+
+      .list-empty {
         font-family: var(--mono);
+        font-size: 0.8rem;
+        color: var(--faint);
         grid-column: 1 / -1;
       }
 
-      @media (max-width: 980px) {
-        .archive-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+      @media (max-width: 900px) {
+        .cols {
+          grid-template-columns: 1fr 1fr;
         }
       }
-
-      @media (max-width: 650px) {
-        .archive-grid {
+      @media (max-width: 600px) {
+        .cols {
           grid-template-columns: 1fr;
         }
       }
     </style>
   </head>
   <body>
-    <div class="site-bg" aria-hidden="true">
-      <video class="site-bg-video" autoplay muted loop playsinline>
-        <source src="../Assets/tree-background.mp4" type="video/mp4" />
-      </video>
-      <div class="site-bg-overlay"></div>
-      <div class="site-bg-grain"></div>
-      <div class="site-bg-fade"></div>
+    <div class="page">
+      <div class="top-row">
+        <a href="../index.html">&larr; home</a>
+        <span class="corner-label">charlie cilla<br />design + film</span>
+      </div>
+
+      <h1 class="page-title">Archive</h1>
+      <p class="page-dek">
+        Poster, collage, print, and mixed-media work outside the featured
+        selection &mdash; a running record, not a highlight reel.
+      </p>
+      <p class="count" id="archive-count"></p>
+
+      <div class="cols" id="archive-cols">
+        <div class="col" id="col-left"></div>
+        <div class="col" id="col-middle"></div>
+        <div class="col" id="col-right"></div>
+      </div>
+
+      <div class="page-footer">
+        <a href="../index.html">&larr; back to selected works</a>
+      </div>
     </div>
-
-    <header class="site-header">
-      <div class="header-content">
-        <img src="../logo.png" alt="Logo" class="logo" />
-        <h1 class="brand-title">CHARLIE CILLA</h1>
-      </div>
-      <ul class="site-nav">
-        <li><a href="../index.html">HOME</a></li>
-        <li><a href="page_portfolio.html" class="is-active">ARCHIVES</a></li>
-        <li><a href="page_contact.html">CONTACT</a></li>
-        <li><a href="page_about.html">ABOUT</a></li>
-        <li><a href="page_projects.html">PROJECTS</a></li>
-      </ul>
-    </header>
-
-    <main class="page-shell">
-      <div class="meta-strip">
-        <div>Charlie Cilla / Archives<br />Image + Print + Mixed Media</div>
-        <div>Selected Experiments<br />Visual Studies 2022—Present</div>
-        <div>A curated stream of poster, collage, and mixed media work.</div>
-      </div>
-
-      <h2 class="archive-hero">
-        <span class="accent-stroke">The</span> Archives
-      </h2>
-
-      <section class="archive-grid" id="archive-grid"></section>
-    </main>
-
-    <footer class="site-footer">&copy; 2026 Charlie Cilla</footer>
 
     <link rel="stylesheet" href="../admin/admin.css" />
     <script src="../admin/data.js"></script>
@@ -162,31 +219,38 @@
         const projects = AdminData.getArchiveProjects().filter(
           (p) => p.visible !== false,
         );
-        const grid = document.getElementById("archive-grid");
+        const cols = {
+          left: document.getElementById("col-left"),
+          middle: document.getElementById("col-middle"),
+          right: document.getElementById("col-right"),
+        };
+
+        document.getElementById("archive-count").textContent =
+          `${String(projects.length).padStart(2, "0")} entries · sorted by column`;
 
         if (!projects.length) {
-          grid.innerHTML =
-            '<div class="archive-empty">No archive projects available.</div>';
+          document.getElementById("archive-cols").innerHTML =
+            '<p class="list-empty">No archive projects available.</p>';
           return;
         }
 
-        grid.innerHTML = projects
-          .map((project, idx) => {
-            const href = project.detailPagePath || "#";
-            const target = href === "#" ? "" : `href="${href}"`;
-            const idxLabel = String(idx + 1).padStart(2, "0");
-            const totalLabel = String(projects.length).padStart(2, "0");
-            return `
-              <a class="archive-card" ${target}>
-                <div class="archive-card-media">
-                  <img src="${project.imagePath}" alt="${project.title || "Archive image"}" loading="lazy" />
-                </div>
-                <span class="archive-card-idx">${idxLabel} / ${totalLabel}</span>
-                <h3 class="archive-card-title">${project.title || "Untitled"}</h3>
-              </a>
-            `;
-          })
-          .join("");
+        projects.forEach((project, idx) => {
+          const col = cols[project.column] || cols.left;
+          const idxLabel = String(idx + 1).padStart(2, "0");
+          const linkClass = idx % 2 === 0 ? "" : "blue";
+          const href = project.detailPagePath || "#";
+
+          const entry = document.createElement("div");
+          entry.className = "entry";
+          entry.innerHTML = `
+            <span class="idx">${idxLabel}.</span>
+            <a class="title-link ${linkClass}" href="${href}">${project.title || "Untitled"}</a>
+            <a class="thumb" href="${href}">
+              <img src="${project.imagePath}" alt="${project.title || "Archive image"}" loading="lazy" />
+            </a>
+          `;
+          col.appendChild(entry);
+        });
       }
 
       renderArchivePage();

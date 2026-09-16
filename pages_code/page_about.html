@@ -4,22 +4,101 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>About - Charlie Cilla</title>
-    <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="../site-theme.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg: #ffffff;
+        --text: #0d0d0d;
+        --muted: #3a3a3a;
+        --faint: #8a8a84;
+        --line: #dadada;
+        --link-blue: #1237c4;
+        --link-purple: #63239e;
+        --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+        --serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--serif);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: var(--link-blue);
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .page {
+        width: 100%;
+        margin: 0;
+        padding: 36px clamp(24px, 4vw, 64px) 70px;
+        position: relative;
+      }
+
+      .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 6px;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+      }
+
+      .top-row a {
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .top-row a:hover {
+        color: var(--link-blue);
+      }
+
+      .corner-label {
+        font-size: 0.8rem;
+        font-style: italic;
+        color: var(--muted);
+        text-align: right;
+      }
+
+      .page-title {
+        font-size: 2.4rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 34px 0 44px;
+      }
+
       .about-layout {
         display: grid;
-        grid-template-columns: 0.9fr 1.1fr;
-        gap: 28px;
+        grid-template-columns: 0.8fr 1.2fr;
+        gap: 48px;
       }
 
       .about-photo {
+        border: 1px solid var(--line);
         overflow: hidden;
       }
 
@@ -27,196 +106,148 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        min-height: 520px;
+        min-height: 420px;
       }
 
-      .about-content {
-        padding: 28px;
-        display: grid;
-        gap: 22px;
+      .about-section {
+        margin-bottom: 30px;
+        max-width: 62ch;
       }
 
-      .about-section h3 {
-        margin: 0 0 10px;
+      .about-section h2 {
         font-family: var(--mono);
-        font-size: 12px;
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
-        letter-spacing: 2.2px;
-        color: var(--accent);
+        color: var(--faint);
+        margin: 0 0 10px;
+        font-weight: 500;
       }
 
       .about-section p {
         margin: 0;
-        color: #d5d5d5;
-        line-height: 1.7;
-        font-size: 15px;
+        color: var(--muted);
+        line-height: 1.75;
+        font-size: 0.95rem;
       }
 
       .skills {
+        list-style: none;
+        margin: 0;
+        padding: 0;
         display: flex;
-        gap: 10px;
         flex-wrap: wrap;
+        gap: 8px 18px;
       }
 
       .skills li {
-        list-style: none;
+        font-size: 0.9rem;
+        color: var(--text);
+      }
+
+      .skills li::before {
+        content: "\2014 ";
+        color: var(--faint);
       }
 
       .socials {
         display: flex;
-        gap: 12px;
+        gap: 16px;
+        margin-top: 8px;
+        font-size: 0.9rem;
       }
 
-      .socials img {
-        width: 34px;
-        height: 34px;
-        border-radius: 8px;
+      .page-footer {
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        font-family: var(--mono);
+        font-size: 0.78rem;
       }
 
-      .socials a {
-        transition: transform 0.2s ease;
+      .page-footer a {
+        color: var(--text);
+        text-decoration: none;
       }
 
-      .socials a:hover {
-        transform: translateY(-2px);
+      .page-footer a:hover {
+        color: var(--link-blue);
       }
 
-      a {
-        color: var(--accent);
-      }
-
-      .about-hero {
-        margin: 8px 0 28px;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: clamp(32px, 10vw, 150px);
-        line-height: 0.9;
-        letter-spacing: -3px;
-        text-transform: uppercase;
-        font-weight: 900;
-        color: #fff;
-        white-space: nowrap;
-      }
-
-      .about-hero .accent-stroke {
-        -webkit-text-stroke: 1.5px var(--accent);
-        color: transparent;
-      }
-
-      @media (max-width: 980px) {
+      @media (max-width: 800px) {
         .about-layout {
           grid-template-columns: 1fr;
         }
-
         .about-photo img {
-          min-height: 300px;
-          max-height: 460px;
+          min-height: 320px;
         }
       }
     </style>
   </head>
   <body>
-    <div class="site-bg" aria-hidden="true">
-      <video class="site-bg-video" autoplay muted loop playsinline>
-        <source src="../Assets/tree-background.mp4" type="video/mp4" />
-      </video>
-      <div class="site-bg-overlay"></div>
-      <div class="site-bg-grain"></div>
-      <div class="site-bg-fade"></div>
-    </div>
-
-    <header class="site-header">
-      <div class="header-content">
-        <img src="../logo.png" alt="Logo" class="logo" />
-        <h1 class="brand-title">CHARLIE CILLA</h1>
-      </div>
-      <ul class="site-nav">
-        <li><a href="../index.html">HOME</a></li>
-        <li><a href="page_portfolio.html">ARCHIVES</a></li>
-        <li><a href="page_contact.html">CONTACT</a></li>
-        <li><a href="page_about.html" class="is-active">ABOUT</a></li>
-        <li><a href="page_projects.html">PROJECTS</a></li>
-      </ul>
-    </header>
-
-    <main class="page-shell">
-      <div class="meta-strip">
-        <div>
-          Charlie Cilla / Designer + Filmmaker<br />University of Waterloo —
-          GBDA
-        </div>
-        <div>Practice 2022—Present<br />Based in Toronto / Waterloo</div>
-        <div>Visual communication through story, form, and systems.</div>
+    <div class="page">
+      <div class="top-row">
+        <a href="../index.html">&larr; home</a>
+        <span class="corner-label">charlie cilla<br />design + film</span>
       </div>
 
-      <h2 class="about-hero">
-        <span class="accent-stroke">About</span> The Work
-      </h2>
+      <h1 class="page-title">About</h1>
 
       <section class="about-layout">
-        <article class="about-photo panel">
+        <div class="about-photo">
           <img src="../Face (2).jpg" alt="Charlie Cilla portrait" />
-        </article>
+        </div>
 
-        <article class="about-content panel">
-          <section class="about-section">
-            <h3>Profile</h3>
+        <div class="about-content">
+          <div class="about-section">
+            <h2>Profile</h2>
             <p>
               I am a designer and aspiring filmmaker interested in the ways we
-              communicate through visuals, storytelling, and subconscious cues.
-              My practice spans filmmaking for narrative, graphic design for
-              communication, and industrial design for functional ideas.
+              communicate through visuals, storytelling, and subconscious
+              cues. My practice spans filmmaking for narrative, graphic
+              design for communication, and industrial design for functional
+              ideas.
             </p>
-          </section>
+          </div>
 
-          <section class="about-section">
-            <h3>Approach</h3>
+          <div class="about-section">
+            <h2>Approach</h2>
             <p>
-              As a Global Business and Digital Arts student at the University of
-              Waterloo, I explore composition, identity, and narrative across
-              both digital and physical media. I work with Adobe Photoshop,
-              Illustrator, and Premiere to combine craft with concept.
+              As a Global Business and Digital Arts student at the University
+              of Waterloo, I explore composition, identity, and narrative
+              across both digital and physical media. I work with Adobe
+              Photoshop, Illustrator, and Premiere to combine craft with
+              concept.
             </p>
-          </section>
+          </div>
 
-          <section class="about-section">
-            <h3>Skills</h3>
+          <div class="about-section">
+            <h2>Skills</h2>
             <ul class="skills">
-              <li><span class="pill">Graphic Design</span></li>
-              <li><span class="pill">Visual Storytelling</span></li>
-              <li><span class="pill">Film Editing</span></li>
-              <li><span class="pill">Project Management</span></li>
+              <li>Graphic Design</li>
+              <li>Visual Storytelling</li>
+              <li>Film Editing</li>
+              <li>Project Management</li>
             </ul>
-          </section>
+          </div>
 
-          <section class="about-section">
-            <h3>Contact</h3>
+          <div class="about-section">
+            <h2>Contact</h2>
             <p>
               Email:
-              <a href="mailto:charlievcilla@gmail.com"
-                >charlievcilla@gmail.com</a
-              >
+              <a href="mailto:charlievcilla@gmail.com">charlievcilla@gmail.com</a>
             </p>
             <div class="socials">
-              <a
-                href="https://www.instagram.com/d0o0st/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img src="../instagram.png" alt="Instagram" />
-              </a>
-              <a
-                href="https://www.linkedin.com/in/charlie-cilla-122038243/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img src="../linkedin.webp" alt="LinkedIn" />
-              </a>
+              <a href="https://www.instagram.com/d0o0st/" target="_blank" rel="noopener">instagram</a>
+              <a href="https://www.linkedin.com/in/charlie-cilla-122038243/" target="_blank" rel="noopener">linkedin</a>
             </div>
-          </section>
-        </article>
+          </div>
+        </div>
       </section>
-    </main>
 
-    <footer class="site-footer">&copy; 2026 Charlie Cilla</footer>
+      <div class="page-footer">
+        <a href="../index.html">&larr; back to selected works</a>
+      </div>
+    </div>
   </body>
 </html>

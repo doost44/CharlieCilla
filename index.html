@@ -4,289 +4,310 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Charlie Cilla</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="site-theme.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
-      .home-shell {
-        min-height: 100vh;
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
       }
 
-      .hero-wordmark {
-        margin: 8px 0 32px;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: clamp(32px, 10vw, 150px);
-        line-height: 0.9;
-        letter-spacing: -3px;
-        text-transform: uppercase;
-        font-weight: 900;
-        color: #fff;
-        text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
-        white-space: nowrap;
+      :root {
+        --bg: #ffffff;
+        --text: #0d0d0d;
+        --muted: #3a3a3a;
+        --faint: #8a8a84;
+        --line: #dadada;
+        --link-blue: #1237c4;
+        --link-purple: #63239e;
+        --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+        --serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
       }
 
-      .hero-wordmark .accent-stroke {
-        -webkit-text-stroke: 1.5px var(--accent);
-        color: transparent;
-      }
-
-      .home-controls {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-        flex-wrap: wrap;
-        margin-bottom: 24px;
-      }
-
-      .filter-tabs {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-
-      .filter-tab {
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        background: rgba(0, 0, 0, 0.35);
-        color: #e8e8e8;
-        padding: 8px 14px;
-        font-size: 10px;
-        letter-spacing: 1.8px;
-        text-transform: uppercase;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-family: var(--mono);
-        border-radius: 2px;
-      }
-
-      .filter-tab:hover {
-        border-color: rgba(255, 255, 255, 0.7);
-        color: #fff;
-      }
-
-      .filter-tab.is-active {
-        background: var(--accent);
-        color: #000;
-        border-color: var(--accent);
-      }
-
-      .home-project-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 28px;
-      }
-
-      .home-card {
-        text-align: left;
-        display: flex;
-        flex-direction: column;
-        cursor: pointer;
-        color: inherit;
-        background: rgba(8, 8, 8, 0.42);
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        transition:
-          border-color 0.2s ease,
-          transform 0.2s ease,
-          background 0.2s ease;
-        overflow: hidden;
+      html,
+      body {
+        margin: 0;
         padding: 0;
-        font: inherit;
       }
 
-      .home-card:hover {
-        border-color: var(--accent);
-        transform: translateY(-2px);
-        background: rgba(12, 12, 12, 0.6);
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--serif);
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
       }
 
-      .home-card-media {
+      a {
+        color: var(--link-blue);
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .page {
         width: 100%;
-        aspect-ratio: 16 / 10;
-        overflow: hidden;
-        background: #050505;
+        margin: 0;
+        padding: 36px clamp(24px, 4vw, 64px) 70px;
         position: relative;
       }
 
-      .home-card-media img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
+      .corner-label {
+        position: absolute;
+        top: 34px;
+        right: clamp(24px, 4vw, 64px);
+        font-size: 0.8rem;
+        font-style: italic;
+        color: var(--muted);
+        text-align: right;
       }
 
-      .home-card-media-fallback {
-        width: 100%;
-        height: 100%;
+      .cols {
         display: grid;
-        place-items: center;
-        color: #888;
-        font-family: var(--mono);
-        font-size: 11px;
-        letter-spacing: 2px;
-        text-transform: uppercase;
+        grid-template-columns: 0.85fr 1.05fr 1.5fr;
+        gap: 40px;
+        margin-top: 70px;
       }
 
-      .home-card-body {
-        padding: 18px 20px 22px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
+      /* ===== col 1: bio ===== */
+      .bio p {
+        font-size: 0.92rem;
+        line-height: 1.6;
+        margin-bottom: 16px;
+        max-width: 32ch;
       }
 
-      .home-card-meta {
+      .bio b {
+        font-weight: 600;
+      }
+
+      .bio a {
+        color: var(--link-blue);
+      }
+
+      .site-nav {
+        list-style: none;
+        margin: 0 0 26px;
+        padding: 0;
         display: flex;
-        gap: 8px;
         flex-wrap: wrap;
+        gap: 4px 10px;
+        font-size: 0.9rem;
       }
 
-      .home-card-title {
-        margin: 0;
-        font-size: clamp(22px, 2.4vw, 34px);
-        line-height: 1;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        text-transform: uppercase;
-        font-weight: 900;
-        letter-spacing: -0.5px;
-        color: #fff;
+      .site-nav a {
+        color: var(--text);
+        text-decoration: none;
       }
 
-      .home-card-index {
+      .site-nav a:hover {
+        color: var(--link-blue);
+      }
+
+      .site-nav .sep {
+        color: var(--faint);
+      }
+
+      .archive-link {
+        display: inline-block;
+        color: var(--text);
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+
+      .archive-link:hover {
+        color: var(--link-blue);
+      }
+
+      /* ===== col 2: chronological list ===== */
+      .list-heading {
         font-family: var(--mono);
-        font-size: 10px;
-        letter-spacing: 2px;
-        color: var(--accent);
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
+        color: var(--faint);
+        margin-bottom: 18px;
       }
 
-      .home-card-text {
-        margin: 0;
-        color: #b8b8b8;
+      .entry {
+        margin-bottom: 20px;
+        cursor: pointer;
+        border: none;
+        background: none;
+        text-align: left;
+        padding: 0;
+        display: block;
+        width: 100%;
+        font-family: inherit;
+      }
+
+      .entry .yr {
+        font-weight: 600;
+        font-size: 0.92rem;
+      }
+
+      .entry .yr a {
+        color: var(--link-purple);
+        text-decoration: underline;
+        text-transform: lowercase;
+      }
+
+      .entry .yr a.blue {
+        color: var(--link-blue);
+      }
+
+      .entry p {
+        font-style: italic;
+        font-size: 0.88rem;
+        color: var(--muted);
         line-height: 1.5;
-        font-size: 13px;
+        margin: 2px 0 0;
+        max-width: 34ch;
       }
 
-      .home-empty {
-        border: 1px dashed rgba(255, 255, 255, 0.2);
-        padding: 40px;
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        color: #9a9a9a;
-        font-size: 12px;
+      .list-empty {
         font-family: var(--mono);
-        grid-column: 1 / -1;
+        font-size: 0.8rem;
+        color: var(--faint);
       }
 
-      .project-modal {
+      /* ===== col 3: ascii render ===== */
+      .ascii-wrap {
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-start;
+      }
+
+      canvas#asciiCanvas {
+        max-width: 100%;
+        image-rendering: pixelated;
+      }
+
+      @media (max-width: 900px) {
+        .cols {
+          grid-template-columns: 1fr;
+        }
+        .ascii-wrap {
+          justify-content: flex-start;
+        }
+      }
+
+      footer.site-footer {
+        width: 100%;
+        margin: 0;
+        padding: 20px clamp(24px, 4vw, 64px) 40px;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--faint);
+        border-top: 1px solid var(--line);
+      }
+
+      /* ===== MODAL / project takeover ===== */
+      .modal {
         position: fixed;
         inset: 0;
-        z-index: 100;
-        background: rgba(0, 0, 0, 0.92);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        display: grid;
-        place-items: start center;
-        padding: clamp(20px, 3vh, 40px) clamp(16px, 2vw, 32px);
+        background: #fff;
+        z-index: 500;
+        overflow-y: auto;
         opacity: 0;
         visibility: hidden;
-        pointer-events: none;
-        transition: opacity 0.26s ease;
-        overflow-y: auto;
+        transform: translateY(14px);
+        transition:
+          opacity 0.22s ease,
+          transform 0.22s ease,
+          visibility 0.22s;
       }
 
-      .project-modal.is-open {
+      .modal.is-open {
         opacity: 1;
         visibility: visible;
-        pointer-events: auto;
+        transform: translateY(0);
       }
 
-      .modal-close {
-        position: fixed;
-        top: 24px;
-        right: 28px;
-        width: 44px;
-        height: 44px;
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        background: rgba(0, 0, 0, 0.65);
-        color: white;
-        font-size: 14px;
-        cursor: pointer;
+      .modal-inner {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 44px 32px 90px;
+      }
+
+      .modal-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 40px;
         font-family: var(--mono);
-        z-index: 110;
+        font-size: 0.78rem;
       }
 
-      .modal-close:hover {
-        border-color: var(--accent);
-        color: var(--accent);
+      .modal-top a,
+      .modal-top button {
+        color: var(--text);
+        text-decoration: none;
+        background: none;
+        border: none;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        cursor: pointer;
+        padding: 0;
       }
 
-      .modal-content {
-        width: 100%;
-        max-width: 1480px;
-        padding: clamp(16px, 1.8vw, 24px) clamp(16px, 1.8vw, 24px)
-          clamp(20px, 2.4vw, 32px);
-        display: grid;
-        gap: clamp(24px, 3vw, 44px);
-        background: rgba(6, 6, 6, 0.5);
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        margin: auto;
-      }
-
-      .modal-header {
-        padding: 0 0 14px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-        display: grid;
-        gap: 8px;
+      .modal-top a:hover,
+      .modal-top button:hover {
+        color: var(--link-blue);
       }
 
       .modal-meta {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--faint);
+        margin-bottom: 10px;
         text-transform: uppercase;
-        letter-spacing: 2.4px;
-        font-size: 11px;
-        color: var(--accent);
       }
 
-      .modal-title {
-        margin: 0;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: clamp(22px, 2.8vw, 42px);
-        line-height: 1;
-        text-transform: uppercase;
-        font-weight: 900;
-        letter-spacing: -1px;
+      .modal h1 {
+        font-size: 2.1rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 0 0 18px;
+        line-height: 1.12;
+        text-transform: lowercase;
       }
 
-      .modal-description {
-        margin: 0;
-        color: #cecece;
+      .modal .desc {
+        font-size: 1rem;
         line-height: 1.7;
-        max-width: 70ch;
+        max-width: 60ch;
+        margin: 0 0 10px;
       }
 
-      .modal-credit {
-        font-size: 11px;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: #bdbdbd;
+      .modal .credit {
+        font-style: italic;
+        color: var(--muted);
+        font-size: 0.88rem;
+        margin: 0 0 36px;
       }
 
-      .modal-media-video {
+      .media-block {
+        margin-bottom: 14px;
+      }
+
+      .media-video {
         position: relative;
         padding-bottom: 56.25%;
         height: 0;
+        border: 1px solid var(--line);
         overflow: hidden;
       }
 
-      .modal-media-video iframe {
+      .media-video iframe {
         position: absolute;
         inset: 0;
         width: 100%;
@@ -294,105 +315,131 @@
         border: 0;
       }
 
-      .modal-media-images img {
+      .media-images img {
         width: 100%;
         display: block;
+        border: 1px solid var(--line);
         margin-bottom: 8px;
       }
 
-      .modal-media-flipbook {
+      .media-flipbook {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 12px;
-        padding: 4px;
+        gap: 10px;
+        border: 1px solid var(--line);
+        padding: 20px;
       }
 
-      .modal-media-flipbook > [id^="flipbook-"] {
-        max-width: 100%;
-      }
-
-      .home-flipbook-controls {
+      .flipbook-controls {
         display: flex;
-        gap: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
+        gap: 18px;
+        font-family: var(--mono);
+        font-size: 0.78rem;
       }
 
-      .home-flipbook-controls button {
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        background: transparent;
-        color: white;
-        padding: 8px 14px;
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 1.6px;
+      .flipbook-controls a,
+      .flipbook-controls button {
+        color: var(--link-blue);
+        text-decoration: none;
+        background: none;
+        border: none;
+        font-family: var(--mono);
+        font-size: 0.78rem;
         cursor: pointer;
-        font-family: var(--mono);
+        padding: 0;
       }
 
-      .home-flipbook-page-info {
-        color: #bdbdbd;
-        font-size: 11px;
+      .flipbook-info {
         font-family: var(--mono);
-        letter-spacing: 1.5px;
+        font-size: 0.72rem;
+        color: var(--faint);
+      }
+
+      .modal-footer {
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+      }
+
+      .modal-footer a,
+      .modal-footer button {
+        color: var(--text);
+        text-decoration: none;
+        background: none;
+        border: none;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        cursor: pointer;
+        padding: 0;
+        text-transform: lowercase;
+      }
+
+      .modal-footer a:hover,
+      .modal-footer button:hover {
+        color: var(--link-blue);
       }
 
       body.modal-open {
         overflow: hidden;
       }
-
-      @media (max-width: 820px) {
-        .home-project-grid {
-          grid-template-columns: 1fr;
-          gap: 20px;
-        }
-      }
     </style>
   </head>
   <body>
-    <div class="site-bg" aria-hidden="true">
-      <video class="site-bg-video" autoplay muted loop playsinline>
-        <source src="Assets/tree-background.mp4" type="video/mp4" />
-      </video>
-      <div class="site-bg-overlay"></div>
-      <div class="site-bg-grain"></div>
-      <div class="site-bg-fade"></div>
-    </div>
+    <div class="page">
+      <span class="corner-label">charlie cilla<br />design + film</span>
 
-    <header class="site-header">
-      <div class="header-content">
-        <img src="logo.png" alt="Logo" class="logo" />
-        <h1 class="brand-title">CHARLIE CILLA</h1>
+      <div class="cols">
+        <div class="bio">
+          <p>Stories and systems, told through visual form.</p>
+          <p>
+            <b>Focus</b><br />
+            film &amp; publication,<br />
+            creative direction,<br />
+            print &amp; editorial.
+          </p>
+          <p>Currently freelancing.</p>
+          <p>
+            Contact:<br />
+            <a href="mailto:charlievcilla@gmail.com">charlievcilla@gmail.com</a><br />
+            <a href="https://www.instagram.com/d0o0st/" target="_blank" rel="noopener">@d0o0st</a><br />
+            <a href="https://www.linkedin.com/in/charlie-cilla-122038243/" target="_blank" rel="noopener">linkedin</a>
+          </p>
+          <ul class="site-nav">
+            <li><a href="pages_code/page_about.html">about</a></li>
+            <li><span class="sep">&middot;</span></li>
+            <li><a href="pages_code/page_contact.html">contact</a></li>
+            <li><span class="sep">&middot;</span></li>
+            <li><a href="pages_code/page_projects.html">projects</a></li>
+          </ul>
+          <a class="archive-link" href="pages_code/page_portfolio.html">&rarr; archive &larr;</a>
+        </div>
+
+        <div class="list">
+          <p class="list-heading">Selected Works</p>
+          <section id="home-project-list"></section>
+        </div>
+
+        <div class="ascii-wrap">
+          <canvas id="asciiCanvas" width="460" height="520"></canvas>
+        </div>
       </div>
-      <ul class="site-nav">
-        <li><a href="index.html" class="is-active">HOME</a></li>
-        <li><a href="pages_code/page_portfolio.html">ARCHIVES</a></li>
-        <li><a href="pages_code/page_contact.html">CONTACT</a></li>
-        <li><a href="pages_code/page_about.html">ABOUT</a></li>
-        <li><a href="pages_code/page_projects.html">PROJECTS</a></li>
-      </ul>
-    </header>
-
-    <main id="central-portfolio-section" class="page-shell home-shell"></main>
-
-    <div
-      id="project-modal"
-      class="project-modal"
-      onclick="if (event.target === this) closeProject();"
-    >
-      <button
-        class="modal-close"
-        type="button"
-        onclick="closeProject()"
-        aria-label="Close"
-      >
-        X
-      </button>
-      <div class="modal-content"></div>
     </div>
 
     <footer class="site-footer">&copy; 2026 Charlie Cilla</footer>
+
+    <div id="project-modal" class="modal">
+      <div class="modal-inner">
+        <div class="modal-top">
+          <button type="button" onclick="closeProject()">&larr; back to works</button>
+        </div>
+        <div id="modal-content"></div>
+      </div>
+    </div>
 
     <link rel="stylesheet" href="admin/admin.css" />
     <script src="admin/data.js"></script>
@@ -405,24 +452,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
       let homeProjectCache = {};
-      let activeFilter = "all";
       const homeViewers = {};
-
-      function categoryGroup(category) {
-        const c = (category || "").toUpperCase();
-        if (c.includes("FILM") || c.includes("DOC") || c.includes("VIDEO")) {
-          return "film";
-        }
-        if (
-          c.includes("PRINT") ||
-          c.includes("EDITORIAL") ||
-          c.includes("PUBLICATION") ||
-          c.includes("BOOK")
-        ) {
-          return "publication";
-        }
-        return "other";
-      }
 
       function stripHtml(input) {
         return (input || "")
@@ -451,39 +481,6 @@
         return path;
       }
 
-      function previewForProject(project) {
-        if (project.type === "video") {
-          const youtubeId = youtubeIdFromProject(project);
-          return youtubeId
-            ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
-            : "";
-        }
-
-        if (Array.isArray(project.images) && project.images.length > 0) {
-          return normalizeFlipbookPath(project.images[0]);
-        }
-
-        if (project.flipbookImages) {
-          const pages = Array.isArray(project.flipbookImages.pages)
-            ? project.flipbookImages.pages.filter(
-                (p) => typeof p === "string" && p.trim(),
-              )
-            : [];
-
-          if (pages.length > 0) {
-            return normalizeFlipbookPath(pages[0]);
-          }
-
-          const basePath = normalizeFlipbookPath(
-            project.flipbookImages.basePath || "",
-          );
-          const ext = project.flipbookImages.extension || ".png";
-          return `${basePath}01${ext}`;
-        }
-
-        return "";
-      }
-
       function renderHomePage() {
         const projects = AdminData.getHomeProjects().filter(
           (p) => p.visible !== false,
@@ -493,106 +490,39 @@
           homeProjectCache[p.id] = p;
         });
 
-        const counts = {
-          all: projects.length,
-          film: projects.filter((p) => categoryGroup(p.category) === "film")
-            .length,
-          publication: projects.filter(
-            (p) => categoryGroup(p.category) === "publication",
-          ).length,
-        };
+        const listEl = document.getElementById("home-project-list");
 
-        const shell = document.getElementById("central-portfolio-section");
-        shell.innerHTML = `
-          <div class="meta-strip">
-            <div>Charlie Cilla / Designer + Filmmaker<br />Featured Selection 2026</div>
-            <div>Film / Publication<br />Creative Direction</div>
-            <div>Stories and systems told through visual form.</div>
-          </div>
-          <h2 class="hero-wordmark"><span class="accent-stroke">Selected</span> Works</h2>
-          <div class="home-controls">
-            <div class="filter-tabs">
-              <button class="filter-tab" type="button" data-filter="all">All (${counts.all})</button>
-              <button class="filter-tab" type="button" data-filter="film">Films (${counts.film})</button>
-              <button class="filter-tab" type="button" data-filter="publication">Publications (${counts.publication})</button>
-            </div>
-            <span class="filter-tab" style="pointer-events:none;border-color:transparent;background:transparent;color:#8a8a8a;">// Click any project to open</span>
-          </div>
-          <section class="home-project-grid" id="home-project-grid"></section>
-        `;
-
-        shell.querySelectorAll(".filter-tab[data-filter]").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            activeFilter = btn.dataset.filter;
-            renderProjectRows();
-          });
-        });
-
-        renderProjectRows();
-      }
-
-      function renderProjectRows() {
-        document.querySelectorAll(".filter-tab[data-filter]").forEach((tab) => {
-          tab.classList.toggle(
-            "is-active",
-            tab.dataset.filter === activeFilter,
-          );
-        });
-
-        const allProjects = Object.values(homeProjectCache);
-        const visibleProjects =
-          activeFilter === "all"
-            ? allProjects
-            : allProjects.filter(
-                (p) => categoryGroup(p.category) === activeFilter,
-              );
-
-        const gridEl = document.getElementById("home-project-grid");
-        if (!gridEl) return;
-
-        if (!visibleProjects.length) {
-          gridEl.innerHTML =
-            '<div class="home-empty">No projects in this category yet.</div>';
+        if (!projects.length) {
+          listEl.innerHTML = '<p class="list-empty">No projects yet.</p>';
           return;
         }
 
-        gridEl.innerHTML = visibleProjects
+        listEl.innerHTML = projects
           .map((project, idx) => {
-            const projectExcerpt = stripHtml(project.description || "");
-            const shortText = projectExcerpt
-              ? `${projectExcerpt.slice(0, 140)}${projectExcerpt.length > 140 ? "..." : ""}`
+            const excerpt = stripHtml(project.description || "");
+            const shortText = excerpt
+              ? `${excerpt.slice(0, 110)}${excerpt.length > 110 ? "..." : ""}`
               : "Project details coming soon.";
-            const preview = previewForProject(project);
-            const idxLabel = String(idx + 1).padStart(2, "0");
+            const linkClass = idx % 2 === 0 ? "" : "blue";
 
             return `
-              <button type="button" class="home-card" data-project-id="${project.id}">
-                <div class="home-card-media">
-                  ${
-                    preview
-                      ? `<img src="${preview}" alt="${project.title || "Project"}" loading="lazy" />`
-                      : '<div class="home-card-media-fallback">No Preview</div>'
-                  }
-                </div>
-                <div class="home-card-body">
-                  <div class="home-card-meta">
-                    <span class="home-card-index">${idxLabel} / ${String(visibleProjects.length).padStart(2, "0")}</span>
-                    <span class="pill accent">${project.year || "Current"}</span>
-                    <span class="pill">${project.category || "Project"}</span>
-                  </div>
-                  <h3 class="home-card-title">${project.title || "Untitled"}</h3>
-                  <p class="home-card-text">${shortText}</p>
-                </div>
+              <button type="button" class="entry" data-project-id="${project.id}">
+                <div class="yr">${project.year || "Current"}. <a class="${linkClass}">${project.title || "Untitled"}</a></div>
+                <p>${shortText}</p>
               </button>
             `;
           })
           .join("");
 
-        gridEl.querySelectorAll(".home-card").forEach((button) => {
+        listEl.querySelectorAll(".entry").forEach((button) => {
           button.addEventListener("click", () =>
             openProject(button.dataset.projectId),
           );
         });
+      }
+
+      function projectOrder() {
+        return Object.values(homeProjectCache);
       }
 
       function openProject(projectId) {
@@ -600,14 +530,14 @@
         if (!p) return;
 
         const modal = document.getElementById("project-modal");
-        const content = modal.querySelector(".modal-content");
+        const content = document.getElementById("modal-content");
         const type = p.type || "video";
 
         let mediaHtml = "";
         if (type === "video") {
           const youtubeId = youtubeIdFromProject(p);
           mediaHtml = `
-            <div class="modal-media-video panel">
+            <div class="media-block media-video">
               <iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0"
                       allow="autoplay; encrypted-media; fullscreen"
                       allowfullscreen></iframe>
@@ -615,33 +545,40 @@
           `;
         } else if (type === "images") {
           mediaHtml = `
-            <div class="modal-media-images panel">
+            <div class="media-block media-images">
               ${(p.images || []).map((img) => `<img src="${normalizeFlipbookPath(img)}" alt="${p.title}">`).join("")}
             </div>
           `;
         } else if (type === "flipbook-pdf" || type === "flipbook-images") {
           const flipbookId = "flipbook-" + p.id;
           mediaHtml = `
-            <div class="modal-media-flipbook panel">
+            <div class="media-block media-flipbook">
               <div id="${flipbookId}"></div>
-              <div class="home-flipbook-controls">
-                <button type="button" onclick="flipPrev('${flipbookId}')">Previous</button>
-                <button type="button" onclick="flipNext('${flipbookId}')">Next</button>
-                <button type="button" onclick="flipZoom('${flipbookId}')">Zoom</button>
+              <div class="flipbook-controls">
+                <button type="button" onclick="flipPrev('${flipbookId}')">&larr; prev</button>
+                <button type="button" onclick="flipNext('${flipbookId}')">next &rarr;</button>
+                <button type="button" onclick="flipZoom('${flipbookId}')">zoom</button>
               </div>
-              <div id="${flipbookId}-info" class="home-flipbook-page-info">Loading...</div>
+              <div id="${flipbookId}-info" class="flipbook-info">Loading...</div>
             </div>
           `;
         }
 
+        const order = projectOrder();
+        const currentIdx = order.findIndex((proj) => proj.id === projectId);
+        const prevProject = order[(currentIdx - 1 + order.length) % order.length];
+        const nextProject = order[(currentIdx + 1) % order.length];
+
         content.innerHTML = `
-          <header class="modal-header">
-            <span class="modal-meta">${p.year || "Current"} · ${p.category || "Project"}</span>
-            <h2 class="modal-title">${p.title || "Untitled"}</h2>
-            ${p.description ? `<p class="modal-description">${p.description}</p>` : ""}
-            ${p.credit ? `<span class="modal-credit">Credit · ${p.credit}</span>` : ""}
-          </header>
+          <p class="modal-meta">${p.year || "Current"} &middot; ${p.category || "Project"}</p>
+          <h1>${p.title || "Untitled"}</h1>
+          ${p.description ? `<p class="desc">${p.description}</p>` : ""}
+          ${p.credit ? `<p class="credit">Credit &mdash; ${p.credit}</p>` : ""}
           ${mediaHtml}
+          <div class="modal-footer">
+            <button type="button" onclick="openProject('${prevProject.id}')">&larr; ${prevProject.title.toLowerCase()}</button>
+            <button type="button" onclick="openProject('${nextProject.id}')">${nextProject.title.toLowerCase()} &rarr;</button>
+          </div>
         `;
 
         modal.classList.add("is-open");
@@ -662,7 +599,7 @@
         modal.classList.remove("is-open");
         document.body.classList.remove("modal-open");
         setTimeout(() => {
-          modal.querySelector(".modal-content").innerHTML = "";
+          document.getElementById("modal-content").innerHTML = "";
           Object.keys(homeViewers).forEach((k) => delete homeViewers[k]);
         }, 260);
       }
@@ -746,8 +683,8 @@
                   {
                     width,
                     height,
-                    backgroundColor: "#000000",
-                    boxColor: "#000000",
+                    backgroundColor: "#ffffff",
+                    boxColor: "#ffffff",
                     boxBorder: 0,
                   },
                   (err, viewer) => {
@@ -878,8 +815,8 @@
               {
                 width,
                 height,
-                backgroundColor: "#000000",
-                boxColor: "#000000",
+                backgroundColor: "#ffffff",
+                boxColor: "#ffffff",
                 boxBorder: 0,
               },
               (initErr, viewer) => {
@@ -935,6 +872,256 @@
       }
 
       renderHomePage();
+
+      // ===== interactive 3D ascii render =====
+      // Placeholder geometry until the custom logo model is ready — swap
+      // the IcosahedronGeometry below for a loaded .glb of the real mark.
+      (function () {
+        const canvas = document.getElementById("asciiCanvas");
+        const ctx = canvas.getContext("2d");
+        const W = canvas.width,
+          H = canvas.height;
+        const CELL = 7;
+        const ramp = " .:-=#";
+        const off = document.createElement("canvas");
+        off.width = W;
+        off.height = H;
+        const octx = off.getContext("2d");
+
+        const ACCENT = { r: 0x12, g: 0x37, b: 0xc4 }; // --link-blue
+        const INK = { r: 0x0d, g: 0x0d, b: 0x0d };
+
+        function lerpColor(a, b, t) {
+          return {
+            r: Math.round(a.r + (b.r - a.r) * t),
+            g: Math.round(a.g + (b.g - a.g) * t),
+            b: Math.round(a.b + (b.b - a.b) * t),
+          };
+        }
+
+        // ---- interaction state, shared by both the three.js path and the fallback ----
+        let excited = 0; // 0..1, eased toward 1 while hovering a link
+        let targetExcited = 0;
+        let rotY = 0.4,
+          rotX = 0.18;
+        let targetRotY = 0,
+          targetRotX = 0;
+        let autoBase = 0;
+        let isTracking = false;
+        let resumeTimeout = null;
+        const MAX_YAW = 0.5,
+          MAX_PITCH = 0.28,
+          LERP = 0.07;
+
+        window.addEventListener("mousemove", (e) => {
+          const nx = (e.clientX / window.innerWidth) * 2 - 1;
+          const ny = (e.clientY / window.innerHeight) * 2 - 1;
+          targetRotY = nx * MAX_YAW;
+          targetRotX = ny * MAX_PITCH;
+          isTracking = true;
+          if (resumeTimeout) {
+            clearTimeout(resumeTimeout);
+            resumeTimeout = null;
+          }
+        });
+
+        document.querySelectorAll("a, .entry").forEach((el) => {
+          el.addEventListener("mouseenter", () => {
+            targetExcited = 1;
+          });
+          el.addEventListener("mouseleave", () => {
+            targetExcited = 0;
+          });
+        });
+
+        function tickInteraction() {
+          autoBase += 0.0025 + excited * 0.01;
+          excited += (targetExcited - excited) * 0.08;
+          if (isTracking) {
+            rotY += (targetRotY - rotY) * LERP;
+            rotX += (targetRotX - rotX) * LERP;
+          } else {
+            rotY += (0 - rotY) * LERP;
+            rotX += (0 - rotX) * LERP;
+          }
+        }
+
+        function sampleToAscii(sourceCanvas) {
+          // sourceCanvas is a separate canvas (the three.js renderer) that
+          // still needs copying in; the fallback path draws straight into
+          // `off` and passes it through as-is.
+          if (sourceCanvas !== off) {
+            octx.clearRect(0, 0, W, H);
+            octx.drawImage(sourceCanvas, 0, 0, W, H);
+          }
+          const img = octx.getImageData(0, 0, W, H).data;
+          const inkColor = lerpColor(INK, ACCENT, excited);
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillRect(0, 0, W, H);
+          ctx.font = CELL + 'px "IBM Plex Mono", monospace';
+          ctx.textBaseline = "top";
+          ctx.fillStyle = `rgb(${inkColor.r},${inkColor.g},${inkColor.b})`;
+          for (let y = 0; y < H; y += CELL) {
+            for (let x = 0; x < W; x += CELL) {
+              const i = (y * W + x) * 4;
+              const lum = img[i] / 255;
+              if (lum < 0.12) continue;
+              const idx = Math.min(
+                ramp.length - 1,
+                Math.floor(lum * ramp.length),
+              );
+              const ch = ramp[idx] || "#";
+              if (ch === " ") continue;
+              ctx.fillText(ch, x, y);
+            }
+          }
+        }
+
+        // Rough 3D approximation of the hand-inked mask logo concept:
+        // a lumpy, asymmetric rounded shield-like silhouette with a
+        // raised grin band and a brow/eye blob. Swap for the traced
+        // .glb of the real artwork once the source file is available.
+        function buildMark() {
+          const group = new THREE.Group();
+
+          const bumps = [
+            1.0, 0.92, 1.08, 0.8, 1.15, 0.78, 1.05, 0.7, 0.9, 0.6, 0.72, 0.58,
+            0.62, 0.55, 0.6, 0.58, 0.65, 0.75, 0.85, 0.95,
+          ];
+          const shape = new THREE.Shape();
+          const baseR = 1.15;
+          bumps.forEach((b, i) => {
+            const a = (i / bumps.length) * Math.PI * 2 - Math.PI / 2;
+            const r = baseR * b;
+            const x = Math.cos(a) * r;
+            const y = Math.sin(a) * r * 1.15 + 0.15;
+            if (i === 0) shape.moveTo(x, y);
+            else shape.lineTo(x, y);
+          });
+          shape.closePath();
+
+          const bodyGeo = new THREE.ExtrudeGeometry(shape, {
+            depth: 0.55,
+            bevelEnabled: true,
+            bevelThickness: 0.12,
+            bevelSize: 0.1,
+            bevelSegments: 3,
+          });
+          bodyGeo.center();
+          const bodyMat = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            flatShading: true,
+            roughness: 0.55,
+            metalness: 0.04,
+          });
+          const body = new THREE.Mesh(bodyGeo, bodyMat);
+          group.add(body);
+
+          // grin band
+          const mouthGeo = new THREE.TorusGeometry(0.55, 0.14, 8, 20, Math.PI * 0.9);
+          const mouthMat = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            flatShading: true,
+            roughness: 0.6,
+          });
+          const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+          mouth.position.set(0, -0.35, 0.4);
+          mouth.rotation.set(Math.PI * 0.55, 0, Math.PI);
+          group.add(mouth);
+
+          // eye / brow blob
+          const eyeGeo = new THREE.IcosahedronGeometry(0.22, 0);
+          const eye = new THREE.Mesh(eyeGeo, bodyMat);
+          eye.position.set(0.25, 0.55, 0.5);
+          group.add(eye);
+
+          return group;
+        }
+
+        function initThree() {
+          const scene = new THREE.Scene();
+          scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+          const key = new THREE.DirectionalLight(0xffffff, 1.3);
+          key.position.set(4, 6, 5);
+          scene.add(key);
+          const fill = new THREE.DirectionalLight(0xc0d8ff, 0.6);
+          fill.position.set(-4, 2, -3);
+          scene.add(fill);
+
+          const mesh = buildMark();
+          scene.add(mesh);
+
+          const camera = new THREE.PerspectiveCamera(32, W / H, 0.1, 100);
+          camera.position.set(0, 0, 5.2);
+
+          let renderer;
+          try {
+            renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
+          } catch (e) {
+            initFallback();
+            return;
+          }
+          renderer.setSize(W, H);
+          renderer.setClearColor(0x000000, 1);
+
+          function loop() {
+            requestAnimationFrame(loop);
+            tickInteraction();
+            mesh.rotation.y = autoBase + rotY;
+            mesh.rotation.x = 0.3 + rotX;
+            const pulse = 1 + excited * 0.06;
+            mesh.scale.setScalar(pulse);
+            renderer.render(scene, camera);
+            sampleToAscii(renderer.domElement);
+          }
+          loop();
+        }
+
+        function initFallback() {
+          function drawForm(t) {
+            octx.clearRect(0, 0, W, H);
+            octx.fillStyle = "#000";
+            octx.fillRect(0, 0, W, H);
+            octx.fillStyle = "#fff";
+            const cx = W * 0.5,
+              topY = H * 0.06;
+            octx.beginPath();
+            octx.moveTo(cx, topY);
+            const spikes = 6;
+            for (let i = 0; i <= spikes; i++) {
+              const a = (i / spikes) * Math.PI - Math.PI / 2;
+              const wobble = Math.sin(t * 0.7 + i) * 6;
+              const r = 170 + (i % 2 === 0 ? 40 : -20) + wobble;
+              const x = cx + Math.cos(a) * r * 1.15;
+              const y = topY + 60 + Math.sin(a) * r * 0.9 + i * 14;
+              octx.lineTo(x, y);
+            }
+            octx.lineTo(cx + 120, H * 0.62);
+            octx.quadraticCurveTo(cx + 90, H * 0.8, cx + 150, H * 0.98);
+            octx.lineTo(cx - 40, H * 0.98);
+            octx.quadraticCurveTo(cx - 70, H * 0.75, cx - 110, H * 0.6);
+            octx.closePath();
+            octx.fill();
+          }
+
+          const t0 = performance.now();
+          function loop(now) {
+            const t = (now - t0) / 1000;
+            tickInteraction();
+            drawForm(t + autoBase * 40);
+            sampleToAscii(off);
+            requestAnimationFrame(loop);
+          }
+          requestAnimationFrame(loop);
+        }
+
+        const threeScript = document.createElement("script");
+        threeScript.src =
+          "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+        threeScript.onload = initThree;
+        threeScript.onerror = initFallback;
+        document.head.appendChild(threeScript);
+      })();
     </script>
   </body>
 </html>

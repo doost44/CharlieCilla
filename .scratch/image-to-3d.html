@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Image to Relief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --bg:#ffffff;
+    --panel:#FAFAF8;
+    --text:#0d0d0d;
+    --muted:#3a3a3a;
+    --faint:#8a8a84;
+    --line:#dadada;
+    --link-blue:#1237c4;
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+    --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--serif);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:1280px;
+    margin:0 auto;
+    padding:32px clamp(18px,3vw,44px) 60px;
+  }
+  .top-row{
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-family:var(--mono);font-size:0.75rem;color:var(--muted);
+    margin-bottom:6px;
+  }
+  h1{
+    font-size:1.6rem;font-weight:600;letter-spacing:-0.01em;
+    margin:26px 0 6px;
+  }
+  .dek{color:var(--muted);font-size:0.9rem;max-width:70ch;margin-bottom:26px;line-height:1.6;}
+
+  .layout{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    gap:24px;
+    align-items:start;
+  }
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:18px;
+  }
+
+  .drop{
+    border:1px dashed var(--line);
+    padding:22px 14px;
+    text-align:center;
+    cursor:pointer;
+    font-family:var(--mono);
+    font-size:0.72rem;
+    color:var(--faint);
+    margin-bottom:18px;
+    transition:border-color .15s, color .15s;
+  }
+  .drop.drag-over{ border-color:var(--link-blue); color:var(--link-blue); }
+  .drop input{ display:none; }
+
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:flex; justify-content:space-between;
+    font-family:var(--mono); font-size:0.68rem; letter-spacing:0.04em; text-transform:uppercase;
+    color:var(--faint); margin-bottom:6px;
+  }
+  .field label span.val{ color:var(--text); }
+  input[type=range]{ width:100%; accent-color: var(--link-blue); }
+
+  .row-toggle{ display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+  .row-toggle button{
+    flex:1;
+    font-family:var(--mono); font-size:0.68rem; letter-spacing:0.03em; text-transform:uppercase;
+    border:1px solid var(--line); background:#fff; color:var(--muted);
+    padding:8px 4px; cursor:pointer;
+  }
+  .row-toggle button.active{ background:var(--text); color:#fff; border-color:var(--text); }
+
+  .hint{
+    font-family:var(--mono); font-size:0.68rem; color:var(--faint); line-height:1.6;
+    border-top:1px solid var(--line); padding-top:14px; margin-top:4px;
+  }
+
+  .stage-wrap{
+    border:1px solid var(--line);
+    display:flex; flex-direction:column;
+  }
+  .stage-bar{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 16px; border-bottom:1px solid var(--line);
+    font-family:var(--mono); font-size:0.7rem; color:var(--faint);
+  }
+  .stage{
+    position:relative;
+    aspect-ratio:1/1;
+    width:100%;
+    background:#F7F7F5;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .stage canvas{ display:block; }
+  .empty-state{
+    font-family:var(--mono); font-size:0.78rem; color:var(--faint);
+    text-align:center; padding:0 20px;
+  }
+  .empty-state b{ color:var(--text); }
+
+  @media (max-width:840px){
+    .layout{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top-row">
+    <span>image &rarr; relief</span>
+    <span>charlie cilla</span>
+  </div>
+  <h1>Turn the mask artwork into a 3D relief</h1>
+  <p class="dek">Drop your image in below. It's read as a heightmap &mdash; light areas push forward, dark areas sit back &mdash; and sculpted into a real, rotatable 3D mesh you can tune live. Nothing here uploads anywhere; the image only ever lives in this browser tab.</p>
+
+  <div class="layout">
+    <div class="panel">
+      <div class="drop" id="drop">
+        <div>drop image here</div>
+        <div style="margin-top:4px;">or click to browse</div>
+        <input type="file" id="fileInput" accept="image/*" />
+      </div>
+
+      <div class="field">
+        <label>Resolution <span class="val" id="valRes">96</span></label>
+        <input type="range" id="res" min="32" max="160" step="8" value="96" />
+      </div>
+      <div class="field">
+        <label>Relief depth <span class="val" id="valDepth">0.55</span></label>
+        <input type="range" id="depth" min="0" max="150" step="1" value="55" />
+      </div>
+      <div class="field">
+        <label>Smoothing <span class="val" id="valBlur">1</span></label>
+        <input type="range" id="blur" min="0" max="4" step="1" value="1" />
+      </div>
+
+      <div class="row-toggle">
+        <button type="button" id="btnNormal" class="active">Light forward</button>
+        <button type="button" id="btnInvert">Dark forward</button>
+      </div>
+
+      <div class="row-toggle">
+        <button type="button" id="modeTex" class="active">Textured</button>
+        <button type="button" id="modeAscii">ASCII</button>
+        <button type="button" id="modeWire">Wireframe</button>
+      </div>
+
+      <div class="row-toggle">
+        <button type="button" id="btnAuto" class="active">Auto-rotate</button>
+        <button type="button" id="btnFlat">Flat view</button>
+      </div>
+
+      <p class="hint">Drag the model to orbit manually. This builds a bas-relief from brightness &mdash; it won't recover true depth from a flat photo, but it's a fast way to see the artwork sculpted and judge proportions before a final model is built.</p>
+    </div>
+
+    <div class="stage-wrap">
+      <div class="stage-bar">
+        <span id="statusLine">no image loaded</span>
+        <span id="dimsLine"></span>
+      </div>
+      <div class="stage" id="stage">
+        <div class="empty-state" id="emptyState"><b>Drop an image</b><br />to see it sculpted in 3D</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  const dropEl = document.getElementById('drop');
+  const fileInput = document.getElementById('fileInput');
+  const stageEl = document.getElementById('stage');
+  const emptyState = document.getElementById('emptyState');
+  const statusLine = document.getElementById('statusLine');
+  const dimsLine = document.getElementById('dimsLine');
+
+  const resInput = document.getElementById('res');
+  const depthInput = document.getElementById('depth');
+  const blurInput = document.getElementById('blur');
+  const valRes = document.getElementById('valRes');
+  const valDepth = document.getElementById('valDepth');
+  const valBlur = document.getElementById('valBlur');
+
+  const btnNormal = document.getElementById('btnNormal');
+  const btnInvert = document.getElementById('btnInvert');
+  const modeTex = document.getElementById('modeTex');
+  const modeAscii = document.getElementById('modeAscii');
+  const modeWire = document.getElementById('modeWire');
+  const btnAuto = document.getElementById('btnAuto');
+  const btnFlat = document.getElementById('btnFlat');
+
+  let invert = false;
+  let mode = 'tex';
+  let autoRotate = true;
+  let flatView = false;
+
+  let scene, camera, renderer, mesh, texture;
+  let W = 0, H = 0;
+  let sourceImg = null;
+
+  let rotY = 0.35, rotX = -0.15, dragging = false, lastX = 0, lastY = 0;
+
+  function setStatus(s){ statusLine.textContent = s; }
+
+  // ---- file loading ----
+  function loadFile(file){
+    if (!file || !file.type.startsWith('image/')) return;
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      sourceImg = img;
+      dimsLine.textContent = img.width + ' × ' + img.height;
+      setStatus(file.name);
+      emptyState.style.display = 'none';
+      initStage();
+      rebuild();
+    };
+    img.src = url;
+  }
+
+  dropEl.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => loadFile(e.target.files[0]));
+  ['dragenter','dragover'].forEach(evt =>
+    dropEl.addEventListener(evt, (e) => { e.preventDefault(); dropEl.classList.add('drag-over'); })
+  );
+  ['dragleave','drop'].forEach(evt =>
+    dropEl.addEventListener(evt, (e) => { e.preventDefault(); dropEl.classList.remove('drag-over'); })
+  );
+  dropEl.addEventListener('drop', (e) => loadFile(e.dataTransfer.files[0]));
+  stageEl.addEventListener('dragover', (e) => e.preventDefault());
+  stageEl.addEventListener('drop', (e) => { e.preventDefault(); loadFile(e.dataTransfer.files[0]); });
+
+  // ---- three.js stage ----
+  function initStage(){
+    if (renderer) return;
+    const rect = stageEl.getBoundingClientRect();
+    W = Math.round(rect.width);
+    H = Math.round(rect.height);
+
+    scene = new THREE.Scene();
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const key = new THREE.DirectionalLight(0xffffff, 1.1);
+    key.position.set(3, 5, 6);
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0xdbe6ff, 0.5);
+    fill.position.set(-4, -1, 4);
+    scene.add(fill);
+
+    camera = new THREE.PerspectiveCamera(30, W / H, 0.1, 100);
+    camera.position.set(0, 0, 4.6);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(W, H);
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.setClearColor(0xF7F7F5, 1);
+    stageEl.appendChild(renderer.domElement);
+
+    renderer.domElement.addEventListener('pointerdown', (e) => { dragging = true; lastX = e.clientX; lastY = e.clientY; });
+    window.addEventListener('pointerup', () => dragging = false);
+    window.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      rotY += (e.clientX - lastX) * 0.008;
+      rotX += (e.clientY - lastY) * 0.008;
+      rotX = Math.max(-1.2, Math.min(1.2, rotX));
+      lastX = e.clientX; lastY = e.clientY;
+    });
+
+    loop();
+  }
+
+  function sampleHeights(res){
+    const off = document.createElement('canvas');
+    off.width = res; off.height = res;
+    const octx = off.getContext('2d');
+    octx.drawImage(sourceImg, 0, 0, res, res);
+    const data = octx.getImageData(0, 0, res, res).data;
+    const heights = new Float32Array(res * res);
+    for (let i = 0; i < res * res; i++) {
+      const r = data[i * 4], g = data[i * 4 + 1], b = data[i * 4 + 2];
+      heights[i] = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
+    }
+    return { heights, off };
+  }
+
+  function blurHeights(heights, res, passes){
+    let src = heights;
+    for (let p = 0; p < passes; p++) {
+      const out = new Float32Array(res * res);
+      for (let y = 0; y < res; y++) {
+        for (let x = 0; x < res; x++) {
+          let sum = 0, count = 0;
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              const nx = x + dx, ny = y + dy;
+              if (nx < 0 || ny < 0 || nx >= res || ny >= res) continue;
+              sum += src[ny * res + nx];
+              count++;
+            }
+          }
+          out[y * res + x] = sum / count;
+        }
+      }
+      src = out;
+    }
+    return src;
+  }
+
+  function rebuild(){
+    if (!sourceImg || !renderer) return;
+
+    const res = parseInt(resInput.value, 10);
+    const depthScale = parseInt(depthInput.value, 10) / 100;
+    const blurPasses = parseInt(blurInput.value, 10);
+
+    valRes.textContent = res;
+    valDepth.textContent = depthScale.toFixed(2);
+    valBlur.textContent = blurPasses;
+
+    const { heights: rawHeights, off } = sampleHeights(res);
+    const heights = blurPasses > 0 ? blurHeights(rawHeights, res, blurPasses) : rawHeights;
+
+    const geo = new THREE.PlaneGeometry(2.6, 2.6, res - 1, res - 1);
+    const pos = geo.attributes.position;
+    for (let y = 0; y < res; y++) {
+      for (let x = 0; x < res; x++) {
+        const idx = y * res + x;
+        let h = heights[idx];
+        if (invert) h = 1 - h;
+        // vertex grid runs bottom-to-top; flip y to match image top-to-bottom
+        const vi = (res - 1 - y) * res + x;
+        pos.setZ(vi, h * depthScale);
+      }
+    }
+    geo.computeVertexNormals();
+
+    if (texture) texture.dispose();
+    texture = new THREE.CanvasTexture(sourceImg instanceof HTMLCanvasElement ? sourceImg : imageToCanvas(sourceImg));
+    texture.colorSpace = THREE.SRGBColorSpace || texture.colorSpace;
+
+    const mat = mode === 'wire'
+      ? new THREE.MeshStandardMaterial({ color: 0xffffff, wireframe: true, flatShading: true })
+      : new THREE.MeshStandardMaterial({
+          map: mode === 'tex' ? texture : null,
+          color: mode === 'tex' ? 0xffffff : 0xffffff,
+          flatShading: false,
+          roughness: 0.6,
+          metalness: 0.03,
+        });
+
+    if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); }
+    mesh = new THREE.Mesh(geo, mat);
+    scene.add(mesh);
+  }
+
+  function imageToCanvas(img){
+    const c = document.createElement('canvas');
+    c.width = img.width; c.height = img.height;
+    c.getContext('2d').drawImage(img, 0, 0);
+    return c;
+  }
+
+  // ---- ascii overlay (reuses the same technique as the homepage render) ----
+  let asciiCanvasEl = null;
+  const ramp = " .:-=#";
+  function ensureAsciiCanvas(){
+    if (asciiCanvasEl) return asciiCanvasEl;
+    asciiCanvasEl = document.createElement('canvas');
+    asciiCanvasEl.width = W; asciiCanvasEl.height = H;
+    asciiCanvasEl.style.position = 'absolute';
+    asciiCanvasEl.style.inset = '0';
+    stageEl.appendChild(asciiCanvasEl);
+    return asciiCanvasEl;
+  }
+  const asciiOff = document.createElement('canvas');
+  function renderAscii(){
+    const el = ensureAsciiCanvas();
+    asciiOff.width = W; asciiOff.height = H;
+    const octx = asciiOff.getContext('2d');
+    octx.drawImage(renderer.domElement, 0, 0, W, H);
+    const img = octx.getImageData(0, 0, W, H).data;
+    const actx = el.getContext('2d');
+    const CELL = 6;
+    actx.fillStyle = '#FFFFFF';
+    actx.fillRect(0, 0, W, H);
+    actx.font = CELL + 'px "IBM Plex Mono", monospace';
+    actx.textBaseline = 'top';
+    actx.fillStyle = '#0D0D0D';
+    for (let y = 0; y < H; y += CELL) {
+      for (let x = 0; x < W; x += CELL) {
+        const i = (y * W + x) * 4;
+        const lum = img[i] / 255;
+        if (lum < 0.1) continue;
+        const idx = Math.min(ramp.length - 1, Math.floor(lum * ramp.length));
+        const ch = ramp[idx] || '#';
+        if (ch === ' ') continue;
+        actx.fillText(ch, x, y);
+      }
+    }
+  }
+
+  function loop(){
+    requestAnimationFrame(loop);
+    if (!mesh) return;
+
+    if (autoRotate && !dragging) rotY += 0.0025;
+    mesh.rotation.y = flatView ? 0 : rotY;
+    mesh.rotation.x = flatView ? -0.05 : rotX;
+
+    renderer.render(scene, camera);
+
+    if (mode === 'ascii') {
+      renderer.domElement.style.display = 'none';
+      renderAscii();
+      ensureAsciiCanvas().style.display = 'block';
+    } else {
+      renderer.domElement.style.display = 'block';
+      if (asciiCanvasEl) asciiCanvasEl.style.display = 'none';
+    }
+  }
+
+  // ---- controls ----
+  resInput.addEventListener('input', rebuild);
+  depthInput.addEventListener('input', rebuild);
+  blurInput.addEventListener('input', rebuild);
+
+  btnNormal.addEventListener('click', () => { invert = false; btnNormal.classList.add('active'); btnInvert.classList.remove('active'); rebuild(); });
+  btnInvert.addEventListener('click', () => { invert = true; btnInvert.classList.add('active'); btnNormal.classList.remove('active'); rebuild(); });
+
+  function setMode(next){
+    mode = next;
+    modeTex.classList.toggle('active', mode === 'tex');
+    modeAscii.classList.toggle('active', mode === 'ascii');
+    modeWire.classList.toggle('active', mode === 'wire');
+    rebuild();
+  }
+  modeTex.addEventListener('click', () => setMode('tex'));
+  modeAscii.addEventListener('click', () => setMode('ascii'));
+  modeWire.addEventListener('click', () => setMode('wire'));
+
+  btnAuto.addEventListener('click', () => { autoRotate = !autoRotate; btnAuto.classList.toggle('active', autoRotate); });
+  btnFlat.addEventListener('click', () => { flatView = !flatView; btnFlat.classList.toggle('active', flatView); });
+})();
+</script>
+</body>
+</html>

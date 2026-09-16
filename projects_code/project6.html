@@ -1,123 +1,186 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Innisdale SS Print - Charlie Cilla</title>
-    <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="../site-theme.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Archivo+Black&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg: #ffffff;
+        --text: #0d0d0d;
+        --muted: #3a3a3a;
+        --faint: #8a8a84;
+        --line: #dadada;
+        --link-blue: #1237c4;
+        --link-purple: #63239e;
+        --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+        --serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--serif);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: var(--link-blue);
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .page {
+        width: 100%;
+        margin: 0;
+        padding: 36px clamp(24px, 4vw, 64px) 70px;
+        position: relative;
+      }
+
+      .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 6px;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+      }
+
+      .top-row a {
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .top-row a:hover {
+        color: var(--link-blue);
+      }
+
+      .corner-label {
+        font-size: 0.8rem;
+        font-style: italic;
+        color: var(--muted);
+        text-align: right;
+      }
+
+      .idx {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--faint);
+        margin: 34px 0 6px;
+      }
+
+      .page-title {
+        font-size: 2.2rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 0 0 40px;
+        max-width: 24ch;
+      }
+
       .detail-layout {
         display: grid;
-        grid-template-columns: 1.15fr 0.85fr;
-        gap: 20px;
+        grid-template-columns: 1fr 1fr;
+        gap: 44px;
       }
 
       .detail-image {
         border: 1px solid var(--line);
-        background: #060606;
         overflow: hidden;
       }
 
       .detail-image img {
         width: 100%;
         height: 100%;
-        min-height: 520px;
         object-fit: cover;
-      }
-
-      .detail-info {
-        border: 1px solid var(--line);
-        background: linear-gradient(160deg, rgba(14, 14, 14, 0.95), rgba(4, 4, 4, 0.94));
-        padding: 20px;
-        display: grid;
-        gap: 16px;
-        align-content: start;
-      }
-
-      .detail-title {
-        margin: 0;
-        font-family: "Archivo Black", "Arial Black", Impact, sans-serif;
-        text-transform: uppercase;
-        line-height: 0.95;
-        font-size: clamp(26px, 4vw, 54px);
+        min-height: 420px;
       }
 
       .detail-text {
-        margin: 0;
-        color: #c5c5c5;
-        line-height: 1.7;
-        white-space: pre-line;
+        max-width: 60ch;
       }
 
-      .detail-back {
-        width: fit-content;
-        border: 1px solid var(--line-strong);
-        border-radius: 999px;
-        padding: 9px 16px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 11px;
+      .detail-text p {
+        margin: 0 0 18px;
+        color: var(--muted);
+        line-height: 1.75;
+        font-size: 0.95rem;
+      }
+
+      .page-footer {
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+      }
+
+      .page-footer a {
+        color: var(--text);
         text-decoration: none;
-        color: white;
       }
 
-      .detail-back:hover {
-        border-color: white;
+      .page-footer a:hover {
+        color: var(--link-blue);
       }
 
-      @media (max-width: 980px) {
+      @media (max-width: 800px) {
         .detail-layout {
           grid-template-columns: 1fr;
         }
-
         .detail-image img {
-          min-height: 280px;
-          max-height: 500px;
+          min-height: 320px;
         }
       }
     </style>
   </head>
   <body>
-    <header class="site-header">
-      <div class="header-content">
-        <img src="../logo.png" alt="Logo" class="logo" />
-        <h1 class="brand-title">CHARLIE CILLA</h1>
+    <div class="page">
+      <div class="top-row">
+        <a href="../pages_code/page_portfolio.html">&larr; archive</a>
+        <span class="corner-label">charlie cilla<br />design + film</span>
       </div>
-      <ul class="site-nav">
-        <li><a href="../index.html">HOME</a></li>
-        <li><a href="../pages_code/page_portfolio.html" class="is-active">ARCHIVES</a></li>
-        <li><a href="../pages_code/page_contact.html">CONTACT</a></li>
-        <li><a href="../pages_code/page_about.html">ABOUT</a></li>
-        <li><a href="../pages_code/page_projects.html">PROJECTS</a></li>
-      </ul>
-    </header>
 
-    <main class="page-shell">
-      <div class="meta-strip">
-        <div>Archive Detail<br />Single Project</div>
-        <div>Visual Study<br />Charlie Cilla</div>
-        <div>Context and process notes for this selected piece.</div>
-      </div>
+      <p class="idx">06 / 09</p>
+      <h1 class="page-title">Innisdale SS Print</h1>
 
       <section class="detail-layout">
-        <article class="detail-image">
+        <div class="detail-image">
           <img src="../InnisdaleSS_Print.jpg" alt="Innisdale SS Print" />
-        </article>
-        <article class="detail-info">
-          <h2 class="detail-title">Innisdale SS Print</h2>
-          <p class="detail-text">A reflection of creativity in design fundamentals, blending aesthetics and functionality.</p>
-          <a class="detail-back" href="../pages_code/page_portfolio.html">Back to archives</a>
-        </article>
+        </div>
+        <div class="detail-text">
+              <p>A reflection of creativity in design fundamentals, blending aesthetics and functionality.</p>
+        </div>
       </section>
-    </main>
 
-    <footer class="site-footer">&copy; 2026 Charlie Cilla</footer>
+      <div class="page-footer">
+        <a href="project5.html">&larr; previous</a>
+        <a href="../pages_code/page_portfolio.html">archive</a>
+        <a href="project7.html">next &rarr;</a>
+      </div>
+    </div>
   </body>
 </html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Project Modal Concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --bg:#FFFFFF;
+    --text:#0D0D0D;
+    --muted:#3A3A3A;
+    --faint:#8A8A84;
+    --line:#DADADA;
+    --link-blue:#1237C4;
+    --link-purple:#63239E;
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+    --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--serif);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--link-blue);}
+
+  .annot-bar{
+    background:var(--text);color:#fff;font-size:12px;
+    padding:10px 24px;text-align:center;font-family:var(--mono);
+  }
+  .annot-bar b{color:#9ecbff;}
+
+  .page{max-width:1400px;margin:0 auto;padding:36px 32px 60px;position:relative;}
+  .corner-label{position:absolute;top:34px;right:32px;font-size:0.8rem;font-style:italic;color:var(--muted);}
+
+  .cols{display:grid;grid-template-columns:0.85fr 1.05fr 1.5fr;gap:40px;margin-top:70px;}
+  .bio p{font-size:0.92rem;line-height:1.6;margin-bottom:16px;max-width:32ch;}
+  .bio b{font-weight:600;}
+  .archive{margin-top:8px;color:var(--text);text-decoration:none;font-size:0.9rem;display:inline-block;}
+
+  .entry{margin-bottom:20px;cursor:pointer;}
+  .entry .yr{font-weight:600;font-size:0.92rem;}
+  .entry .yr a{color:var(--link-purple);text-decoration:underline;}
+  .entry .yr a.blue{color:var(--link-blue);}
+  .entry p{font-style:italic;font-size:0.88rem;color:var(--muted);line-height:1.5;margin-top:2px;max-width:34ch;}
+
+  .ascii-wrap{display:flex;justify-content:flex-end;align-items:flex-start;}
+  canvas#asciiCanvas{max-width:100%;image-rendering:pixelated;}
+
+  .hint{
+    margin-top:70px;font-family:var(--mono);font-size:0.72rem;
+    color:var(--faint);text-align:center;
+  }
+
+  /* ===== MODAL / project takeover ===== */
+  .modal{
+    position:fixed;inset:0;
+    background:#fff;
+    z-index:500;
+    overflow-y:auto;
+    opacity:0;visibility:hidden;
+    transform:translateY(14px);
+    transition:opacity .22s ease, transform .22s ease, visibility .22s;
+  }
+  .modal.open{opacity:1;visibility:visible;transform:translateY(0);}
+  .modal-inner{max-width:900px;margin:0 auto;padding:44px 32px 90px;}
+
+  .modal-top{
+    display:flex;justify-content:space-between;align-items:baseline;
+    margin-bottom:40px;
+    font-family:var(--mono);font-size:0.78rem;
+  }
+  .modal-top a{color:var(--text);text-decoration:none;}
+  .modal-top a:hover{color:var(--link-blue);}
+
+  .modal-meta{font-family:var(--mono);font-size:0.75rem;color:var(--faint);margin-bottom:10px;}
+  .modal h1{
+    font-size:2.1rem;font-weight:600;letter-spacing:-0.01em;
+    margin-bottom:18px;line-height:1.12;
+  }
+  .modal .desc{font-size:1rem;line-height:1.7;max-width:60ch;margin-bottom:10px;}
+  .modal .credit{font-style:italic;color:var(--muted);font-size:0.88rem;margin-bottom:36px;}
+
+  .media-block{margin-bottom:14px;}
+  .media-frame{
+    border:1px solid var(--line);
+    background:#F4F4F2;
+    aspect-ratio:16/10;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:0.75rem;color:var(--faint);
+  }
+  .media-caption{
+    font-family:var(--mono);font-size:0.72rem;color:var(--faint);
+    margin-top:8px;display:flex;justify-content:space-between;
+  }
+  .media-caption .pg-nav a{margin-left:14px;color:var(--link-blue);}
+
+  .modal-footer{
+    margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;font-family:var(--mono);font-size:0.78rem;
+  }
+  .modal-footer a{color:var(--text);text-decoration:none;}
+  .modal-footer a:hover{color:var(--link-blue);}
+
+  @media (max-width:900px){
+    .cols{grid-template-columns:1fr;}
+    .ascii-wrap{justify-content:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<div class="annot-bar">Click any project title to preview the restyled modal — <b>same modal system, early-internet skin</b></div>
+
+<div class="page">
+  <span class="corner-label">portfolio <sup>(-3&deg;)</sup></span>
+
+  <div class="cols">
+    <div class="bio">
+      <p><b>English,</b> french, some spanish.</p>
+      <p><b>Good</b> with-&gt;<br/>
+      design &amp; art direction,<br/>
+      film &amp; video editing,<br/>
+      web &amp; front-end code,<br/>
+      3d modelling &amp; illustration,<br/>
+      writing.</p>
+      <p><b>Design</b> (BFA), OCAD University, 2022&ndash;26: specialised in visual identity.</p>
+      <p>Currently freelancing.</p>
+      <p>Contact:<br/>
+      <a href="#">@charliecilla</a><br/>
+      <a href="#">charlie.cilla@gmail.com</a></p>
+      <a class="archive" href="#">&rarr; archive &larr;</a>
+    </div>
+
+    <div class="list">
+      <div class="entry" data-project="handbook">
+        <div class="yr">2025. <a class="blue">designer handbook</a></div>
+        <p>A visual guide to the fundamentals of design.</p>
+      </div>
+      <div class="entry" data-project="voices">
+        <div class="yr">2025. <a>voices 2025</a></div>
+        <p>A multimedia exploration of contemporary voices.</p>
+      </div>
+      <div class="entry" data-project="goatman">
+        <div class="yr">2025. <a class="blue">the goatman</a></div>
+        <p>A painted journey through a strange world.</p>
+      </div>
+      <div class="entry" data-project="boards">
+        <div class="yr">2025. <a>bound by boards</a></div>
+        <p>Connections made through griptape.</p>
+      </div>
+    </div>
+
+    <div class="ascii-wrap">
+      <canvas id="asciiCanvas" width="460" height="520"></canvas>
+    </div>
+  </div>
+
+  <p class="hint">^ click a project title above to open its page in the restyled modal</p>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal" id="projectModal">
+  <div class="modal-inner">
+    <div class="modal-top">
+      <a href="#" id="modalClose">&larr; back to works</a>
+      <span id="modalNextHint"></span>
+    </div>
+
+    <p class="modal-meta" id="modalMeta">2025 &middot; PRINT / EDITORIAL</p>
+    <h1 id="modalTitle">Designer Handbook</h1>
+    <p class="desc" id="modalDesc">A visual guide to the fundamentals of design &mdash; twenty-two pages covering type, colour, grid, and hierarchy, built as a flip-through reference for first-year students.</p>
+    <p class="credit" id="modalCredit"></p>
+
+    <div class="media-block">
+      <div class="media-frame" id="mediaFrame">[ page 01 of 22 ]</div>
+      <div class="media-caption">
+        <span>designer_handbook &mdash; page-01.png</span>
+        <span class="pg-nav"><a href="#" id="pgPrev">&larr; prev</a><a href="#" id="pgNext">next &rarr;</a></span>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <a href="#" id="modalPrevProject">&larr; bound by boards</a>
+      <a href="#" id="modalNextProject">voices 2025 &rarr;</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  var PROJECTS = {
+    handbook: {meta:'2025 · PRINT / EDITORIAL', title:'Designer Handbook', desc:'A visual guide to the fundamentals of design — twenty-two pages covering type, colour, grid, and hierarchy, built as a flip-through reference for first-year students.', credit:'', media:'[ page 01 of 22 ]', cap:'designer_handbook — page-01.png', prev:'bound by boards', next:'voices 2025'},
+    voices: {meta:'2025 · PUBLICATION', title:'Voices 2025', desc:'A multimedia exploration of contemporary voices — thirty-six pages combining interview transcripts, portraiture, and pull-quote typography.', credit:'', media:'[ page 01 of 36 ]', cap:'voices — page-01.png', prev:'designer handbook', next:'the goatman'},
+    goatman: {meta:'2025 · SHORT FILM', title:'The Goatman', desc:'A painted journey through a strange world — a hand-painted animated short exploring folklore and isolation.', credit:'Credit — animation, sound design', media:'[ ▶ play — 04:12 ]', cap:'the_goatman.mp4', prev:'voices 2025', next:'bound by boards'},
+    boards: {meta:'2025 · SHORT DOC', title:'Bound By Boards', desc:'Connections made through griptape — a short documentary following a local skate community.', credit:'Credit — camera, edit', media:'[ ▶ play — 07:45 ]', cap:'bound_by_boards.mp4', prev:'the goatman', next:'designer handbook'}
+  };
+
+  var modal = document.getElementById('projectModal');
+  document.querySelectorAll('.entry').forEach(function(el){
+    el.addEventListener('click', function(){
+      openProject(el.getAttribute('data-project'));
+    });
+  });
+
+  function openProject(id){
+    var p = PROJECTS[id];
+    if(!p) return;
+    document.getElementById('modalMeta').textContent = p.meta;
+    document.getElementById('modalTitle').textContent = p.title;
+    document.getElementById('modalDesc').textContent = p.desc;
+    document.getElementById('modalCredit').textContent = p.credit;
+    document.getElementById('mediaFrame').textContent = p.media;
+    document.getElementById('modalCaption');
+    document.querySelector('.media-caption span').textContent = p.cap;
+    document.getElementById('modalPrevProject').textContent = '← ' + p.prev;
+    document.getElementById('modalNextProject').textContent = p.next + ' →';
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeProject(){
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('modalClose').addEventListener('click', function(e){e.preventDefault();closeProject();});
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeProject(); });
+
+  // ===== background ascii render (same technique as homepage mockup) =====
+  (function(){
+    var canvas = document.getElementById('asciiCanvas');
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+    var CELL = 7;
+    var ramp = " .:-=#";
+    var off = document.createElement('canvas');
+    off.width = W; off.height = H;
+    var octx = off.getContext('2d');
+
+    function drawForm(t){
+      octx.clearRect(0,0,W,H);
+      octx.fillStyle = '#000';
+      octx.fillRect(0,0,W,H);
+      octx.fillStyle = '#fff';
+      var cx = W*0.5, topY = H*0.06;
+      octx.beginPath();
+      octx.moveTo(cx, topY);
+      var spikes = 6;
+      for(var i=0;i<=spikes;i++){
+        var a = (i/spikes) * Math.PI - Math.PI/2;
+        var wobble = Math.sin(t*0.7 + i) * 6;
+        var r = 170 + (i%2===0 ? 40 : -20) + wobble;
+        var x = cx + Math.cos(a)*r*1.15;
+        var y = topY + 60 + Math.sin(a)*r*0.9 + i*14;
+        octx.lineTo(x, y);
+      }
+      octx.lineTo(cx+120, H*0.62);
+      octx.quadraticCurveTo(cx+90, H*0.8, cx+150, H*0.98);
+      octx.lineTo(cx-40, H*0.98);
+      octx.quadraticCurveTo(cx-70, H*0.75, cx-110, H*0.6);
+      octx.closePath();
+      octx.fill();
+    }
+
+    function render(){
+      var img = octx.getImageData(0,0,W,H).data;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0,0,W,H);
+      ctx.font = CELL + 'px "IBM Plex Mono", monospace';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = '#0D0D0D';
+      for(var y=0; y<H; y+=CELL){
+        for(var x=0; x<W; x+=CELL){
+          var i = (y*W + x) * 4;
+          var lum = img[i] / 255;
+          if(lum < 0.5) continue;
+          var idx = Math.min(ramp.length-1, Math.floor(((lum-0.5)*2) * ramp.length));
+          var ch = ramp[idx] || '#';
+          if(ch === ' ') continue;
+          ctx.fillText(ch, x, y);
+        }
+      }
+    }
+
+    var t0 = performance.now();
+    function loop(now){
+      var t = (now - t0) / 1000;
+      drawForm(t);
+      render();
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  })();
+</script>
+
+</body>
+</html>

@@ -4,352 +4,355 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Projects - Charlie Cilla</title>
-    <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="../site-theme.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
-      .projects-hero {
-        margin: 8px 0 32px;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: clamp(32px, 10vw, 150px);
-        line-height: 0.9;
-        letter-spacing: -3px;
-        text-transform: uppercase;
-        font-weight: 900;
-        color: #fff;
-        white-space: nowrap;
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
       }
 
-      .projects-hero .accent-stroke {
-        -webkit-text-stroke: 1.5px var(--accent);
-        color: transparent;
+      :root {
+        --bg: #ffffff;
+        --text: #0d0d0d;
+        --muted: #3a3a3a;
+        --faint: #8a8a84;
+        --line: #dadada;
+        --link-blue: #1237c4;
+        --link-purple: #63239e;
+        --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+        --serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
       }
 
-      .projects-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 28px;
+      html,
+      body {
+        margin: 0;
+        padding: 0;
       }
 
-      .project-card {
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(8, 8, 8, 0.42);
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        display: flex;
-        flex-direction: column;
-        min-height: 100%;
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--serif);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: var(--link-blue);
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .page {
         width: 100%;
+        margin: 0;
+        padding: 36px clamp(24px, 4vw, 64px) 70px;
+        position: relative;
+      }
+
+      .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 6px;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+      }
+
+      .top-row a {
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .top-row a:hover {
+        color: var(--link-blue);
+      }
+
+      .corner-label {
+        font-size: 0.8rem;
+        font-style: italic;
+        color: var(--muted);
+        text-align: right;
+      }
+
+      .page-title {
+        font-size: 2.4rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 34px 0 44px;
+      }
+
+      .list {
+        max-width: 640px;
+      }
+
+      .entry {
+        display: block;
+        width: 100%;
+        border: none;
+        background: none;
         padding: 0;
         text-align: left;
-        color: inherit;
-        font: inherit;
+        font-family: inherit;
         cursor: pointer;
+        margin-bottom: 26px;
+      }
+
+      .entry .idx-title {
+        font-weight: 600;
+        font-size: 1rem;
+      }
+
+      .entry .idx-title a {
+        color: var(--link-purple);
+        text-decoration: underline;
+        text-transform: lowercase;
+      }
+
+      .entry .idx-title a.blue {
+        color: var(--link-blue);
+      }
+
+      .entry p {
+        font-style: italic;
+        font-size: 0.9rem;
+        color: var(--muted);
+        line-height: 1.55;
+        margin: 4px 0 0;
+        max-width: 56ch;
+      }
+
+      .page-footer {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        font-family: var(--mono);
+        font-size: 0.78rem;
+      }
+
+      .page-footer a {
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .page-footer a:hover {
+        color: var(--link-blue);
+      }
+
+      /* ===== modal ===== */
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: #fff;
+        z-index: 500;
+        overflow-y: auto;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(14px);
         transition:
-          border-color 0.25s ease,
-          transform 0.25s ease,
-          background 0.2s ease;
+          opacity 0.22s ease,
+          transform 0.22s ease,
+          visibility 0.22s;
       }
 
-      .project-card:hover {
-        border-color: var(--accent);
-        transform: translateY(-3px);
-        background: rgba(12, 12, 12, 0.6);
+      .modal.is-open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
       }
 
-      .project-media {
+      .modal-inner {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 44px 32px 90px;
+      }
+
+      .modal-top {
+        margin-bottom: 40px;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+      }
+
+      .modal-top button {
+        color: var(--text);
+        text-decoration: none;
+        background: none;
+        border: none;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      .modal-top button:hover {
+        color: var(--link-blue);
+      }
+
+      .modal h1 {
+        font-size: 2.1rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 0 0 18px;
+        line-height: 1.12;
+        text-transform: lowercase;
+      }
+
+      .modal .desc {
+        font-size: 1rem;
+        line-height: 1.7;
+        max-width: 60ch;
+        margin: 0 0 30px;
+        color: var(--muted);
+      }
+
+      .media-block {
+        margin-bottom: 14px;
+      }
+
+      .media-video {
         position: relative;
-        aspect-ratio: 16 / 9;
-        border-bottom: 1px solid var(--line);
-        background: #040404;
+        padding-bottom: 56.25%;
+        height: 0;
+        border: 1px solid var(--line);
         overflow: hidden;
       }
 
-      .project-media img,
-      .project-media iframe {
+      .media-video iframe {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover;
         border: 0;
       }
 
-      .project-media-fallback {
+      .media-images img {
         width: 100%;
-        height: 100%;
-        display: grid;
-        place-items: center;
-        color: #c9c9c9;
-        font-size: 12px;
-        letter-spacing: 2px;
-        text-transform: uppercase;
+        display: block;
+        border: 1px solid var(--line);
+        margin-bottom: 10px;
       }
 
-      .project-content {
-        display: grid;
-        gap: 12px;
-        padding: 16px;
-      }
-
-      .project-title {
-        margin: 0;
-        font-size: clamp(22px, 2.8vw, 34px);
-        line-height: 1;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        text-transform: uppercase;
-        font-weight: 900;
-        letter-spacing: -0.5px;
-      }
-
-      .project-description {
-        margin: 0;
-        color: var(--muted);
-        font-size: 15px;
-        line-height: 1.5;
-      }
-
-      .project-meta {
+      .media-fan {
         display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      .project-modal {
-        position: fixed;
-        inset: 0;
-        z-index: 120;
-        background: rgba(0, 0, 0, 0.92);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        display: grid;
-        place-items: start center;
-        padding: clamp(20px, 3vh, 40px) clamp(16px, 2vw, 32px);
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        transition: opacity 0.2s ease;
-        overflow-y: auto;
-      }
-
-      .project-modal.is-open {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-      }
-
-      .project-modal-panel {
-        width: min(1480px, 100%);
-        background: rgba(6, 6, 6, 0.5);
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        padding: clamp(16px, 1.8vw, 24px) clamp(16px, 1.8vw, 24px) clamp(20px, 2.4vw, 32px);
-        margin: auto;
-      }
-
-      .project-modal-close {
-        position: fixed;
-        top: 24px;
-        right: 28px;
-        width: 44px;
-        height: 44px;
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 0;
-        color: #fff;
-        background: rgba(0, 0, 0, 0.65);
-        font-size: 14px;
-        cursor: pointer;
-        font-family: var(--mono);
-        z-index: 130;
-      }
-
-      .project-modal-close:hover {
-        border-color: var(--accent);
-        color: var(--accent);
-      }
-
-      .project-modal-header {
-        margin-bottom: clamp(24px, 3vw, 44px);
-        padding-bottom: 14px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      }
-
-      .project-modal-title {
-        margin: 0 0 6px;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: clamp(22px, 2.8vw, 42px);
-        line-height: 1;
-        text-transform: uppercase;
-        font-weight: 900;
-        letter-spacing: -1px;
-      }
-
-      .project-modal-description {
-        margin: 0;
-        color: #c8c8c8;
-        line-height: 1.32;
-      }
-
-      .project-modal-description br + br {
-        display: none;
-      }
-
-      .project-modal-media {
-        display: grid;
-        gap: 10px;
-      }
-
-      .project-modal-media.grid-5 {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-start;
-        align-items: center;
-        gap: 0;
-        padding: 24px 0 12px;
         overflow-x: auto;
+        padding: 10px 0 20px;
       }
 
-      .project-modal-media.grid-5 img {
-        width: 280px;
-        max-width: none;
+      .media-fan img {
+        width: 220px;
+        flex: 0 0 auto;
         aspect-ratio: 1 / 1.45;
         object-fit: cover;
-        margin-left: -92px;
-        box-shadow: -4px 6px 24px rgba(0, 0, 0, 0.5);
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        border: 1px solid var(--line);
+        margin-left: -70px;
+        background: #fff;
+        transition: transform 0.2s ease;
       }
 
-      .project-modal-media.grid-5 img:first-child {
+      .media-fan img:first-child {
         margin-left: 0;
       }
 
-      .project-modal-media.grid-5 img:hover {
-        transform: translateY(-8px) scale(1.05);
-        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.62);
+      .media-fan img:hover {
+        transform: translateY(-10px);
         z-index: 2;
       }
 
-      .project-modal-media img,
-      .project-modal-media iframe {
-        width: 100%;
-        display: block;
-        background: #000;
-        border: 0;
-      }
-
-      .project-modal-media iframe {
-        min-height: 520px;
-      }
-
-      .project-modal-note {
-        margin-top: 8px;
-        color: #9e9e9e;
-        font-size: 13px;
-      }
-
-      .project-flipbook-wrap {
-        display: grid;
-        gap: 12px;
-      }
-
-      #project-flipbook {
-        max-width: 100%;
-        margin: 0 auto;
-      }
-
-      .project-flipbook-controls {
+      .media-flipbook {
         display: flex;
+        flex-direction: column;
+        align-items: center;
         gap: 10px;
-        flex-wrap: wrap;
+        border: 1px solid var(--line);
+        padding: 20px;
       }
 
-      .project-flipbook-controls button {
+      .flipbook-controls {
+        display: flex;
+        gap: 18px;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+      }
+
+      .flipbook-controls button {
+        color: var(--link-blue);
+        background: none;
         border: none;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.08);
-        color: #fff;
-        padding: 8px 14px;
-        font-size: 12px;
+        font-family: var(--mono);
+        font-size: 0.78rem;
         cursor: pointer;
+        padding: 0;
       }
 
-      .project-flipbook-info {
-        color: #b8b8b8;
-        font-size: 13px;
+      .flipbook-info {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--faint);
       }
 
-      body.project-modal-open {
+      .modal-footer {
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+      }
+
+      .modal-footer button {
+        color: var(--text);
+        background: none;
+        border: none;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        cursor: pointer;
+        padding: 0;
+        text-transform: lowercase;
+      }
+
+      .modal-footer button:hover {
+        color: var(--link-blue);
+      }
+
+      body.modal-open {
         overflow: hidden;
-      }
-
-      @media (max-width: 900px) {
-        .projects-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .project-modal-panel {
-          padding: 16px;
-        }
-
-        .project-modal-media iframe {
-          min-height: 360px;
-        }
-
-        .project-modal-media.grid-5 img {
-          width: 220px;
-          margin-left: -60px;
-        }
       }
     </style>
   </head>
   <body>
-    <div class="site-bg" aria-hidden="true">
-      <video class="site-bg-video" autoplay muted loop playsinline>
-        <source src="../Assets/tree-background.mp4" type="video/mp4" />
-      </video>
-      <div class="site-bg-overlay"></div>
-      <div class="site-bg-grain"></div>
-      <div class="site-bg-fade"></div>
-    </div>
-
-    <header class="site-header">
-      <div class="header-content">
-        <img src="../logo.png" alt="Logo" class="logo" />
-        <h1 class="brand-title">CHARLIE CILLA</h1>
-      </div>
-      <ul class="site-nav">
-        <li><a href="../index.html">HOME</a></li>
-        <li><a href="page_portfolio.html">ARCHIVES</a></li>
-        <li><a href="page_contact.html">CONTACT</a></li>
-        <li><a href="page_about.html">ABOUT</a></li>
-        <li><a href="page_projects.html" class="is-active">PROJECTS</a></li>
-      </ul>
-    </header>
-
-    <main class="page-shell">
-      <div class="meta-strip">
-        <div>Charlie Cilla / Projects<br />Full Catalog 2022—Present</div>
-        <div>Visual Design<br />Editorial + Brand + Motion</div>
-        <div>Built for motion, print, and systems thinking.</div>
+    <div class="page">
+      <div class="top-row">
+        <a href="../index.html">&larr; home</a>
+        <span class="corner-label">charlie cilla<br />design + film</span>
       </div>
 
-      <h2 class="projects-hero"><span class="accent-stroke">All</span> Projects</h2>
+      <h1 class="page-title">Projects</h1>
 
-      <section class="projects-grid" id="projects-grid"></section>
-    </main>
+      <div class="list" id="project-list"></div>
 
-    <div id="project-modal" class="project-modal" onclick="if (event.target === this) closeProjectModal()">
-      <button class="project-modal-close" type="button" onclick="closeProjectModal()" aria-label="Close">
-        X
-      </button>
-      <div class="project-modal-panel" id="project-modal-panel"></div>
+      <div class="page-footer">
+        <a href="../index.html">&larr; back to selected works</a>
+      </div>
     </div>
 
-    <footer class="site-footer">&copy; 2026 Charlie Cilla</footer>
+    <div id="project-modal" class="modal">
+      <div class="modal-inner">
+        <div class="modal-top">
+          <button type="button" onclick="closeProjectModal()">&larr; back to projects</button>
+        </div>
+        <div id="modal-content"></div>
+      </div>
+    </div>
 
     <link rel="stylesheet" href="../admin/admin.css" />
     <script src="../admin/data.js"></script>
@@ -357,55 +360,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="Handbook_Files/flipbook-viewer-master/dist/flipbook-viewer.js"></script>
     <script>
-      const fallbackProjects = [
-        {
-          id: "project-1",
-          title: "Student Meal Plan App Prototype",
-          description:
-            "A budgeting-first student meal planner focused on reducing financial stress over a full semester.",
-          type: "images",
-          images: ["../Mealplan.jpg"],
-        },
-        {
-          id: "project-2",
-          title: "POWERADE Rebrand",
-          description:
-            "A high-energy brand reset rooted in endurance culture and runner-first storytelling.",
-          type: "images",
-          images: ["../[GBDA 202] Rebranding Pitch-1_page-0001.jpg"],
-        },
-        {
-          id: "project-3",
-          title: "WYAWYG?",
-          description:
-            "A poster series blending handmade processes and digital composition into one visual language.",
-          type: "images",
-          images: ["../POSTER1 (1).jpg"],
-        },
-        {
-          id: "project-4",
-          title: "Designer Handbook",
-          description:
-            "An educational handbook exploring typography, hierarchy, and visual systems through page design.",
-          type: "flipbook-images",
-          flipbookImages: {
-            basePath: "Handbook_Files/handbook-pages/page-",
-            pageCount: 22,
-            extension: ".png",
-          },
-        },
-      ];
-
-      function getProjectsData() {
-        if (
-          typeof AdminData !== "undefined" &&
-          typeof AdminData.getProjects === "function"
-        ) {
-          return AdminData.getProjects().filter((p) => p.visible !== false);
-        }
-        return fallbackProjects;
-      }
-
       const projectsById = {};
       let currentProjectViewer = null;
 
@@ -421,16 +375,21 @@
         return match ? match[1] : "";
       }
 
+      function normalizeProjectAssetPath(path) {
+        if (!path) return "";
+        if (/^(https?:|data:|blob:)/i.test(path)) return path;
+        return path;
+      }
+
+      // Fallback in case cached project data (e.g. from an earlier admin
+      // edit stored in localStorage) predates the flipbookImages field.
       function isVoicesProject(project) {
         const title = String(project.title || "").toLowerCase();
         return title.includes("voices") || project.id === "project-5";
       }
 
       function getEffectiveFlipbookImages(project) {
-        if (project && project.flipbookImages) {
-          return project.flipbookImages;
-        }
-
+        if (project.flipbookImages) return project.flipbookImages;
         if (isVoicesProject(project)) {
           return {
             basePath: "Handbook_Files/handbook-pages/voices-",
@@ -438,116 +397,152 @@
             extension: ".png",
           };
         }
-
         return null;
       }
 
-      function getPreviewSrc(project) {
+      function getProjectsData() {
+        return AdminData.getProjects().filter((p) => p.visible !== false);
+      }
+
+      function projectOrder() {
+        return Object.values(projectsById);
+      }
+
+      function renderProjectsPage() {
+        const projects = getProjectsData();
+        const listEl = document.getElementById("project-list");
+
+        projects.forEach((project) => {
+          projectsById[project.id] = project;
+        });
+
+        if (!projects.length) {
+          listEl.innerHTML = '<p>No projects available right now.</p>';
+          return;
+        }
+
+        listEl.innerHTML = projects
+          .map((project, idx) => {
+            const idxLabel = String(idx + 1).padStart(2, "0");
+            const excerpt = stripHtml(project.description).slice(0, 150);
+            const readableExcerpt = excerpt
+              ? `${excerpt}${excerpt.length >= 150 ? "..." : ""}`
+              : "Project details coming soon.";
+            const linkClass = idx % 2 === 0 ? "" : "blue";
+
+            return `
+              <button type="button" class="entry" data-project-id="${project.id}">
+                <div class="idx-title">${idxLabel}. <a class="${linkClass}">${project.title || "Untitled"}</a></div>
+                <p>${readableExcerpt}</p>
+              </button>
+            `;
+          })
+          .join("");
+
+        listEl.querySelectorAll(".entry").forEach((button) => {
+          button.addEventListener("click", () =>
+            openProjectModal(button.dataset.projectId),
+          );
+        });
+      }
+
+      function openProjectModal(projectId) {
+        const project = projectsById[projectId];
+        if (!project) return;
+
+        const modal = document.getElementById("project-modal");
+        const content = document.getElementById("modal-content");
+
+        let mediaHtml = "";
+
         if (project.type === "video") {
-          const id = youtubeIdFromUrl(project.youtubeUrl || project.youtube);
-          return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "";
+          const id =
+            youtubeIdFromUrl(project.youtubeUrl || project.youtube || "") ||
+            project.youtubeId ||
+            "";
+          if (id) {
+            mediaHtml = `
+              <div class="media-block media-video">
+                <iframe src="https://www.youtube.com/embed/${id}?rel=0"
+                        allow="autoplay; encrypted-media; fullscreen"
+                        allowfullscreen></iframe>
+              </div>
+            `;
+          }
+        } else if (getEffectiveFlipbookImages(project)) {
+          const flipbookId = "flipbook-" + project.id;
+          mediaHtml = `
+            <div class="media-block media-flipbook">
+              <div id="${flipbookId}"></div>
+              <div class="flipbook-controls">
+                <button type="button" onclick="flipbookPrev()">&larr; prev</button>
+                <button type="button" onclick="flipbookNext()">next &rarr;</button>
+                <button type="button" onclick="flipbookZoom()">zoom</button>
+              </div>
+              <div id="${flipbookId}-info" class="flipbook-info">Loading...</div>
+            </div>
+          `;
+        } else if (Array.isArray(project.images) && project.images.length > 0) {
+          const isFan = project.displayStyle === "grid-5";
+          const imgs = project.images
+            .map((src) => `<img src="${src}" alt="${project.title || "Project image"}" loading="lazy" />`)
+            .join("");
+          mediaHtml = `
+            <div class="media-block ${isFan ? "media-fan" : "media-images"}">${imgs}</div>
+          `;
         }
 
-        const flipbookImages = getEffectiveFlipbookImages(project);
-        if (flipbookImages) {
-          const pages = Array.isArray(flipbookImages.pages)
-            ? flipbookImages.pages.filter((p) => typeof p === "string" && p.trim())
-            : [];
+        const order = projectOrder();
+        const currentIdx = order.findIndex((p) => p.id === projectId);
+        const prevProject = order[(currentIdx - 1 + order.length) % order.length];
+        const nextProject = order[(currentIdx + 1) % order.length];
 
-          if (pages.length > 0) return pages[0];
+        content.innerHTML = `
+          <h1>${project.title || "Untitled"}</h1>
+          <p class="desc">${project.description || "Project details coming soon."}</p>
+          ${mediaHtml}
+          <div class="modal-footer">
+            <button type="button" onclick="openProjectModal('${prevProject.id}')">&larr; ${prevProject.title.toLowerCase()}</button>
+            <button type="button" onclick="openProjectModal('${nextProject.id}')">${nextProject.title.toLowerCase()} &rarr;</button>
+          </div>
+        `;
 
-          const basePath = flipbookImages.basePath || "";
-          const ext = flipbookImages.extension || ".png";
-          return `${basePath}01${ext}`;
-        }
+        modal.classList.add("is-open");
+        document.body.classList.add("modal-open");
 
-        if (Array.isArray(project.images) && project.images.length > 0) {
-          return project.images[0];
-        }
-
-        return "";
-      }
-
-      function getTypeLabel(project) {
-        if (project.type === "flipbook-images" || isVoicesProject(project)) return "Flipbook";
-        if (project.type === "flipbook-pdf") return "PDF";
-        if (project.type === "video") return "Video";
-        return "Image Series";
-      }
-
-      function projectCountLabel(project) {
         const effectiveFlipbook = getEffectiveFlipbookImages(project);
-        if (effectiveFlipbook && effectiveFlipbook.pageCount) {
-          return `${effectiveFlipbook.pageCount} Pages`;
+        if (effectiveFlipbook) {
+          setTimeout(() => initProjectFlipbook(project.id, effectiveFlipbook), 60);
         }
-
-        const imageCount = Array.isArray(project.images) ? project.images.length : 0;
-        if (imageCount > 1) return `${imageCount} Visuals`;
-        return "Featured Work";
       }
 
-      function getFlipbookPreviewImages(flipbookImages) {
-        if (!flipbookImages) return [];
-
-        const selectedPages = Array.isArray(flipbookImages.pages)
-          ? flipbookImages.pages.filter((p) => typeof p === "string" && p.trim())
-          : [];
-
-        if (selectedPages.length > 0) {
-          return selectedPages.slice(0, 8);
-        }
-
-        const basePath = flipbookImages.basePath || "";
-        const ext = flipbookImages.extension || ".png";
-        const count = Math.max(1, parseInt(flipbookImages.pageCount, 10) || 1);
-        const previewCount = Math.min(8, count);
-        const generated = [];
-
-        for (let i = 1; i <= previewCount; i++) {
-          const padded = String(i).padStart(2, "0");
-          generated.push(`${basePath}${padded}${ext}`);
-        }
-
-        return generated;
+      function closeProjectModal() {
+        const modal = document.getElementById("project-modal");
+        modal.classList.remove("is-open");
+        document.body.classList.remove("modal-open");
+        currentProjectViewer = null;
+        setTimeout(() => {
+          document.getElementById("modal-content").innerHTML = "";
+        }, 260);
       }
 
-      function normalizeProjectAssetPath(path) {
-        if (!path) return "";
-        if (/^(https?:|data:|blob:)/i.test(path)) return path;
-        if (path.startsWith("../")) return path;
-        if (path.startsWith("./")) return path;
-        if (path.startsWith("/")) return path;
-        return path;
-      }
-
-      function isWyawygProject(project) {
-        const title = String(project.title || "").toLowerCase();
-        return project.displayStyle === "grid-5" || title.includes("wyawyg") || project.id === "project-3";
-      }
-
-      function initProjectFlipbookImages(config) {
-        const root = document.getElementById("project-flipbook");
-        const info = document.getElementById("project-flipbook-info");
+      function initProjectFlipbook(projectId, config) {
+        const flipbookId = "flipbook-" + projectId;
+        const root = document.getElementById(flipbookId);
+        const info = document.getElementById(flipbookId + "-info");
         if (!root || !info || typeof flipbook === "undefined") {
           if (info) info.textContent = "Flipbook viewer is unavailable.";
           return;
         }
 
-        const selectedPages = Array.isArray(config.pages)
-          ? config.pages.filter((p) => typeof p === "string" && p.trim())
-          : [];
-
-        const useSelectedPages = selectedPages.length > 0;
-        const basePath = normalizeProjectAssetPath(config.basePath || "Handbook_Files/handbook-pages/page-");
+        const basePath = normalizeProjectAssetPath(
+          config.basePath || "Handbook_Files/handbook-pages/page-",
+        );
         const extension = config.extension || ".png";
-        const pageCount = Math.max(1, parseInt(config.pageCount, 10) || 1);
-        const totalPages = useSelectedPages ? selectedPages.length : pageCount;
+        const totalPages = Math.max(1, parseInt(config.pageCount, 10) || 1);
         const cache = [];
 
         function getSrc(pageNum) {
-          if (useSelectedPages) {
-            return normalizeProjectAssetPath(selectedPages[pageNum - 1]);
-          }
           const padded = String(pageNum).padStart(2, "0");
           return `${basePath}${padded}${extension}`;
         }
@@ -558,12 +553,7 @@
 
           const img = new Image();
           img.onload = () => {
-            cache[n] = {
-              img,
-              num: n,
-              width: img.width,
-              height: img.height,
-            };
+            cache[n] = { img, num: n, width: img.width, height: img.height };
             cb(null, cache[n]);
           };
           img.onerror = () => cb(new Error(`Failed to load page ${n}`));
@@ -599,8 +589,8 @@
             {
               width,
               height,
-              backgroundColor: "#000000",
-              boxColor: "#000000",
+              backgroundColor: "#ffffff",
+              boxColor: "#ffffff",
               boxBorder: 0,
             },
             (initErr, viewer) => {
@@ -635,147 +625,12 @@
         }
       }
 
-      window.flipbookPrev = flipbookPrev;
-      window.flipbookNext = flipbookNext;
-      window.flipbookZoom = flipbookZoom;
-
-      function openProjectModal(projectId) {
-        const project = projectsById[projectId];
-        if (!project) return;
-
-        const modal = document.getElementById("project-modal");
-        const panel = document.getElementById("project-modal-panel");
-        const effectiveFlipbook = getEffectiveFlipbookImages(project);
-
-        let mediaHtml = "<p class=\"project-modal-note\">No media available for this project yet.</p>";
-
-        if (project.type === "video") {
-          const id = youtubeIdFromUrl(project.youtubeUrl || project.youtube || "") || project.youtubeId || "";
-          if (id) {
-            mediaHtml = `
-              <div class="project-modal-media">
-                <iframe
-                  src="https://www.youtube.com/embed/${id}?rel=0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                ></iframe>
-              </div>
-            `;
-          }
-        } else if (effectiveFlipbook && (project.type === "flipbook-images" || isVoicesProject(project))) {
-          mediaHtml = `
-            <div class="project-flipbook-wrap">
-              <div id="project-flipbook"></div>
-              <div class="project-flipbook-controls">
-                <button type="button" onclick="flipbookPrev()">Previous</button>
-                <button type="button" onclick="flipbookNext()">Next</button>
-                <button type="button" onclick="flipbookZoom()">Zoom</button>
-              </div>
-              <div class="project-flipbook-info" id="project-flipbook-info">Loading...</div>
-            </div>
-          `;
-        } else if (Array.isArray(project.images) && project.images.length > 0) {
-          const mediaClass = isWyawygProject(project) ? "project-modal-media grid-5" : "project-modal-media";
-          mediaHtml = `
-            <div class="${mediaClass}">
-              ${project.images.map((src) => `<img src="${src}" alt="${project.title || "Project image"}" loading="lazy" />`).join("")}
-            </div>
-          `;
-        } else if (project.type === "flipbook-pdf" || project.flipbookPdf || project.flipbook || project.pdf) {
-          const pdfSrc = project.flipbookPdf || project.flipbook || project.pdf || "";
-          if (pdfSrc) {
-            mediaHtml = `
-              <div class="project-modal-media">
-                <iframe src="${pdfSrc}"></iframe>
-              </div>
-            `;
-          }
-        }
-
-        panel.innerHTML = `
-          <div class="project-modal-header">
-            <h2 class="project-modal-title">${project.title || "Untitled Project"}</h2>
-            <p class="project-modal-description">${project.description || "Project details coming soon."}</p>
-          </div>
-          ${mediaHtml}
-        `;
-
-        modal.classList.add("is-open");
-        document.body.classList.add("project-modal-open");
-
-        if (effectiveFlipbook && (project.type === "flipbook-images" || isVoicesProject(project))) {
-          setTimeout(() => initProjectFlipbookImages(effectiveFlipbook), 40);
-        }
-      }
-
-      function closeProjectModal() {
-        const modal = document.getElementById("project-modal");
-        modal.classList.remove("is-open");
-        document.body.classList.remove("project-modal-open");
-        currentProjectViewer = null;
-      }
-
-      window.closeProjectModal = closeProjectModal;
-
-      function renderProjectsPage() {
-        const projects = getProjectsData();
-        const grid = document.getElementById("projects-grid");
-
-        projects.forEach((project) => {
-          projectsById[project.id] = project;
-        });
-
-        if (!projects.length) {
-          grid.innerHTML = '<p class="project-description">No projects available right now.</p>';
-          return;
-        }
-
-        grid.innerHTML = projects
-          .map((project) => {
-            const preview = getPreviewSrc(project);
-            const excerpt = stripHtml(project.description).slice(0, 170);
-            const readableExcerpt = excerpt.length > 0 ? `${excerpt}${excerpt.length >= 170 ? "..." : ""}` : "Project details coming soon.";
-
-            const media = preview
-              ? `<img src="${preview}" alt="${project.title || "Project preview"}" loading="lazy" />`
-              : '<div class="project-media-fallback">Preview Pending</div>';
-
-            return `
-              <button class="project-card" type="button" data-project-id="${project.id}">
-                <div class="project-media">${media}</div>
-                <div class="project-content">
-                  <h3 class="project-title">${project.title || "Untitled Project"}</h3>
-                  <p class="project-description">${readableExcerpt}</p>
-                  <div class="project-meta">
-                    <span class="pill accent">${getTypeLabel(project)}</span>
-                    <span class="pill">${projectCountLabel(project)}</span>
-                  </div>
-                </div>
-              </button>
-            `;
-          })
-          .join("");
-
-        grid.querySelectorAll(".project-card[data-project-id]").forEach((card) => {
-          card.addEventListener("click", () => {
-            const projectId = card.getAttribute("data-project-id");
-            const project = projectsById[projectId];
-            if (project && project.detailPagePath) {
-              window.location.href = project.detailPagePath;
-              return;
-            }
-            openProjectModal(projectId);
-          });
-        });
-      }
-
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           closeProjectModal();
         }
       });
 
-      window.renderProjectsPage = renderProjectsPage;
       renderProjectsPage();
     </script>
   </body>

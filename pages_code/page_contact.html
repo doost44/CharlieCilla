@@ -4,266 +4,275 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Contact - Charlie Cilla</title>
-    <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="../site-theme.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
-      .contact-hero {
-        margin: 8px 0 28px;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: clamp(32px, 10vw, 150px);
-        line-height: 0.9;
-        letter-spacing: -3px;
-        text-transform: uppercase;
-        font-weight: 900;
-        color: #fff;
-        white-space: nowrap;
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
       }
 
-      .contact-hero .accent-stroke {
-        -webkit-text-stroke: 1.5px var(--accent);
-        color: transparent;
+      :root {
+        --bg: #ffffff;
+        --text: #0d0d0d;
+        --muted: #3a3a3a;
+        --faint: #8a8a84;
+        --line: #dadada;
+        --link-blue: #1237c4;
+        --link-purple: #63239e;
+        --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+        --serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--serif);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: var(--link-blue);
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .page {
+        width: 100%;
+        margin: 0;
+        padding: 36px clamp(24px, 4vw, 64px) 70px;
+        position: relative;
+      }
+
+      .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 6px;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+      }
+
+      .top-row a {
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .top-row a:hover {
+        color: var(--link-blue);
+      }
+
+      .corner-label {
+        font-size: 0.8rem;
+        font-style: italic;
+        color: var(--muted);
+        text-align: right;
+      }
+
+      .page-title {
+        font-size: 2.4rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 34px 0 44px;
       }
 
       .contact-layout {
         display: grid;
-        grid-template-columns: 0.95fr 1.05fr;
-        gap: 28px;
+        grid-template-columns: 0.8fr 1.2fr;
+        gap: 48px;
       }
 
       .contact-image {
+        border: 1px solid var(--line);
         overflow: hidden;
       }
 
       .contact-image img {
         width: 100%;
         height: 100%;
-        min-height: 560px;
         object-fit: cover;
+        min-height: 420px;
       }
 
-      .contact-panel {
-        padding: 22px;
-        display: grid;
-        gap: 20px;
+      .contact-section {
+        margin-bottom: 34px;
+        max-width: 62ch;
       }
 
-      .contact-panel h3 {
-        margin: 0;
+      .contact-section h2 {
         font-family: var(--mono);
-        font-size: 12px;
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
-        letter-spacing: 2.2px;
-        color: var(--accent);
+        color: var(--faint);
+        margin: 0 0 10px;
+        font-weight: 500;
       }
 
-      .contact-panel p {
-        margin: 0;
-        color: #c7c7c7;
-        line-height: 1.65;
+      .contact-section p {
+        margin: 0 0 8px;
+        color: var(--muted);
+        line-height: 1.75;
+        font-size: 0.95rem;
       }
 
-      .social-icons {
+      .socials {
         display: flex;
-        gap: 12px;
-      }
-
-      .social-icons img {
-        width: 34px;
-        height: 34px;
-        border-radius: 8px;
-      }
-
-      .social-icons a {
-        transition: transform 0.2s ease;
-      }
-
-      .social-icons a:hover {
-        transform: translateY(-2px);
+        gap: 16px;
+        margin-top: 6px;
+        font-size: 0.9rem;
       }
 
       .contact-form {
         display: grid;
-        gap: 10px;
+        gap: 4px;
+        max-width: 46ch;
       }
 
       .contact-form label {
         font-family: var(--mono);
-        font-size: 10px;
+        font-size: 0.68rem;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
-        letter-spacing: 2.2px;
-        color: #c4c4c4;
+        color: var(--faint);
+        margin-top: 14px;
+      }
+
+      .contact-form label:first-child {
+        margin-top: 0;
       }
 
       .contact-form input,
       .contact-form textarea {
-        background: rgba(0, 0, 0, 0.55);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        padding: 12px 14px;
-        font-family: inherit;
-        border-radius: 2px;
+        background: #fff;
+        color: var(--text);
+        border: 1px solid var(--line);
+        padding: 10px 12px;
+        font-family: var(--serif);
+        font-size: 0.92rem;
       }
 
       .contact-form input:focus,
       .contact-form textarea:focus {
         outline: none;
-        border-color: var(--line-strong);
+        border-color: var(--link-blue);
       }
 
       .contact-form textarea {
         resize: vertical;
-        min-height: 130px;
+        min-height: 120px;
       }
 
       .contact-form button {
-        margin-top: 8px;
+        margin-top: 20px;
         width: fit-content;
-        border: 1px solid var(--accent);
-        background: rgba(232, 51, 31, 0.08);
-        color: white;
-        border-radius: 2px;
-        padding: 10px 18px;
-        text-transform: uppercase;
-        letter-spacing: 1.8px;
+        border: 1px solid var(--text);
+        background: #fff;
+        color: var(--text);
+        padding: 10px 20px;
         cursor: pointer;
         font-family: var(--mono);
-        font-size: 11px;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
       }
 
       .contact-form button:hover {
-        background: var(--accent);
-        color: #000;
+        background: var(--text);
+        color: #fff;
       }
 
-      a {
-        color: var(--accent);
+      .page-footer {
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        font-family: var(--mono);
+        font-size: 0.78rem;
       }
 
-      @media (max-width: 980px) {
+      .page-footer a {
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .page-footer a:hover {
+        color: var(--link-blue);
+      }
+
+      @media (max-width: 800px) {
         .contact-layout {
           grid-template-columns: 1fr;
         }
-
         .contact-image img {
-          min-height: 300px;
-          max-height: 460px;
+          min-height: 320px;
         }
       }
     </style>
   </head>
   <body>
-    <div class="site-bg" aria-hidden="true">
-      <video class="site-bg-video" autoplay muted loop playsinline>
-        <source src="../Assets/tree-background.mp4" type="video/mp4" />
-      </video>
-      <div class="site-bg-overlay"></div>
-      <div class="site-bg-grain"></div>
-      <div class="site-bg-fade"></div>
-    </div>
-
-    <header class="site-header">
-      <div class="header-content">
-        <img src="../logo.png" alt="Logo" class="logo" />
-        <h1 class="brand-title">CHARLIE CILLA</h1>
-      </div>
-      <ul class="site-nav">
-        <li><a href="../index.html">HOME</a></li>
-        <li><a href="page_portfolio.html">ARCHIVES</a></li>
-        <li><a href="page_contact.html" class="is-active">CONTACT</a></li>
-        <li><a href="page_about.html">ABOUT</a></li>
-        <li><a href="page_projects.html">PROJECTS</a></li>
-      </ul>
-    </header>
-
-    <main class="page-shell">
-      <div class="meta-strip">
-        <div>
-          Open For Collaborations<br />Creative Commissions + Commissions
-        </div>
-        <div>Toronto / Waterloo<br />Remote Friendly — Worldwide</div>
-        <div>Let us build something with a strong visual point of view.</div>
+    <div class="page">
+      <div class="top-row">
+        <a href="../index.html">&larr; home</a>
+        <span class="corner-label">charlie cilla<br />design + film</span>
       </div>
 
-      <h2 class="contact-hero">
-        <span class="accent-stroke">Get</span> In Touch
-      </h2>
+      <h1 class="page-title">Get in touch</h1>
 
       <section class="contact-layout">
-        <article class="contact-image panel">
+        <div class="contact-image">
           <img src="../A5_Charlie_Cilla_Paradox.jpg" alt="Contact visual" />
-        </article>
+        </div>
 
-        <article class="contact-panel panel">
-          <section>
-            <h3>Reach Out</h3>
+        <div class="contact-content">
+          <div class="contact-section">
+            <h2>Reach Out</h2>
             <p>
               Email:
-              <a href="mailto:charlievcilla@gmail.com"
-                >charlievcilla@gmail.com</a
-              >
+              <a href="mailto:charlievcilla@gmail.com">charlievcilla@gmail.com</a>
             </p>
-            <p>Find me on social platforms:</p>
-            <div class="social-icons">
-              <a
-                href="https://www.instagram.com/charlie_cilla/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img src="../instagram.png" alt="Instagram" />
-              </a>
-              <a
-                href="https://www.linkedin.com/in/charlie-cilla-122038243/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img src="../linkedin.webp" alt="LinkedIn" />
-              </a>
+            <p>Open for collaborations, commissions, and freelance work. Remote friendly, based Toronto / Waterloo.</p>
+            <div class="socials">
+              <a href="https://www.instagram.com/d0o0st/" target="_blank" rel="noopener">instagram</a>
+              <a href="https://www.linkedin.com/in/charlie-cilla-122038243/" target="_blank" rel="noopener">linkedin</a>
             </div>
-          </section>
+          </div>
 
-          <section>
-            <h3>Send Message</h3>
+          <div class="contact-section">
+            <h2>Send a Message</h2>
             <form class="contact-form" action="submit_form.php" method="post">
               <label for="name">Name</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Your name"
-                required
-              />
+              <input type="text" id="name" name="name" placeholder="Your name" required />
 
               <label for="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="your@email.com"
-                required
-              />
+              <input type="email" id="email" name="email" placeholder="your@email.com" required />
 
               <label for="message">Message</label>
-              <textarea
-                id="message"
-                name="message"
-                rows="5"
-                placeholder="Your message..."
-                required
-              ></textarea>
+              <textarea id="message" name="message" rows="5" placeholder="Your message..." required></textarea>
 
               <button type="submit">Send Message</button>
             </form>
-          </section>
-        </article>
+          </div>
+        </div>
       </section>
-    </main>
 
-    <footer class="site-footer">&copy; 2026 Charlie Cilla</footer>
+      <div class="page-footer">
+        <a href="../index.html">&larr; back to selected works</a>
+      </div>
+    </div>
   </body>
 </html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Reading Craftworks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Crimson+Text:ital@1&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --bg:#FFFFFF;
+    --bg-warm:#EBEAE4;
+    --surface:#F5F5F5;
+    --line:#D1D1D1;
+    --text:#111111;
+    --text-2:#181717;
+    --muted:#5C5C58;
+    --indigo:#1A02AF;
+    --blue:#0099FF;
+    --sans:'Inter',sans-serif;
+    --serif:'Crimson Text',serif;
+  }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .annot-bar{
+    background:var(--text);
+    color:#fff;
+    font-size:12px;
+    letter-spacing:0.02em;
+    padding:10px 24px;
+    text-align:center;
+  }
+  .annot-bar b{color:var(--blue);}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+
+  nav{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:26px 0;
+  }
+  .brand{font-weight:700;font-size:0.95rem;letter-spacing:-0.01em;}
+  .navlinks{display:flex;gap:28px;list-style:none;font-size:0.88rem;color:var(--muted);}
+  .navlinks a{color:inherit;text-decoration:none;}
+  .navlinks a.active{color:var(--text);}
+  .navlinks .menu{border:1px solid var(--line);border-radius:20px;padding:6px 16px;font-size:0.78rem;letter-spacing:0.04em;text-transform:uppercase;}
+
+  .ticker-wrap{
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+    padding:14px 0;
+    margin-top:6px;
+  }
+  .ticker{
+    display:flex;gap:40px;white-space:nowrap;
+    animation:scroll 22s linear infinite;
+    width:max-content;
+  }
+  .ticker span{
+    font-size:0.85rem;
+    color:var(--muted);
+    display:flex;align-items:center;gap:10px;
+  }
+  .ticker span::before{content:'—';color:var(--indigo);}
+  @keyframes scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+  .hero{padding:70px 0 50px;}
+  .hero .eyebrow{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:1.15rem;
+    color:var(--indigo);
+    margin-bottom:18px;
+  }
+  .hero h1{
+    font-size:clamp(2.2rem,5vw,3.6rem);
+    font-weight:700;
+    letter-spacing:-0.03em;
+    line-height:1.06;
+    max-width:16ch;
+  }
+  .hero h1 .accent{color:var(--indigo);}
+
+  .section-label{
+    font-size:0.75rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    display:flex;align-items:center;gap:10px;
+    margin:50px 0 22px;
+  }
+  .section-label .num{
+    width:22px;height:22px;border-radius:50%;
+    background:var(--indigo);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.65rem;
+  }
+
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;}
+  .filters button{
+    font-size:0.8rem;
+    padding:8px 16px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    background:var(--bg);
+    color:var(--muted);
+    cursor:pointer;
+  }
+  .filters button.is-active{background:var(--indigo);border-color:var(--indigo);color:#fff;}
+
+  .grid{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:20px;
+    margin-bottom:60px;
+  }
+  .card{
+    background:var(--surface);
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .card .media{
+    aspect-ratio:4/3;
+    background:linear-gradient(135deg,var(--indigo),var(--blue));
+    position:relative;
+  }
+  .card .media span{
+    position:absolute;bottom:14px;left:16px;
+    color:#fff;font-size:0.75rem;letter-spacing:0.05em;text-transform:uppercase;
+    opacity:0.85;
+  }
+  .card .body{padding:18px 20px 22px;}
+  .card .tag{
+    font-size:0.68rem;letter-spacing:0.05em;text-transform:uppercase;
+    color:var(--indigo);margin-bottom:8px;display:block;
+  }
+  .card h3{font-size:1.15rem;font-weight:600;letter-spacing:-0.01em;}
+
+  footer{
+    border-top:1px solid var(--line);
+    background:var(--bg-warm);
+    padding:44px 0 40px;
+    margin:0 -32px;
+    padding-left:32px;padding-right:32px;
+  }
+  footer .foot-inner{max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;}
+  footer h4{font-family:var(--serif);font-style:italic;font-size:1.3rem;font-weight:400;margin-bottom:6px;}
+  footer p{color:var(--muted);font-size:0.85rem;}
+  footer .cols{display:flex;gap:60px;flex-wrap:wrap;}
+  footer .col a{display:block;color:var(--muted);text-decoration:none;font-size:0.85rem;margin-bottom:8px;}
+  footer .col .h{color:var(--text);font-size:0.75rem;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;}
+
+  @media (max-width:760px){
+    .grid{grid-template-columns:1fr;}
+    .navlinks{display:none;}
+    footer .foot-inner{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<div class="annot-bar">How I read <b>studio-craftworks.com/works</b> — check this matches what you have in mind before I apply it</div>
+
+<div class="wrap">
+  <nav>
+    <div class="brand">Studio Craftworks</div>
+    <ul class="navlinks">
+      <li class="active">Works</li>
+      <li>About us</li>
+      <li>Contact</li>
+      <li>Playground</li>
+      <li class="menu">Menu</li>
+    </ul>
+  </nav>
+</div>
+
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span>UX/UI Design</span><span>Visual Identity</span><span>Branding</span><span>Design Consulting</span><span>Art Direction</span><span>Social Media Management</span>
+    <span>UX/UI Design</span><span>Visual Identity</span><span>Branding</span><span>Design Consulting</span><span>Art Direction</span><span>Social Media Management</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="hero">
+    <p class="eyebrow">simple, beautiful, and engaging</p>
+    <h1>We craft <span class="accent">experiences</span>, not just interfaces.</h1>
+  </section>
+
+  <p class="section-label"><span class="num">01</span> Projects</p>
+  <div class="filters">
+    <button class="is-active">All</button>
+    <button>Branding</button>
+    <button>Visual Identity</button>
+    <button>Typeface Designs</button>
+    <button>Web Design</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="media"><span>Branding</span></div>
+      <div class="body"><span class="tag">Identity</span><h3>Project Title</h3></div>
+    </div>
+    <div class="card">
+      <div class="media"><span>Web Design</span></div>
+      <div class="body"><span class="tag">Digital</span><h3>Project Title</h3></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div>
+      <h4>Let's talk ❤️</h4>
+      <p>Stay in touch and keep up with what we're doing.</p>
+    </div>
+    <div class="cols">
+      <div class="col">
+        <div class="h">Sitemap</div>
+        <a href="#">Works</a>
+        <a href="#">About us</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="col">
+        <div class="h">Social</div>
+        <a href="#">Instagram</a>
+        <a href="#">LinkedIn</a>
+      </div>
+      <div class="col">
+        <div class="h">Studio</div>
+        <a href="#">Pekini 13, Tbilisi, Georgia</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

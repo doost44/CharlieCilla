@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Mark Model Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --bg:#ffffff;
+    --text:#0d0d0d;
+    --muted:#3a3a3a;
+    --faint:#8a8a84;
+    --line:#dadada;
+    --link-blue:#1237c4;
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+    --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--serif);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:1100px;
+    margin:0 auto;
+    padding:36px clamp(20px,4vw,48px) 60px;
+  }
+  .top-row{
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-family:var(--mono);font-size:0.78rem;color:var(--muted);
+    margin-bottom:6px;
+  }
+  h1{
+    font-size:1.7rem;font-weight:600;letter-spacing:-0.01em;
+    margin:30px 0 8px;
+  }
+  .dek{color:var(--muted);font-size:0.92rem;max-width:60ch;margin-bottom:28px;line-height:1.6;}
+
+  .stage-wrap{
+    border:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .stage-bar{
+    width:100%;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 18px;
+    border-bottom:1px solid var(--line);
+    font-family:var(--mono);font-size:0.72rem;
+    color:var(--faint);
+  }
+  .toggle{
+    display:flex;gap:2px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:2px;
+  }
+  .toggle button{
+    font-family:var(--mono);font-size:0.68rem;letter-spacing:0.04em;text-transform:uppercase;
+    border:none;background:none;color:var(--muted);
+    padding:6px 12px;border-radius:999px;cursor:pointer;
+  }
+  .toggle button.active{background:var(--text);color:#fff;}
+  canvas#stage{ display:block; }
+  .stage-hint{
+    font-family:var(--mono);font-size:0.7rem;color:var(--faint);
+    padding:14px 0 4px;
+    text-align:center;
+  }
+  .note{
+    margin-top:28px;font-size:0.9rem;color:var(--muted);line-height:1.65;max-width:64ch;
+  }
+  .note b{color:var(--text);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-row">
+    <span>mark model &mdash; preview</span>
+    <span>charlie cilla</span>
+  </div>
+  <h1>3D mark, isolated</h1>
+  <p class="dek">The bumpy-shield approximation of your mask artwork, shown on its own before it goes back into the homepage's ASCII renderer. Drag to rotate, or hover the toggle to compare the raw 3D form against the ASCII-sampled version.</p>
+
+  <div class="stage-wrap">
+    <div class="stage-bar">
+      <span>560 &times; 560</span>
+      <div class="toggle">
+        <button type="button" id="btnRaw" class="active">Raw 3D</button>
+        <button type="button" id="btnAscii">ASCII</button>
+      </div>
+    </div>
+    <canvas id="stage" width="560" height="560"></canvas>
+    <p class="stage-hint">drag to rotate &middot; auto-rotates when idle</p>
+  </div>
+
+  <p class="note"><b>This is still an approximation</b> &mdash; traced by eye from the screenshot, not the real artwork. Once you send the actual file (PNG is fine for silhouette tracing, SVG/AI is better for an exact match), I can rebuild this to follow the real outline much more closely.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  const canvas = document.getElementById('stage');
+  const W = canvas.width, H = canvas.height;
+
+  const scene = new THREE.Scene();
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  const key = new THREE.DirectionalLight(0xffffff, 1.3);
+  key.position.set(4, 6, 5);
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xc0d8ff, 0.6);
+  fill.position.set(-4, 2, -3);
+  scene.add(fill);
+
+  // Head/skull silhouette: domed crown tapering to a chin, with two
+  // stacked mouth/teeth bands and small ear-like bumps at mid-height —
+  // read by eye from the mask artwork, not traced from the real file.
+  function buildMark(){
+    const group = new THREE.Group();
+    const bodyMat = new THREE.MeshStandardMaterial({color:0xffffff, flatShading:true, roughness:0.55, metalness:0.04});
+
+    // half-profile (radius, height) revolved around the Y axis, chin to crown
+    const profile = [
+      [0.05,-1.3],[0.4,-1.15],[0.55,-1.05],[0.7,-0.85],[0.8,-0.6],
+      [0.88,-0.3],[0.94,0.05],[0.99,0.4],[1.0,0.6],[0.94,0.85],
+      [0.8,1.1],[0.55,1.28],[0.28,1.37],[0.0,1.4],
+    ].map(([r,y]) => new THREE.Vector2(r,y));
+    const headGeo = new THREE.LatheGeometry(profile, 24);
+    const head = new THREE.Mesh(headGeo, bodyMat);
+    group.add(head);
+
+    // upper mouth/teeth band
+    const upperMouth = new THREE.Mesh(
+      new THREE.TorusGeometry(0.86, 0.12, 8, 28, Math.PI * 1.7),
+      bodyMat,
+    );
+    upperMouth.position.set(0, -0.05, 0);
+    upperMouth.rotation.set(Math.PI / 2, 0, Math.PI * 0.65);
+    group.add(upperMouth);
+
+    // lower mouth/teeth band
+    const lowerMouth = new THREE.Mesh(
+      new THREE.TorusGeometry(0.62, 0.1, 8, 24, Math.PI * 1.5),
+      bodyMat,
+    );
+    lowerMouth.position.set(0, -0.78, 0);
+    lowerMouth.rotation.set(Math.PI / 2, 0, Math.PI * 0.7);
+    group.add(lowerMouth);
+
+    // small teeth nubs around the upper band
+    for (let i = 0; i < 8; i++) {
+      const a = Math.PI * 0.15 + (i / 7) * Math.PI * 0.7;
+      const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.14, 0.1), bodyMat);
+      tooth.position.set(Math.cos(a) * 0.75, -0.1, 0.55 + Math.sin(a) * 0.1);
+      group.add(tooth);
+    }
+
+    // ear-like bumps at mid-height
+    [-1, 1].forEach((side) => {
+      const ear = new THREE.Mesh(new THREE.IcosahedronGeometry(0.18, 0), bodyMat);
+      ear.position.set(side * 1.0, 0.55, 0);
+      group.add(ear);
+    });
+
+    return group;
+  }
+
+  const mark = buildMark();
+  scene.add(mark);
+
+  const camera = new THREE.PerspectiveCamera(32, W/H, 0.1, 100);
+  camera.position.set(0,0.05,6.4);
+  camera.lookAt(0,0.05,0);
+
+  const rawRenderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:false});
+  rawRenderer.setSize(W,H);
+  rawRenderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  rawRenderer.setClearColor(0xF7F7F5, 1);
+
+  // Separate offscreen renderer feeds the ASCII sampler at native canvas size
+  const asciiSourceCanvas = document.createElement('canvas');
+  asciiSourceCanvas.width = W; asciiSourceCanvas.height = H;
+  const asciiRenderer = new THREE.WebGLRenderer({canvas: asciiSourceCanvas, antialias:false, alpha:false});
+  asciiRenderer.setSize(W,H);
+  asciiRenderer.setClearColor(0x000000,1);
+
+  const off = document.createElement('canvas');
+  off.width = W; off.height = H;
+  const octx = off.getContext('2d');
+  const CELL = 8;
+  const ramp = " .:-=#";
+
+  let mode = 'raw';
+  let rotY = 0.4, rotX = 0.2;
+  let dragging = false, lastX=0, lastY=0;
+  let autoBase = 0;
+
+  canvas.addEventListener('pointerdown', (e)=>{ dragging = true; lastX=e.clientX; lastY=e.clientY; });
+  window.addEventListener('pointerup', ()=> dragging = false);
+  window.addEventListener('pointermove', (e)=>{
+    if(!dragging) return;
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    rotY += dx * 0.008;
+    rotX += dy * 0.008;
+    lastX = e.clientX; lastY = e.clientY;
+  });
+
+  // Since the visible <canvas> is WebGL-owned for raw mode, ASCII mode
+  // swaps in a 2D-context canvas element instead.
+  const asciiCanvasEl = document.createElement('canvas');
+  asciiCanvasEl.width = W; asciiCanvasEl.height = H;
+  asciiCanvasEl.style.display = 'none';
+  canvas.after(asciiCanvasEl);
+  const asciiCtx = asciiCanvasEl.getContext('2d');
+
+  function renderAsciiFrame(){
+    octx.clearRect(0,0,W,H);
+    octx.drawImage(asciiSourceCanvas, 0,0,W,H);
+    const img = octx.getImageData(0,0,W,H).data;
+    asciiCtx.fillStyle = '#FFFFFF';
+    asciiCtx.fillRect(0,0,W,H);
+    asciiCtx.font = CELL + 'px "IBM Plex Mono", monospace';
+    asciiCtx.textBaseline = 'top';
+    asciiCtx.fillStyle = '#0D0D0D';
+    for(let y=0;y<H;y+=CELL){
+      for(let x=0;x<W;x+=CELL){
+        const i = (y*W+x)*4;
+        const lum = img[i]/255;
+        if(lum < 0.12) continue;
+        const idx = Math.min(ramp.length-1, Math.floor(lum*ramp.length));
+        const ch = ramp[idx] || '#';
+        if(ch===' ') continue;
+        asciiCtx.fillText(ch, x, y);
+      }
+    }
+  }
+
+  function setMode(next){
+    mode = next;
+    document.getElementById('btnRaw').classList.toggle('active', mode==='raw');
+    document.getElementById('btnAscii').classList.toggle('active', mode==='ascii');
+    canvas.style.display = mode==='raw' ? 'block' : 'none';
+    asciiCanvasEl.style.display = mode==='ascii' ? 'block' : 'none';
+  }
+  document.getElementById('btnRaw').addEventListener('click', ()=> setMode('raw'));
+  document.getElementById('btnAscii').addEventListener('click', ()=> setMode('ascii'));
+
+  function loop(){
+    requestAnimationFrame(loop);
+    if(!dragging) autoBase += 0.004;
+    mark.rotation.y = autoBase + rotY;
+    mark.rotation.x = 0.3 + rotX * 0.3;
+
+    rawRenderer.render(scene, camera);
+    asciiRenderer.render(scene, camera);
+    if(mode === 'ascii') renderAsciiFrame();
+  }
+  loop();
+})();
+</script>
+</body>
+</html>
