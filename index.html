@@ -72,7 +72,7 @@
 
       .cols {
         display: grid;
-        grid-template-columns: 0.85fr 1.05fr 1.5fr;
+        grid-template-columns: 0.75fr 0.95fr 1.7fr;
         gap: 40px;
         margin-top: 70px;
       }
@@ -170,7 +170,9 @@
         color: var(--muted);
         line-height: 1.5;
         margin: 2px 0 0;
-        max-width: 34ch;
+        /* fill the actual column width instead of an arbitrary
+           character cap, so lines run longer before wrapping */
+        max-width: 100%;
       }
 
       .list-empty {
@@ -184,6 +186,9 @@
         display: flex;
         justify-content: flex-end;
         align-items: flex-start;
+        /* bleed past the page's right padding so the render hugs the
+           true viewport edge, matching the reference layout */
+        margin-right: calc(-1 * clamp(24px, 4vw, 64px));
       }
 
       canvas#asciiCanvas {
@@ -197,12 +202,14 @@
         }
         .ascii-wrap {
           justify-content: flex-start;
+          margin-right: 0;
         }
       }
 
       footer.site-footer {
         width: 100%;
         margin: 0;
+        margin-top: 60px;
         padding: 20px clamp(24px, 4vw, 64px) 40px;
         font-family: var(--mono);
         font-size: 0.72rem;
@@ -425,7 +432,7 @@
         </div>
 
         <div class="ascii-wrap">
-          <canvas id="asciiCanvas" width="460" height="520"></canvas>
+          <canvas id="asciiCanvas" width="760" height="800"></canvas>
         </div>
       </div>
     </div>
@@ -874,15 +881,17 @@
       renderHomePage();
 
       // ===== interactive 3D ascii render =====
-      // Placeholder geometry until the custom logo model is ready — swap
-      // the IcosahedronGeometry below for a loaded .glb of the real mark.
+      // Renders a procedural office-chair model (hinged backrest, seat,
+      // armrests, gas lift, 5-star base on casters) — no external asset
+      // needed. Swap buildChair() for a loaded .glb if a traced model of
+      // the real object ever replaces this approximation.
       (function () {
         const canvas = document.getElementById("asciiCanvas");
         const ctx = canvas.getContext("2d");
         const W = canvas.width,
           H = canvas.height;
-        const CELL = 7;
-        const ramp = " .:-=#";
+        const CELL = 8; // bumped alongside the larger canvas to keep the per-frame glyph count in check
+        const ramp = " .:-=*#%@"; // light -> dense, ordered by ink coverage
         const off = document.createElement("canvas");
         off.width = W;
         off.height = H;
@@ -977,63 +986,119 @@
           }
         }
 
-        // Rough 3D approximation of the hand-inked mask logo concept:
-        // a lumpy, asymmetric rounded shield-like silhouette with a
-        // raised grin band and a brow/eye blob. Swap for the traced
-        // .glb of the real artwork once the source file is available.
-        function buildMark() {
+        // Stylized office chair: hinged two-panel backrest, cushioned
+        // seat, mirrored armrests, a gas-lift column and a 5-star base
+        // on casters. Pure procedural geometry (a rounded-box "cushion"
+        // helper does the corner-softening), tuned only for silhouette —
+        // fine surface detail is invisible at ASCII-cell resolution.
+        function buildChair() {
           const group = new THREE.Group();
 
-          const bumps = [
-            1.0, 0.92, 1.08, 0.8, 1.15, 0.78, 1.05, 0.7, 0.9, 0.6, 0.72, 0.58,
-            0.62, 0.55, 0.6, 0.58, 0.65, 0.75, 0.85, 0.95,
-          ];
-          const shape = new THREE.Shape();
-          const baseR = 1.15;
-          bumps.forEach((b, i) => {
-            const a = (i / bumps.length) * Math.PI * 2 - Math.PI / 2;
-            const r = baseR * b;
-            const x = Math.cos(a) * r;
-            const y = Math.sin(a) * r * 1.15 + 0.15;
-            if (i === 0) shape.moveTo(x, y);
-            else shape.lineTo(x, y);
-          });
-          shape.closePath();
+          // rounded box: pushes corners toward a radius without ever
+          // exceeding the original w×h×d bounds
+          function cushion(w, h, d, radius) {
+            const geo = new THREE.BoxGeometry(w, h, d, 6, 6, 6);
+            const pos = geo.attributes.position;
+            const v = new THREE.Vector3();
+            const hw = w / 2, hh = h / 2, hd = d / 2;
+            for (let i = 0; i < pos.count; i++) {
+              v.fromBufferAttribute(pos, i);
+              const qx = Math.max(0, Math.abs(v.x) - (hw - radius));
+              const qy = Math.max(0, Math.abs(v.y) - (hh - radius));
+              const qz = Math.max(0, Math.abs(v.z) - (hd - radius));
+              const q = Math.sqrt(qx * qx + qy * qy + qz * qz);
+              if (q > radius) {
+                const s = radius / q;
+                if (Math.abs(v.x) > hw - radius) v.x = Math.sign(v.x) * (hw - radius + qx * s);
+                if (Math.abs(v.y) > hh - radius) v.y = Math.sign(v.y) * (hh - radius + qy * s);
+                if (Math.abs(v.z) > hd - radius) v.z = Math.sign(v.z) * (hd - radius + qz * s);
+              }
+              pos.setXYZ(i, v.x, v.y, v.z);
+            }
+            geo.computeVertexNormals();
+            return geo;
+          }
 
-          const bodyGeo = new THREE.ExtrudeGeometry(shape, {
-            depth: 0.55,
-            bevelEnabled: true,
-            bevelThickness: 0.12,
-            bevelSize: 0.1,
-            bevelSegments: 3,
-          });
-          bodyGeo.center();
-          const bodyMat = new THREE.MeshStandardMaterial({
+          const soft = new THREE.MeshStandardMaterial({
             color: 0xffffff,
-            flatShading: true,
             roughness: 0.55,
             metalness: 0.04,
           });
-          const body = new THREE.Mesh(bodyGeo, bodyMat);
-          group.add(body);
-
-          // grin band
-          const mouthGeo = new THREE.TorusGeometry(0.55, 0.14, 8, 20, Math.PI * 0.9);
-          const mouthMat = new THREE.MeshStandardMaterial({
-            color: 0xffffff,
-            flatShading: true,
-            roughness: 0.6,
+          const hard = new THREE.MeshStandardMaterial({
+            color: 0xf4f4f4,
+            roughness: 0.3,
+            metalness: 0.2,
           });
-          const mouth = new THREE.Mesh(mouthGeo, mouthMat);
-          mouth.position.set(0, -0.35, 0.4);
-          mouth.rotation.set(Math.PI * 0.55, 0, Math.PI);
-          group.add(mouth);
 
-          // eye / brow blob
-          const eyeGeo = new THREE.IcosahedronGeometry(0.22, 0);
-          const eye = new THREE.Mesh(eyeGeo, bodyMat);
-          eye.position.set(0.25, 0.55, 0.5);
-          group.add(eye);
+          // backrest, on a hinge so the two lumbar panels tilt back together
+          const backPivot = new THREE.Group();
+          backPivot.position.set(0, 0.0625, -0.425);
+          const backGroup = new THREE.Group();
+          backPivot.add(backGroup);
+
+          const lower = new THREE.Mesh(cushion(1.275, 0.9, 0.25, 0.1125), soft);
+          lower.position.set(0, 0.5625, 0);
+          backGroup.add(lower);
+
+          const upper = new THREE.Mesh(cushion(1.2, 0.775, 0.225, 0.1125), soft);
+          upper.position.set(0, 1.375, 0.019);
+          backGroup.add(upper);
+
+          backGroup.rotation.x = -0.22;
+          group.add(backPivot);
+
+          // spine connecting the hinge down to the seat
+          const spine = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.4, 0.15), hard);
+          spine.position.set(0, 0.1, -0.375);
+          spine.rotation.x = -0.1;
+          group.add(spine);
+
+          // seat
+          const seat = new THREE.Mesh(cushion(1.3125, 0.275, 1.25, 0.125), soft);
+          seat.position.set(0, 0, 0.075);
+          group.add(seat);
+
+          // mirrored armrests: pole + pad
+          function arm(side) {
+            const g = new THREE.Group();
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.056, 0.625, 12), hard);
+            pole.position.set(0, 0.4375, 0.025);
+            g.add(pole);
+            const pad = new THREE.Mesh(cushion(0.1875, 0.0875, 0.575, 0.05), soft);
+            pad.position.set(0, 0.7875, 0.1);
+            g.add(pad);
+            g.position.x = side * 0.725;
+            return g;
+          }
+          group.add(arm(1));
+          group.add(arm(-1));
+
+          // gas-lift column
+          const lift = new THREE.Mesh(new THREE.CylinderGeometry(0.081, 0.094, 0.775, 16), hard);
+          lift.position.set(0, -0.4375, 0.075);
+          group.add(lift);
+
+          // 5-star base with casters
+          const baseGroup = new THREE.Group();
+          baseGroup.position.set(0, -0.85, 0.075);
+          const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.1625, 0.2, 0.175, 16), hard);
+          baseGroup.add(hub);
+          for (let i = 0; i < 5; i++) {
+            const leg = new THREE.Group();
+            leg.rotation.y = (i / 5) * Math.PI * 2;
+            const foot = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1125, 0.975), hard);
+            foot.position.set(0, -0.0375, 0.525);
+            leg.add(foot);
+            const wheel = new THREE.Mesh(new THREE.SphereGeometry(0.0875, 10, 8), soft);
+            wheel.position.set(0, -0.125, 0.975);
+            leg.add(wheel);
+            baseGroup.add(leg);
+          }
+          group.add(baseGroup);
+
+          // recenter vertically, then nudge the whole assembly toward the
+          // upper-left of the frame (left: negative x, up: less-negative y)
+          group.position.set(-0.5, -0.1, 0);
 
           return group;
         }
@@ -1048,11 +1113,14 @@
           fill.position.set(-4, 2, -3);
           scene.add(fill);
 
-          const mesh = buildMark();
+          const mesh = buildChair();
           scene.add(mesh);
 
           const camera = new THREE.PerspectiveCamera(32, W / H, 0.1, 100);
-          camera.position.set(0, 0, 5.2);
+          // pulled back from 5.2 so the left/up-shifted chair has enough
+          // headroom in the frustum and its backrest/base stop clipping,
+          // even at the extreme mouse-driven pitch angles
+          camera.position.set(0, 0, 6.9);
 
           let renderer;
           try {
@@ -1078,30 +1146,70 @@
         }
 
         function initFallback() {
+          // canvas-2D silhouette of the same chair, for browsers without
+          // WebGL — a static front view with a slow swivel sway
+          function roundRect(x, y, w, h, r) {
+            octx.beginPath();
+            octx.moveTo(x + r, y);
+            octx.arcTo(x + w, y, x + w, y + h, r);
+            octx.arcTo(x + w, y + h, x, y + h, r);
+            octx.arcTo(x, y + h, x, y, r);
+            octx.arcTo(x, y, x + w, y, r);
+            octx.closePath();
+            octx.fill();
+          }
+
           function drawForm(t) {
             octx.clearRect(0, 0, W, H);
             octx.fillStyle = "#000";
             octx.fillRect(0, 0, W, H);
+
+            const cx = W * 0.5;
+            const sway = Math.sin(t * 0.4) * 0.05;
+            const shiftX = -W * 0.12; // left
+            const shiftY = -H * 0.03; // up (kept small so the backrest top doesn't clip the canvas edge)
+
+            octx.save();
+            octx.translate(shiftX, shiftY);
+            octx.translate(cx, H * 0.5);
+            octx.rotate(sway);
+            octx.translate(-cx, -H * 0.5);
+
             octx.fillStyle = "#fff";
-            const cx = W * 0.5,
-              topY = H * 0.06;
+            // backrest: upper + lower lumbar panels on the hinge line
+            // (all sizes are W/H fractions so this scales with the canvas)
+            roundRect(cx - 0.085 * W, 0.038 * H, 0.17 * W, 0.29 * H, 0.042 * H);
+            roundRect(cx - 0.105 * W, 0.317 * H, 0.21 * W, 0.2 * H, 0.046 * H);
+            // seat
+            roundRect(cx - 0.145 * W, 0.529 * H, 0.29 * W, 0.106 * H, 0.038 * H);
+            // armrests
+            roundRect(cx - 0.178 * W, 0.49 * H, 0.04 * W, 0.125 * H, 0.019 * H);
+            roundRect(cx + 0.138 * W, 0.49 * H, 0.04 * W, 0.125 * H, 0.019 * H);
+            // gas-lift column
+            roundRect(cx - 0.02 * W, 0.644 * H, 0.04 * W, 0.125 * H, 0.012 * H);
+
+            // 5-star base with casters
+            const hubY = 0.779 * H;
             octx.beginPath();
-            octx.moveTo(cx, topY);
-            const spikes = 6;
-            for (let i = 0; i <= spikes; i++) {
-              const a = (i / spikes) * Math.PI - Math.PI / 2;
-              const wobble = Math.sin(t * 0.7 + i) * 6;
-              const r = 170 + (i % 2 === 0 ? 40 : -20) + wobble;
-              const x = cx + Math.cos(a) * r * 1.15;
-              const y = topY + 60 + Math.sin(a) * r * 0.9 + i * 14;
-              octx.lineTo(x, y);
-            }
-            octx.lineTo(cx + 120, H * 0.62);
-            octx.quadraticCurveTo(cx + 90, H * 0.8, cx + 150, H * 0.98);
-            octx.lineTo(cx - 40, H * 0.98);
-            octx.quadraticCurveTo(cx - 70, H * 0.75, cx - 110, H * 0.6);
-            octx.closePath();
+            octx.arc(cx, hubY, 0.0225 * H, 0, Math.PI * 2);
             octx.fill();
+            octx.strokeStyle = "#fff";
+            octx.lineWidth = 0.0175 * H;
+            octx.lineCap = "round";
+            for (let i = 0; i < 5; i++) {
+              const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
+              const ex = cx + Math.cos(a) * 0.25 * H;
+              const ey = hubY + Math.sin(a) * 0.25 * H * 0.5;
+              octx.beginPath();
+              octx.moveTo(cx, hubY);
+              octx.lineTo(ex, ey);
+              octx.stroke();
+              octx.beginPath();
+              octx.arc(ex, ey, 0.0145 * H, 0, Math.PI * 2);
+              octx.fill();
+            }
+
+            octx.restore();
           }
 
           const t0 = performance.now();
