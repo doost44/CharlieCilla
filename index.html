@@ -501,6 +501,69 @@
         return path;
       }
 
+      function getFlipbookPageUrls(config) {
+        const selectedPages = Array.isArray(config.pages)
+          ? config.pages.filter((p) => typeof p === "string" && p.trim())
+          : [];
+        const useSelectedPages = selectedPages.length > 0;
+
+        const rawBasePath =
+          config.basePath || "pages_code/Handbook_Files/handbook-pages/page-";
+        const extension = config.extension || ".png";
+        const fallbackCount = parseInt(config.pageCount, 10) || 1;
+        const sourceTotalPages = useSelectedPages
+          ? selectedPages.length
+          : fallbackCount;
+
+        const shouldSkipFirstPage = config.skipFirstPage === true;
+        const sourceStartIndex =
+          shouldSkipFirstPage && sourceTotalPages > 1 ? 1 : 0;
+        const contentTotalPages = Math.max(
+          1,
+          sourceTotalPages - sourceStartIndex,
+        );
+        const basePath = normalizeFlipbookPath(rawBasePath);
+
+        const urls = [];
+        for (let n = 1; n <= contentTotalPages; n++) {
+          if (useSelectedPages) {
+            urls.push(
+              normalizeFlipbookPath(selectedPages[sourceStartIndex + n - 1]),
+            );
+          } else {
+            const filePageNum = sourceStartIndex + n;
+            const paddedNum = String(filePageNum).padStart(2, "0");
+            urls.push(`${basePath}${paddedNum}${extension}`);
+          }
+        }
+        return urls;
+      }
+
+      // Warms the browser's HTTP cache for every flipbook (handbook/voices)
+      // page image in the background after the page loads, so opening a
+      // flipbook project later feels instant instead of loading on demand.
+      function preloadFlipbookImages() {
+        const projects = AdminData.getHomeProjects().filter(
+          (p) => p.visible !== false && p.type === "flipbook-images",
+        );
+        const urls = [];
+        projects.forEach((p) => {
+          urls.push(...getFlipbookPageUrls(p.flipbookImages || {}));
+        });
+
+        let idx = 0;
+        const CONCURRENCY = 4;
+        function loadNext() {
+          if (idx >= urls.length) return;
+          const url = urls[idx++];
+          const img = new Image();
+          if ("fetchPriority" in img) img.fetchPriority = "low";
+          img.onload = img.onerror = loadNext;
+          img.src = url;
+        }
+        for (let i = 0; i < CONCURRENCY; i++) loadNext();
+      }
+
       function renderHomePage() {
         const projects = AdminData.getHomeProjects().filter(
           (p) => p.visible !== false,
@@ -898,6 +961,12 @@
       }
 
       renderHomePage();
+
+      if ("requestIdleCallback" in window) {
+        requestIdleCallback(() => preloadFlipbookImages(), { timeout: 4000 });
+      } else {
+        setTimeout(preloadFlipbookImages, 1500);
+      }
 
       // ===== interactive 3D ascii render =====
       // Renders a procedural office-chair model (hinged, curved backrest
