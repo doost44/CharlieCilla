@@ -329,6 +329,19 @@
         margin-bottom: 8px;
       }
 
+      .media-video-file {
+        display: flex;
+        justify-content: center;
+        border: 1px solid var(--line);
+        background: #000;
+      }
+
+      .media-video-file video {
+        max-width: 100%;
+        max-height: 78vh;
+        display: block;
+      }
+
       .media-flipbook {
         display: flex;
         flex-direction: column;
@@ -548,6 +561,12 @@
               <iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0"
                       allow="autoplay; encrypted-media; fullscreen"
                       allowfullscreen></iframe>
+            </div>
+          `;
+        } else if (type === "video-file") {
+          mediaHtml = `
+            <div class="media-block media-video-file">
+              <video src="${p.videoSrc}" controls autoplay playsinline></video>
             </div>
           `;
         } else if (type === "images") {
@@ -881,21 +900,48 @@
       renderHomePage();
 
       // ===== interactive 3D ascii render =====
-      // Renders a procedural office-chair model (hinged backrest, seat,
-      // armrests, gas lift, 5-star base on casters) — no external asset
-      // needed. Swap buildChair() for a loaded .glb if a traced model of
-      // the real object ever replaces this approximation.
+      // Renders a procedural office-chair model (hinged, curved backrest
+      // panels; sculpted waterfall seat; tilt mechanism; twin-wheel
+      // casters) — no external asset needed. Swap buildChair() for a
+      // loaded .glb if a traced model of the real object ever replaces
+      // this approximation.
       (function () {
         const canvas = document.getElementById("asciiCanvas");
         const ctx = canvas.getContext("2d");
         const W = canvas.width,
           H = canvas.height;
         const CELL = 8; // bumped alongside the larger canvas to keep the per-frame glyph count in check
-        const ramp = " .:-=*#%@"; // light -> dense, ordered by ink coverage
-        const off = document.createElement("canvas");
+        // curated light -> dense ramp, ordered by approximate ink coverage;
+        // longer than a minimal ramp so smoother (antialiased) luminance
+        // input actually buys visible gradient instead of banding
+        const ramp =
+          " .`',:;-~+<>!ilI?*xnuvcz#XMW8%B@$";
+        const GAMMA = 0.82; // lifts shadow detail without blowing out highlights
+        const THRESH = 0.05; // background is exact black, so this can sit low
+        const DITHER = 0.05; // subtle 4x4 ordered dither, smooths ramp banding
+        const BAYER4 = [
+          0, 8, 2, 10,
+          12, 4, 14, 6,
+          3, 11, 1, 9,
+          15, 7, 13, 5,
+        ].map((v) => v / 16 - 0.5);
+        const off = document.createElement("canvas"); // fallback's own draw target
         off.width = W;
         off.height = H;
         const octx = off.getContext("2d");
+        // low-res proxy the source frame is downsampled into before reading
+        // pixels: letting the canvas's own image smoothing box-filter each
+        // CELL block gives properly antialiased glyph selection instead of
+        // the old single-point-per-cell pick, at a fraction of the cost of
+        // averaging every pixel by hand
+        const cols = Math.round(W / CELL),
+          rows = Math.round(H / CELL);
+        const tiny = document.createElement("canvas");
+        tiny.width = cols;
+        tiny.height = rows;
+        const tctx = tiny.getContext("2d", { willReadFrequently: true });
+        tctx.imageSmoothingEnabled = true;
+        if ("imageSmoothingQuality" in tctx) tctx.imageSmoothingQuality = "high";
 
         const ACCENT = { r: 0x12, g: 0x37, b: 0xc4 }; // --link-blue
         const INK = { r: 0x0d, g: 0x0d, b: 0x0d };
@@ -956,48 +1002,60 @@
         }
 
         function sampleToAscii(sourceCanvas) {
-          // sourceCanvas is a separate canvas (the three.js renderer) that
-          // still needs copying in; the fallback path draws straight into
-          // `off` and passes it through as-is.
-          if (sourceCanvas !== off) {
-            octx.clearRect(0, 0, W, H);
-            octx.drawImage(sourceCanvas, 0, 0, W, H);
-          }
-          const img = octx.getImageData(0, 0, W, H).data;
+          // one drawImage does the antialiasing: the browser box/bilinear-
+          // filters the full-res frame down to exactly one pixel per ascii
+          // cell, so each glyph reflects the whole CELL block instead of a
+          // single sampled point (works for both the three.js canvas and
+          // the fallback's own `off` canvas — no more special-casing).
+          tctx.clearRect(0, 0, cols, rows);
+          tctx.drawImage(sourceCanvas, 0, 0, W, H, 0, 0, cols, rows);
+          const img = tctx.getImageData(0, 0, cols, rows).data;
           const inkColor = lerpColor(INK, ACCENT, excited);
           ctx.fillStyle = "#FFFFFF";
           ctx.fillRect(0, 0, W, H);
           ctx.font = CELL + 'px "IBM Plex Mono", monospace';
           ctx.textBaseline = "top";
           ctx.fillStyle = `rgb(${inkColor.r},${inkColor.g},${inkColor.b})`;
-          for (let y = 0; y < H; y += CELL) {
-            for (let x = 0; x < W; x += CELL) {
-              const i = (y * W + x) * 4;
-              const lum = img[i] / 255;
-              if (lum < 0.12) continue;
+          let p = 0;
+          for (let ry = 0; ry < rows; ry++) {
+            const dRow = ry & 3;
+            for (let rx = 0; rx < cols; rx++, p += 4) {
+              let lum =
+                (img[p] * 0.299 + img[p + 1] * 0.587 + img[p + 2] * 0.114) /
+                255;
+              lum += BAYER4[dRow * 4 + (rx & 3)] * DITHER;
+              lum = lum < 0 ? 0 : lum > 1 ? 1 : lum;
+              lum = Math.pow(lum, GAMMA);
+              if (lum < THRESH) continue;
               const idx = Math.min(
                 ramp.length - 1,
                 Math.floor(lum * ramp.length),
               );
-              const ch = ramp[idx] || "#";
+              const ch = ramp[idx];
               if (ch === " ") continue;
-              ctx.fillText(ch, x, y);
+              ctx.fillText(ch, rx * CELL, ry * CELL);
             }
           }
         }
 
-        // Stylized office chair: hinged two-panel backrest, cushioned
-        // seat, mirrored armrests, a gas-lift column and a 5-star base
-        // on casters. Pure procedural geometry (a rounded-box "cushion"
-        // helper does the corner-softening), tuned only for silhouette —
-        // fine surface detail is invisible at ASCII-cell resolution.
+        // Stylized office chair: hinged two-panel backrest (curved and
+        // tapered for a lumbar hug), a sculpted waterfall-front seat,
+        // mirrored armrests, a gas-lift column with a tilt mechanism, and
+        // a 5-star base on tapered legs with twin-wheel casters. All
+        // procedural — the vertex-warp helpers below run once at build
+        // time, not per frame, so the extra shape detail is free at
+        // render time. Three tonal materials (cushion / frame / hardware)
+        // give the ASCII sampler distinct luminance bands to key its
+        // glyph density off, which reads as part separation even though
+        // the render itself is monochrome.
         function buildChair() {
           const group = new THREE.Group();
 
           // rounded box: pushes corners toward a radius without ever
           // exceeding the original w×h×d bounds
-          function cushion(w, h, d, radius) {
-            const geo = new THREE.BoxGeometry(w, h, d, 6, 6, 6);
+          function cushion(w, h, d, radius, seg) {
+            seg = seg || 6;
+            const geo = new THREE.BoxGeometry(w, h, d, seg, seg, seg);
             const pos = geo.attributes.position;
             const v = new THREE.Vector3();
             const hw = w / 2, hh = h / 2, hd = d / 2;
@@ -1019,15 +1077,98 @@
             return geo;
           }
 
+          // widen/narrow a geometry by height band — gives the backrest
+          // panels a gentle barrel silhouette instead of a flat slab
+          function taperY(geo, hh, topK, botK) {
+            const pos = geo.attributes.position;
+            const v = new THREE.Vector3();
+            for (let i = 0; i < pos.count; i++) {
+              v.fromBufferAttribute(pos, i);
+              const t = (v.y + hh) / (2 * hh);
+              const k = 1 + (t > 0.5 ? (t - 0.5) * 2 * topK : (0.5 - t) * 2 * botK);
+              v.x *= k;
+              pos.setXYZ(i, v.x, v.y, v.z);
+            }
+            geo.computeVertexNormals();
+            return geo;
+          }
+
+          // bend a panel forward at its edges around a vertical axis, so
+          // the backrest wraps toward the sitter like the reference chair
+          function wrapZ(geo, radius) {
+            const pos = geo.attributes.position;
+            const v = new THREE.Vector3();
+            for (let i = 0; i < pos.count; i++) {
+              v.fromBufferAttribute(pos, i);
+              v.z += (v.x * v.x) / (2 * radius);
+              pos.setXYZ(i, v.x, v.y, v.z);
+            }
+            geo.computeVertexNormals();
+            return geo;
+          }
+
+          // dish the seat top slightly and curl the front edge down into
+          // a waterfall lip, breaking up what would otherwise be one flat
+          // uniform-luminance slab under ASCII sampling
+          function sculptSeat(geo, w, d) {
+            const pos = geo.attributes.position;
+            const v = new THREE.Vector3();
+            const hw = w / 2, hd = d / 2;
+            for (let i = 0; i < pos.count; i++) {
+              v.fromBufferAttribute(pos, i);
+              if (v.y > 0.01) {
+                const dx = v.x / hw, dz = v.z / hd;
+                v.y -= (1 - dx * dx * 0.6) * (1 - dz * dz * 0.35) * 0.05;
+                if (v.z > hd * 0.58) {
+                  const t = (v.z - hd * 0.58) / (hd * 0.42);
+                  v.y -= t * t * 0.11;
+                  v.z -= t * t * 0.03;
+                }
+              }
+              pos.setXYZ(i, v.x, v.y, v.z);
+            }
+            geo.computeVertexNormals();
+          }
+
+          // tapered, ridged leg: narrows from hub to tip, a raised spine
+          // catches the key light as a highlight line, and it slopes down
+          // toward the caster — much more readable than a plain box
+          const HUB_OFF = 0.0375;
+          function legGeometry(L, w, h) {
+            const geo = new THREE.BoxGeometry(w, h, L, 3, 3, 12);
+            const pos = geo.attributes.position;
+            const v = new THREE.Vector3();
+            for (let i = 0; i < pos.count; i++) {
+              v.fromBufferAttribute(pos, i);
+              const t = (v.z + L / 2) / L;
+              const taper = 1 - t * 0.42;
+              v.x *= taper;
+              if (v.y > 0.15 * h) {
+                const edge = 1 - Math.min(1, Math.abs(v.x) / (0.5 * w * taper));
+                v.y += edge * (0.28 * h) * (1 - t * 0.4);
+              }
+              v.y = v.y * (1 - t * 0.25) - t * (0.32 * h);
+              pos.setXYZ(i, v.x, v.y, v.z);
+            }
+            geo.computeVertexNormals();
+            geo.translate(0, 0, L / 2 + HUB_OFF);
+            return geo;
+          }
+
           const soft = new THREE.MeshStandardMaterial({
             color: 0xffffff,
-            roughness: 0.55,
+            roughness: 0.58,
             metalness: 0.04,
           });
           const hard = new THREE.MeshStandardMaterial({
-            color: 0xf4f4f4,
-            roughness: 0.3,
-            metalness: 0.2,
+            color: 0xf2f2f2,
+            roughness: 0.22,
+            metalness: 0.35,
+          });
+          const mech = new THREE.MeshStandardMaterial({
+            color: 0xa6a6a6,
+            roughness: 0.55,
+            metalness: 0.15,
           });
 
           // backrest, on a hinge so the two lumbar panels tilt back together
@@ -1036,11 +1177,17 @@
           const backGroup = new THREE.Group();
           backPivot.add(backGroup);
 
-          const lower = new THREE.Mesh(cushion(1.275, 0.9, 0.25, 0.1125), soft);
+          const lowerGeo = cushion(1.275, 0.9, 0.25, 0.1125, 8);
+          taperY(lowerGeo, 0.45, -0.05, -0.09);
+          wrapZ(lowerGeo, 2.0);
+          const lower = new THREE.Mesh(lowerGeo, soft);
           lower.position.set(0, 0.5625, 0);
           backGroup.add(lower);
 
-          const upper = new THREE.Mesh(cushion(1.2, 0.775, 0.225, 0.1125), soft);
+          const upperGeo = cushion(1.2, 0.775, 0.225, 0.1125, 8);
+          taperY(upperGeo, 0.3875, -0.1, -0.02);
+          wrapZ(upperGeo, 2.3);
+          const upper = new THREE.Mesh(upperGeo, soft);
           upper.position.set(0, 1.375, 0.019);
           backGroup.add(upper);
 
@@ -1053,18 +1200,46 @@
           spine.rotation.x = -0.1;
           group.add(spine);
 
+          // hinge cap bridging the recline pivot (stays with the seat)
+          const hingeCap = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.34, 14), hard);
+          hingeCap.rotation.z = Math.PI / 2;
+          hingeCap.position.set(0, 0.09, -0.425);
+          group.add(hingeCap);
+
           // seat
-          const seat = new THREE.Mesh(cushion(1.3125, 0.275, 1.25, 0.125), soft);
+          const seatGeo = cushion(1.3125, 0.275, 1.25, 0.125, 8);
+          sculptSeat(seatGeo, 1.3125, 1.25);
+          const seat = new THREE.Mesh(seatGeo, soft);
           seat.position.set(0, 0, 0.075);
           group.add(seat);
 
-          // mirrored armrests: pole + pad
+          // tilt mechanism block, knob and paddle lever tucked under the seat
+          const mechBlock = new THREE.Mesh(cushion(0.34, 0.09, 0.36, 0.03, 6), mech);
+          mechBlock.position.set(0, -0.09, 0.075);
+          group.add(mechBlock);
+          const knob = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.05, 14), hard);
+          knob.rotation.x = Math.PI / 2;
+          knob.position.set(0.16, -0.09, 0.24);
+          group.add(knob);
+          const lever = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.26, 8), mech);
+          lever.rotation.z = Math.PI / 2;
+          lever.rotation.y = 0.35;
+          lever.position.set(-0.2, -0.1, 0.18);
+          group.add(lever);
+
+          // mirrored armrests: pole, collar, bracket and pad
           function arm(side) {
             const g = new THREE.Group();
             const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.056, 0.625, 12), hard);
             pole.position.set(0, 0.4375, 0.025);
             g.add(pole);
-            const pad = new THREE.Mesh(cushion(0.1875, 0.0875, 0.575, 0.05), soft);
+            const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.062, 0.03, 12), mech);
+            collar.position.set(0, 0.62, 0.025);
+            g.add(collar);
+            const bracket = new THREE.Mesh(cushion(0.09, 0.07, 0.22, 0.025, 5), hard);
+            bracket.position.set(0, 0.745, 0.07);
+            g.add(bracket);
+            const pad = new THREE.Mesh(cushion(0.1875, 0.0875, 0.575, 0.05, 6), soft);
             pad.position.set(0, 0.7875, 0.1);
             g.add(pad);
             g.position.x = side * 0.725;
@@ -1073,26 +1248,46 @@
           group.add(arm(1));
           group.add(arm(-1));
 
-          // gas-lift column
+          // gas-lift column, with a shroud ring near the top
           const lift = new THREE.Mesh(new THREE.CylinderGeometry(0.081, 0.094, 0.775, 16), hard);
           lift.position.set(0, -0.4375, 0.075);
           group.add(lift);
+          const shroudRing = new THREE.Mesh(new THREE.TorusGeometry(0.088, 0.012, 8, 16), mech);
+          shroudRing.rotation.x = Math.PI / 2;
+          shroudRing.position.set(0, -0.14, 0.075);
+          group.add(shroudRing);
 
-          // 5-star base with casters
+          // 5-star base with tapered, ridged legs and twin-wheel casters
           const baseGroup = new THREE.Group();
           baseGroup.position.set(0, -0.85, 0.075);
           const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.1625, 0.2, 0.175, 16), hard);
           baseGroup.add(hub);
+          const hubCap = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.04, 16), mech);
+          hubCap.position.y = 0.1;
+          baseGroup.add(hubCap);
+
+          function leg(angle) {
+            const g = new THREE.Group();
+            g.rotation.y = angle;
+            const L = 0.975, fw = 0.15, fh = 0.1125;
+            g.add(new THREE.Mesh(legGeometry(L, fw, fh), hard));
+            const casterZ = L + HUB_OFF - 0.05;
+            const boss = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.058, 0.07, 10), hard);
+            boss.position.set(0, -0.09, casterZ);
+            g.add(boss);
+            const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.16, 8), mech);
+            axle.rotation.z = Math.PI / 2;
+            axle.position.set(0, -0.135, casterZ);
+            g.add(axle);
+            [-0.062, 0.062].forEach((ox) => {
+              const wheel = new THREE.Mesh(new THREE.SphereGeometry(0.072, 10, 8), mech);
+              wheel.position.set(ox, -0.14, casterZ);
+              g.add(wheel);
+            });
+            return g;
+          }
           for (let i = 0; i < 5; i++) {
-            const leg = new THREE.Group();
-            leg.rotation.y = (i / 5) * Math.PI * 2;
-            const foot = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1125, 0.975), hard);
-            foot.position.set(0, -0.0375, 0.525);
-            leg.add(foot);
-            const wheel = new THREE.Mesh(new THREE.SphereGeometry(0.0875, 10, 8), soft);
-            wheel.position.set(0, -0.125, 0.975);
-            leg.add(wheel);
-            baseGroup.add(leg);
+            baseGroup.add(leg((i / 5) * Math.PI * 2));
           }
           group.add(baseGroup);
 
@@ -1105,13 +1300,20 @@
 
         function initThree() {
           const scene = new THREE.Scene();
-          scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-          const key = new THREE.DirectionalLight(0xffffff, 1.3);
+          scene.add(new THREE.AmbientLight(0xffffff, 0.48));
+          const key = new THREE.DirectionalLight(0xffffff, 1.55);
           key.position.set(4, 6, 5);
           scene.add(key);
-          const fill = new THREE.DirectionalLight(0xc0d8ff, 0.6);
+          const fill = new THREE.DirectionalLight(0xc0d8ff, 0.55);
           fill.position.set(-4, 2, -3);
           scene.add(fill);
+          // grazing rim light: catches the edges of the curved backrest
+          // and legs as the chair auto-rotates, which is what actually
+          // separates one part's silhouette from the next in a monochrome
+          // ASCII render (flat ambient+key alone reads as one soft blob)
+          const rim = new THREE.DirectionalLight(0xffffff, 0.5);
+          rim.position.set(-2, 3, -6);
+          scene.add(rim);
 
           const mesh = buildChair();
           scene.add(mesh);
@@ -1185,10 +1387,12 @@
             // armrests
             roundRect(cx - 0.178 * W, 0.49 * H, 0.04 * W, 0.125 * H, 0.019 * H);
             roundRect(cx + 0.138 * W, 0.49 * H, 0.04 * W, 0.125 * H, 0.019 * H);
+            // tilt mechanism, bridging seat and lift
+            roundRect(cx - 0.048 * W, 0.605 * H, 0.096 * W, 0.032 * H, 0.01 * H);
             // gas-lift column
             roundRect(cx - 0.02 * W, 0.644 * H, 0.04 * W, 0.125 * H, 0.012 * H);
 
-            // 5-star base with casters
+            // 5-star base with twin-wheel casters
             const hubY = 0.779 * H;
             octx.beginPath();
             octx.arc(cx, hubY, 0.0225 * H, 0, Math.PI * 2);
@@ -1204,8 +1408,12 @@
               octx.moveTo(cx, hubY);
               octx.lineTo(ex, ey);
               octx.stroke();
+              // twin wheels, offset perpendicular to the spoke
+              const px = -Math.sin(a) * 0.014 * H,
+                py = Math.cos(a) * 0.014 * H;
               octx.beginPath();
-              octx.arc(ex, ey, 0.0145 * H, 0, Math.PI * 2);
+              octx.arc(ex + px, ey + py, 0.011 * H, 0, Math.PI * 2);
+              octx.arc(ex - px, ey - py, 0.011 * H, 0, Math.PI * 2);
               octx.fill();
             }
 

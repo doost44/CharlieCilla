@@ -64,24 +64,33 @@ const VOICES_FLIPBOOK_IMAGES = Array.from({ length: 36 }, (_, i) => {
   };
 });
 
+const HANDBOOK_2026_FLIPBOOK_IMAGES = Array.from({ length: 28 }, (_, i) => {
+  const pageNum = String(i + 1).padStart(2, "0");
+  return {
+    path: `Handbook_Files/handbook-pages/handbook2026-${pageNum}.png`,
+    name: `Handbook 2026 Page ${pageNum}`,
+  };
+});
+
 const REPOSITORY_FLIPBOOK_IMAGES = [
   ...HANDBOOK_FLIPBOOK_IMAGES,
   ...VOICES_FLIPBOOK_IMAGES,
+  ...HANDBOOK_2026_FLIPBOOK_IMAGES,
 ];
 
 // Default home page projects (video/film)
 const DEFAULT_HOME_PROJECTS = [
   {
-    id: "home-1",
+    id: "home-0",
     title: "DESIGNER HANDBOOK",
-    year: "2025",
+    year: "2026",
     category: "PRINT / EDITORIAL",
     description: "A VISUAL GUIDE TO THE FUNDAMENTALS OF DESIGN",
     credit: "",
     type: "flipbook-images",
     flipbookImages: {
-      basePath: "Handbook_Files/handbook-pages/page-",
-      pageCount: 22,
+      basePath: "Handbook_Files/handbook-pages/handbook2026-",
+      pageCount: 28,
       extension: ".png",
     },
     visible: true,
@@ -102,9 +111,68 @@ const DEFAULT_HOME_PROJECTS = [
     visible: true,
   },
   {
+    id: "home-1",
+    title: "DESIGNER HANDBOOK 2025",
+    year: "2025",
+    category: "PRINT / EDITORIAL",
+    description: "A VISUAL GUIDE TO THE FUNDAMENTALS OF DESIGN",
+    credit: "",
+    type: "flipbook-images",
+    flipbookImages: {
+      basePath: "Handbook_Files/handbook-pages/page-",
+      pageCount: 22,
+      extension: ".png",
+    },
+    visible: true,
+  },
+  {
+    id: "home-5",
+    title: "AMNA",
+    year: "2025",
+    category: "WATERLOO BLOCKCHAIN",
+    description: "TECH WEEK 2025",
+    credit: "",
+    type: "video-file",
+    videoSrc: "Assets/videos/amna-tech-week-2025.mp4",
+    visible: true,
+  },
+  {
+    id: "home-6",
+    title: "BBINB",
+    year: "2025",
+    category: "WATERLOO BLOCKCHAIN",
+    description: "BLOCKCHAIN IN INDUSTRY 2025",
+    credit: "",
+    type: "video-file",
+    videoSrc: "Assets/videos/bbinb-blockchain-industry-2025.mp4",
+    visible: true,
+  },
+  {
+    id: "home-8",
+    title: "STUDENT MEAL PLAN APP PROTOTYPE",
+    year: "2025",
+    category: "APP PROTOTYPE",
+    description: "A BUDGETING TOOL FOR STUDENT MEAL PLANS",
+    credit: "",
+    type: "images",
+    images: ["../Mealplan.jpg"],
+    visible: true,
+  },
+  {
+    id: "home-7",
+    title: "WATERLOO BLOCKCHAIN",
+    year: "2025",
+    category: "10 YEAR ETHEREUM ANNIVERSARY",
+    description: "10 YEAR ETHEREUM ANNIVERSARY 2025",
+    credit: "",
+    type: "video-file",
+    videoSrc: "Assets/videos/waterloo-blockchain-eth-anniversary-2025.mp4",
+    visible: true,
+  },
+  {
     id: "home-3",
     title: "THE GOATMAN",
-    year: "2025",
+    year: "2024",
     category: "SHORT FILM",
     description: "A PAINTED JOURNEY THROUGH A STRANGE WORLD",
     credit: "",
@@ -116,7 +184,7 @@ const DEFAULT_HOME_PROJECTS = [
   {
     id: "home-4",
     title: "BOUND BY BOARDS",
-    year: "2025",
+    year: "2024",
     category: "SHORT DOC",
     description: "CONNECTIONS MADE THROUGH GRIPTAPE",
     credit: "DP",
