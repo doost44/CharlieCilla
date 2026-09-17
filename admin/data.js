@@ -51,7 +51,7 @@ const REPOSITORY_IMAGES = [
 const HANDBOOK_FLIPBOOK_IMAGES = Array.from({ length: 22 }, (_, i) => {
   const pageNum = String(i + 1).padStart(2, "0");
   return {
-    path: `Handbook_Files/handbook-pages/page-${pageNum}.png`,
+    path: `Handbook_Files/handbook-pages/page-${pageNum}.jpg`,
     name: `Handbook Page ${pageNum}`,
   };
 });
@@ -59,7 +59,7 @@ const HANDBOOK_FLIPBOOK_IMAGES = Array.from({ length: 22 }, (_, i) => {
 const VOICES_FLIPBOOK_IMAGES = Array.from({ length: 36 }, (_, i) => {
   const pageNum = String(i + 1).padStart(2, "0");
   return {
-    path: `Handbook_Files/handbook-pages/voices-${pageNum}.png`,
+    path: `Handbook_Files/handbook-pages/voices-${pageNum}.jpg`,
     name: `Voices Page ${pageNum}`,
   };
 });
@@ -67,7 +67,7 @@ const VOICES_FLIPBOOK_IMAGES = Array.from({ length: 36 }, (_, i) => {
 const HANDBOOK_2026_FLIPBOOK_IMAGES = Array.from({ length: 28 }, (_, i) => {
   const pageNum = String(i + 1).padStart(2, "0");
   return {
-    path: `Handbook_Files/handbook-pages/handbook2026-${pageNum}.png`,
+    path: `Handbook_Files/handbook-pages/handbook2026-${pageNum}.jpg`,
     name: `Handbook 2026 Page ${pageNum}`,
   };
 });
@@ -91,7 +91,7 @@ const DEFAULT_HOME_PROJECTS = [
     flipbookImages: {
       basePath: "Handbook_Files/handbook-pages/handbook2026-",
       pageCount: 28,
-      extension: ".png",
+      extension: ".jpg",
     },
     visible: true,
   },
@@ -106,7 +106,7 @@ const DEFAULT_HOME_PROJECTS = [
     flipbookImages: {
       basePath: "Handbook_Files/handbook-pages/voices-",
       pageCount: 36,
-      extension: ".png",
+      extension: ".jpg",
     },
     visible: true,
   },
@@ -121,7 +121,7 @@ const DEFAULT_HOME_PROJECTS = [
     flipbookImages: {
       basePath: "Handbook_Files/handbook-pages/page-",
       pageCount: 22,
-      extension: ".png",
+      extension: ".jpg",
     },
     visible: true,
   },
@@ -328,7 +328,7 @@ Each spread demonstrates practical applications of design principles through car
     flipbookImages: {
       basePath: "Handbook_Files/handbook-pages/page-",
       pageCount: 22,
-      extension: ".png",
+      extension: ".jpg",
     },
     displayStyle: "default",
     visible: true,
@@ -343,7 +343,7 @@ The project explores themes of identity, community, and aspiration through a ser
     flipbookImages: {
       basePath: "Handbook_Files/handbook-pages/voices-",
       pageCount: 36,
-      extension: ".png",
+      extension: ".jpg",
     },
     displayStyle: "default",
     visible: true,
