@@ -325,11 +325,19 @@
       }
 
       .carousel-slide img {
-        flex: 1 1 0;
-        min-width: 0;
+        flex: none;
+        width: auto;
+        height: auto;
         max-height: 80vh;
-        object-fit: contain;
         display: block;
+      }
+
+      .carousel-slide.single img {
+        max-width: 100%;
+      }
+
+      .carousel-slide.spread img {
+        max-width: 50%;
       }
 
       .carousel-nav {
@@ -396,20 +404,39 @@
         visibility: visible;
       }
 
-      .carousel-lightbox-imgs {
+      .carousel-lightbox-track {
         display: flex;
-        align-items: center;
-        max-width: 92vw;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        width: 92vw;
+        height: 92vh;
+      }
+
+      .carousel-lightbox-track::-webkit-scrollbar {
+        display: none;
+      }
+
+      .carousel-lightbox-track .carousel-slide img {
         max-height: 92vh;
       }
 
-      .carousel-lightbox-imgs img {
-        max-width: 92vw;
-        max-height: 92vh;
-        flex: 1 1 0;
-        min-width: 0;
-        object-fit: contain;
-        display: block;
+      .carousel-lightbox-track .carousel-slide.single img {
+        max-width: 100%;
+      }
+
+      .carousel-lightbox-track .carousel-slide.spread img {
+        max-width: 50%;
+      }
+
+      .carousel-lightbox-prev {
+        left: 24px;
+      }
+
+      .carousel-lightbox-next {
+        right: 24px;
       }
 
       .carousel-lightbox-close {
@@ -423,6 +450,7 @@
         font-size: 0.9rem;
         cursor: pointer;
         padding: 0;
+        z-index: 1;
       }
 
       .carousel-lightbox-close:hover {
@@ -516,7 +544,9 @@
 
     <div id="carousel-lightbox" class="carousel-lightbox">
       <button type="button" class="carousel-lightbox-close" onclick="closeCarouselZoom()">&times; close</button>
-      <div id="carousel-lightbox-imgs" class="carousel-lightbox-imgs"></div>
+      <button type="button" class="carousel-nav carousel-lightbox-prev" onclick="lightboxPrev()" aria-label="Previous slide">&larr;</button>
+      <div id="carousel-lightbox-track" class="carousel-lightbox-track"></div>
+      <button type="button" class="carousel-nav carousel-lightbox-next" onclick="lightboxNext()" aria-label="Next slide">&rarr;</button>
     </div>
 
     <link rel="stylesheet" href="../admin/admin.css" />
@@ -528,6 +558,7 @@
       const projectsById = {};
       let currentProjectViewer = null;
       const projectCarousels = {};
+      let activeZoomCarouselId = null;
 
       function stripHtml(input) {
         return (input || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
@@ -856,21 +887,26 @@
                   `<img src="${url}" alt="Page ${group.pages[j]}" loading="${i === 0 ? "eager" : "lazy"}" decoding="async">`,
               )
               .join("");
-            return `<div class="carousel-slide">${imgs}</div>`;
+            const sizeClass = group.urls.length === 2 ? "spread" : "single";
+            return `<div class="carousel-slide ${sizeClass}">${imgs}</div>`;
           })
           .join("");
 
-        const state = { track, groups, count: groups.length, current: 0 };
+        const state = {
+          track,
+          groups,
+          count: groups.length,
+          current: 0,
+          totalPages: urls.length,
+          useSpreads,
+        };
         projectCarousels[carouselId] = state;
 
         const update = (n) => {
           state.current = n;
-          pageInfo.textContent = carouselGroupLabel(
-            groups[n],
-            urls.length,
-            useSpreads,
-          );
+          pageInfo.textContent = carouselGroupLabel(groups[n], urls.length, useSpreads);
         };
+        state.setCurrent = update;
         update(0);
 
         let scrollTimer = null;
@@ -916,21 +952,70 @@
 
       function carouselZoom(carouselId) {
         const state = projectCarousels[carouselId];
-        if (!state) return;
         const lightbox = document.getElementById("carousel-lightbox");
-        const container = document.getElementById("carousel-lightbox-imgs");
-        if (!lightbox || !container) return;
-        const group = state.groups[state.current];
-        container.innerHTML = group.urls
-          .map((url, j) => `<img src="${url}" alt="Page ${group.pages[j]}">`)
+        const track = document.getElementById("carousel-lightbox-track");
+        if (!state || !lightbox || !track) return;
+
+        activeZoomCarouselId = carouselId;
+
+        track.innerHTML = state.groups
+          .map((group) => {
+            const imgs = group.urls
+              .map(
+                (url, j) =>
+                  `<img src="${url}" alt="Page ${group.pages[j]}" loading="lazy" decoding="async">`,
+              )
+              .join("");
+            const sizeClass = group.urls.length === 2 ? "spread" : "single";
+            return `<div class="carousel-slide ${sizeClass}">${imgs}</div>`;
+          })
           .join("");
+
         lightbox.classList.add("is-open");
+        track.scrollLeft = state.current * (track.clientWidth || 1);
       }
 
       function closeCarouselZoom() {
         const lightbox = document.getElementById("carousel-lightbox");
         if (!lightbox) return;
         lightbox.classList.remove("is-open");
+        if (activeZoomCarouselId) {
+          const state = projectCarousels[activeZoomCarouselId];
+          if (state) {
+            state.track.scrollLeft = state.current * (state.track.clientWidth || 1);
+          }
+        }
+        activeZoomCarouselId = null;
+      }
+
+      function lightboxGoTo(index) {
+        if (!activeZoomCarouselId) return;
+        const state = projectCarousels[activeZoomCarouselId];
+        const track = document.getElementById("carousel-lightbox-track");
+        if (!state || !track) return;
+        const clamped = Math.max(0, Math.min(state.count - 1, index));
+        const slide = track.children[clamped];
+        if (slide) {
+          slide.scrollIntoView({
+            behavior: "smooth",
+            inline: "center",
+            block: "nearest",
+          });
+        }
+      }
+
+      function lightboxPrev() {
+        const track = document.getElementById("carousel-lightbox-track");
+        if (!track) return;
+        const slideW = track.clientWidth || 1;
+        lightboxGoTo(Math.round(track.scrollLeft / slideW) - 1);
+      }
+
+      function lightboxNext() {
+        const track = document.getElementById("carousel-lightbox-track");
+        if (!track) return;
+        const slideW = track.clientWidth || 1;
+        lightboxGoTo(Math.round(track.scrollLeft / slideW) + 1);
       }
 
       function flipbookPrev() {
@@ -948,13 +1033,18 @@
       }
 
       document.addEventListener("keydown", (event) => {
+        const lightbox = document.getElementById("carousel-lightbox");
+        const lightboxOpen = lightbox && lightbox.classList.contains("is-open");
         if (event.key === "Escape") {
-          const lightbox = document.getElementById("carousel-lightbox");
-          if (lightbox && lightbox.classList.contains("is-open")) {
+          if (lightboxOpen) {
             closeCarouselZoom();
           } else {
             closeProjectModal();
           }
+        } else if (lightboxOpen && event.key === "ArrowLeft") {
+          lightboxPrev();
+        } else if (lightboxOpen && event.key === "ArrowRight") {
+          lightboxNext();
         }
       });
 
@@ -964,6 +1054,22 @@
           if (event.target.id === "carousel-lightbox") closeCarouselZoom();
         },
       );
+
+      (function () {
+        const lightboxTrack = document.getElementById("carousel-lightbox-track");
+        let lightboxScrollTimer = null;
+        lightboxTrack.addEventListener("scroll", () => {
+          clearTimeout(lightboxScrollTimer);
+          lightboxScrollTimer = setTimeout(() => {
+            if (!activeZoomCarouselId) return;
+            const state = projectCarousels[activeZoomCarouselId];
+            if (!state) return;
+            const slideW = lightboxTrack.clientWidth || 1;
+            const idx = Math.round(lightboxTrack.scrollLeft / slideW);
+            state.setCurrent(Math.max(0, Math.min(state.count - 1, idx)));
+          }, 80);
+        });
+      })();
 
       renderProjectsPage();
     </script>

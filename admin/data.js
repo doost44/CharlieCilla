@@ -85,7 +85,8 @@ const DEFAULT_HOME_PROJECTS = [
     title: "DESIGNER HANDBOOK",
     year: "2026",
     category: "PRINT / EDITORIAL",
-    description: "A VISUAL GUIDE TO THE FUNDAMENTALS OF DESIGN",
+    description:
+      "A year further into the role, that range has turned into ownership. I'm still moving across 10+ WUSA sub-brands under strict guidelines and adapting on the fly, but now I'm shaping the system itself &mdash; I helped build out a design cheat sheet so the wider team could stay consistent and onboard faster, nudged WUSA's visual identity toward something more photo-based and a little more relaxed, and led the sub-branding for Welcome Week.<br><br>This year the handbook also went to print for the first time, turning a resource that used to live only on a screen into something designers could actually hold. My event graphics work has sharpened into one of my strongest skills &mdash; layouts that hold up under tight deadlines, and concepts confident enough to push past the obvious.",
     credit: "",
     type: "carousel-images",
     carouselImages: {
@@ -101,7 +102,8 @@ const DEFAULT_HOME_PROJECTS = [
     title: "VOICES 2025",
     year: "2025",
     category: "PUBLICATION",
-    description: "A MULTIMEDIA EXPLORATION OF CONTEMPORARY VOICES",
+    description:
+      "Voices has been a project of WUSA's Women's Centre since 1995, printing a new anthology magazine of student work each year. Over those years it's become something special &mdash; a space that holds different artistic expressions and experiences, where students can voice their beliefs, share their hearts, and mark both celebration and mourning.<br><br>For the 2025 edition, I stepped in as lead designer, guiding the entire design identity from the ground up. I worked independently through every stage &mdash; developing the concept, pitching it, and carrying the project from idea to finished publication in a short period of time, while making sure the design still did justice to a publication with this much history behind it.",
     credit: "",
     type: "carousel-images",
     carouselImages: {
@@ -117,7 +119,8 @@ const DEFAULT_HOME_PROJECTS = [
     title: "DESIGNER HANDBOOK 2025",
     year: "2025",
     category: "PRINT / EDITORIAL",
-    description: "A VISUAL GUIDE TO THE FUNDAMENTALS OF DESIGN",
+    description:
+      "The Designer Handbook is less a single document and more a working record of what it means to design inside WUSA &mdash; a highly structured, brand-heavy environment where consistency matters just as much as creativity.<br><br>At WUSA, I work under strict brand guidelines, producing a high volume of assets on tight turnarounds while keeping a strong, consistent presence across 10+ different sub-brands &mdash; switching between them and adapting fast.<br><br>Outside of day-to-day student services work, I take on event graphics: strong layouts, bold concepts, and more room to actually push ideas creatively.",
     credit: "",
     type: "carousel-images",
     carouselImages: {
