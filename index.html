@@ -191,9 +191,9 @@
         margin-right: calc(-1 * clamp(24px, 4vw, 64px));
       }
 
-      canvas#asciiCanvas {
+      pre#asciiCanvas {
         max-width: 100%;
-        image-rendering: pixelated;
+        user-select: none;
       }
 
       @media (max-width: 900px) {
@@ -347,8 +347,6 @@
         flex-direction: column;
         align-items: center;
         gap: 10px;
-        border: 1px solid var(--line);
-        padding: 20px;
       }
 
       .flipbook-controls {
@@ -445,7 +443,7 @@
         </div>
 
         <div class="ascii-wrap">
-          <canvas id="asciiCanvas" width="760" height="800"></canvas>
+          <pre id="asciiCanvas" aria-hidden="true"></pre>
         </div>
       </div>
     </div>
@@ -975,16 +973,33 @@
       // loaded .glb if a traced model of the real object ever replaces
       // this approximation.
       (function () {
-        const canvas = document.getElementById("asciiCanvas");
-        const ctx = canvas.getContext("2d");
-        const W = canvas.width,
-          H = canvas.height;
-        const CELL = 8; // bumped alongside the larger canvas to keep the per-frame glyph count in check
+        // Output is real DOM text (a <pre>), not a rasterized <canvas> —
+        // glyphs get drawn by the browser's own text renderer at their
+        // native size instead of being stamped onto a low-res bitmap and
+        // scaled, which is what was causing the blur. This mirrors how
+        // reference ASCII-3D sites (e.g. three.js's own AsciiEffect) do
+        // it: sample the rendered frame down to a small grid, map each
+        // cell to a glyph, and set that as literal text content.
+        const outEl = document.getElementById("asciiCanvas");
+        const wrapEl = outEl.parentElement;
+        const W = 760,
+          H = 800; // fixed resolution the 3D scene renders/samples at
+        const FONT_SIZE = 9,
+          LINE_HEIGHT = 9; // px — fixed, so glyphs stay a constant crisp size
+        outEl.style.fontFamily = '"IBM Plex Mono", monospace';
+        outEl.style.fontWeight = "500"; // the only bold-ish weight actually loaded (400/500) — avoids synthetic-bold blur
+        outEl.style.fontSize = FONT_SIZE + "px";
+        outEl.style.lineHeight = LINE_HEIGHT + "px";
+        outEl.style.whiteSpace = "pre";
+        outEl.style.margin = "0";
+        outEl.style.overflow = "hidden";
+        outEl.style.webkitFontSmoothing = "antialiased";
+
         // curated light -> dense ramp, ordered by approximate ink coverage;
         // longer than a minimal ramp so smoother (antialiased) luminance
         // input actually buys visible gradient instead of banding
         const ramp =
-          " .`',:;-~+<>!ilI?*xnuvcz#XMW8%B@$";
+          " .`',:;-~+<>!ilI?*xnuvcz#XMW8%B$@";
         const GAMMA = 0.82; // lifts shadow detail without blowing out highlights
         const THRESH = 0.05; // background is exact black, so this can sit low
         const DITHER = 0.05; // subtle 4x4 ordered dither, smooths ramp banding
@@ -998,22 +1013,51 @@
         off.width = W;
         off.height = H;
         const octx = off.getContext("2d");
+
+        // real monospace advance width for the loaded font, measured once,
+        // so the column count matches what the browser will actually lay
+        // out instead of guessing a square cell like the old canvas did
+        const measureCtx = document.createElement("canvas").getContext("2d");
+        measureCtx.font = `500 ${FONT_SIZE}px "IBM Plex Mono", monospace`;
+        const charWidth = measureCtx.measureText("0").width || FONT_SIZE * 0.6;
+
         // low-res proxy the source frame is downsampled into before reading
         // pixels: letting the canvas's own image smoothing box-filter each
-        // CELL block gives properly antialiased glyph selection instead of
-        // the old single-point-per-cell pick, at a fraction of the cost of
-        // averaging every pixel by hand
-        const cols = Math.round(W / CELL),
-          rows = Math.round(H / CELL);
+        // grid cell gives properly antialiased glyph selection instead of
+        // a single sampled point.
         const tiny = document.createElement("canvas");
-        tiny.width = cols;
-        tiny.height = rows;
         const tctx = tiny.getContext("2d", { willReadFrequently: true });
         tctx.imageSmoothingEnabled = true;
         if ("imageSmoothingQuality" in tctx) tctx.imageSmoothingQuality = "high";
 
+        // the text grid is sized off the box's actual on-screen width (so
+        // it never gets blurrily scaled down on narrow layouts the way the
+        // old canvas did) capped at the source render's native 760x800,
+        // same aspect ratio, and rebuilt on resize.
+        let cols, rows;
+        function rebuildGrid() {
+          const availW = Math.max(
+            200,
+            Math.floor(wrapEl.getBoundingClientRect().width) || W,
+          );
+          const boxW = Math.min(W, availW);
+          const boxH = Math.round(boxW * (H / W));
+          outEl.style.width = boxW + "px";
+          outEl.style.height = boxH + "px";
+          cols = Math.max(20, Math.floor(boxW / charWidth));
+          rows = Math.max(20, Math.floor(boxH / LINE_HEIGHT));
+          tiny.width = cols;
+          tiny.height = rows;
+        }
+        rebuildGrid();
+        let resizeTimer;
+        window.addEventListener("resize", () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(rebuildGrid, 150);
+        });
+
         const ACCENT = { r: 0x12, g: 0x37, b: 0xc4 }; // --link-blue
-        const INK = { r: 0x0d, g: 0x0d, b: 0x0d };
+        const INK = { r: 0x00, g: 0x00, b: 0x00 };
 
         function lerpColor(a, b, t) {
           return {
@@ -1072,19 +1116,17 @@
 
         function sampleToAscii(sourceCanvas) {
           // one drawImage does the antialiasing: the browser box/bilinear-
-          // filters the full-res frame down to exactly one pixel per ascii
-          // cell, so each glyph reflects the whole CELL block instead of a
+          // filters the full-res frame down to exactly one pixel per grid
+          // cell, so each glyph reflects the whole cell instead of a
           // single sampled point (works for both the three.js canvas and
           // the fallback's own `off` canvas — no more special-casing).
           tctx.clearRect(0, 0, cols, rows);
           tctx.drawImage(sourceCanvas, 0, 0, W, H, 0, 0, cols, rows);
           const img = tctx.getImageData(0, 0, cols, rows).data;
           const inkColor = lerpColor(INK, ACCENT, excited);
-          ctx.fillStyle = "#FFFFFF";
-          ctx.fillRect(0, 0, W, H);
-          ctx.font = CELL + 'px "IBM Plex Mono", monospace';
-          ctx.textBaseline = "top";
-          ctx.fillStyle = `rgb(${inkColor.r},${inkColor.g},${inkColor.b})`;
+          outEl.style.color = `rgb(${inkColor.r},${inkColor.g},${inkColor.b})`;
+
+          let out = "";
           let p = 0;
           for (let ry = 0; ry < rows; ry++) {
             const dRow = ry & 3;
@@ -1095,16 +1137,15 @@
               lum += BAYER4[dRow * 4 + (rx & 3)] * DITHER;
               lum = lum < 0 ? 0 : lum > 1 ? 1 : lum;
               lum = Math.pow(lum, GAMMA);
-              if (lum < THRESH) continue;
-              const idx = Math.min(
-                ramp.length - 1,
-                Math.floor(lum * ramp.length),
-              );
-              const ch = ramp[idx];
-              if (ch === " ") continue;
-              ctx.fillText(ch, rx * CELL, ry * CELL);
+              const idx =
+                lum < THRESH
+                  ? 0
+                  : Math.min(ramp.length - 1, Math.floor(lum * ramp.length));
+              out += ramp[idx];
             }
+            out += "\n";
           }
+          outEl.textContent = out;
         }
 
         // Stylized office chair: hinged two-panel backrest (curved and
@@ -1176,54 +1217,6 @@
             return geo;
           }
 
-          // dish the seat top slightly and curl the front edge down into
-          // a waterfall lip, breaking up what would otherwise be one flat
-          // uniform-luminance slab under ASCII sampling
-          function sculptSeat(geo, w, d) {
-            const pos = geo.attributes.position;
-            const v = new THREE.Vector3();
-            const hw = w / 2, hd = d / 2;
-            for (let i = 0; i < pos.count; i++) {
-              v.fromBufferAttribute(pos, i);
-              if (v.y > 0.01) {
-                const dx = v.x / hw, dz = v.z / hd;
-                v.y -= (1 - dx * dx * 0.6) * (1 - dz * dz * 0.35) * 0.05;
-                if (v.z > hd * 0.58) {
-                  const t = (v.z - hd * 0.58) / (hd * 0.42);
-                  v.y -= t * t * 0.11;
-                  v.z -= t * t * 0.03;
-                }
-              }
-              pos.setXYZ(i, v.x, v.y, v.z);
-            }
-            geo.computeVertexNormals();
-          }
-
-          // tapered, ridged leg: narrows from hub to tip, a raised spine
-          // catches the key light as a highlight line, and it slopes down
-          // toward the caster — much more readable than a plain box
-          const HUB_OFF = 0.0375;
-          function legGeometry(L, w, h) {
-            const geo = new THREE.BoxGeometry(w, h, L, 3, 3, 12);
-            const pos = geo.attributes.position;
-            const v = new THREE.Vector3();
-            for (let i = 0; i < pos.count; i++) {
-              v.fromBufferAttribute(pos, i);
-              const t = (v.z + L / 2) / L;
-              const taper = 1 - t * 0.42;
-              v.x *= taper;
-              if (v.y > 0.15 * h) {
-                const edge = 1 - Math.min(1, Math.abs(v.x) / (0.5 * w * taper));
-                v.y += edge * (0.28 * h) * (1 - t * 0.4);
-              }
-              v.y = v.y * (1 - t * 0.25) - t * (0.32 * h);
-              pos.setXYZ(i, v.x, v.y, v.z);
-            }
-            geo.computeVertexNormals();
-            geo.translate(0, 0, L / 2 + HUB_OFF);
-            return geo;
-          }
-
           const soft = new THREE.MeshStandardMaterial({
             color: 0xffffff,
             roughness: 0.58,
@@ -1239,132 +1232,363 @@
             roughness: 0.55,
             metalness: 0.15,
           });
+          // leather-look surfaces reuse `soft`, molded plastic/frame parts
+          // reuse `hard`, and metal hardware reuses `mech` — the v3 model's
+          // leather-grain textures and PMREM environment reflections don't
+          // survive monochrome ASCII sampling, so only the geometry (every
+          // panel, mechanism and caster) is ported, not the material FX.
 
-          // backrest, on a hinge so the two lumbar panels tilt back together
+          // dish the seat top, curl the waterfall front, roll off the side
+          // bolsters and lift the rear edge slightly
+          function sculptSeatV3(geo, w, d) {
+            const pos = geo.attributes.position;
+            const v = new THREE.Vector3();
+            const hw = w / 2, hd = d / 2;
+            for (let i = 0; i < pos.count; i++) {
+              v.fromBufferAttribute(pos, i);
+              if (v.y > 0.01) {
+                const dx = v.x / hw, dz = v.z / hd;
+                v.y -= (1 - dx * dx * 0.75) * (1 - dz * dz * 0.45) * 0.016;
+                v.y -= Math.max(0, Math.abs(dx) - 0.72) * 0.05;
+              }
+              if (v.z > hd * 0.62) {
+                const t = (v.z - hd * 0.62) / (hd * 0.38);
+                v.y -= t * t * 0.055;
+                v.z -= t * t * 0.012;
+              }
+              if (v.z < -hd * 0.8 && v.y > 0) v.y += 0.006;
+              pos.setXYZ(i, v.x, v.y, v.z);
+            }
+            geo.computeVertexNormals();
+          }
+
+          // tapered leg with a raised top ridge, sloping down to the caster
+          function legGeometryV3(L, w, h) {
+            const geo = new THREE.BoxGeometry(w, h, L, 5, 4, 16);
+            const pos = geo.attributes.position;
+            const v = new THREE.Vector3();
+            for (let i = 0; i < pos.count; i++) {
+              v.fromBufferAttribute(pos, i);
+              const t = (v.z + L / 2) / L;
+              const taper = 1 - t * 0.4;
+              v.x *= taper;
+              if (v.y > 0.004) {
+                const edge = 1 - Math.min(1, Math.abs(v.x) / (0.0275 * taper));
+                v.y += edge * 0.013 * (1 - t * 0.35);
+              }
+              v.y = v.y * (1 - t * 0.22) - t * 0.036;
+              pos.setXYZ(i, v.x, v.y, v.z);
+            }
+            geo.computeVertexNormals();
+            geo.translate(0, 0, L / 2 + 0.045);
+            return geo;
+          }
+
+          // ---- backrest: two hinged, curved, tapered lumbar panels over a
+          // molded shell, on a hinge that stays bridged to the seat ----
+          const HINGE_Y = 0.455, HINGE_Z = -0.215;
+          const BW = 0.46, BTH = 0.085;
+          const loH = 0.3, upH = 0.26;
+          const loY = 0.26, upY = 0.585;
+
+          function backPanel(w, h, d, r, mat, wrapR, topK, botK) {
+            const geo = cushion(w, h, d, r, 12);
+            taperY(geo, h / 2, topK, botK);
+            wrapZ(geo, wrapR);
+            return new THREE.Mesh(geo, mat);
+          }
+
           const backPivot = new THREE.Group();
-          backPivot.position.set(0, 0.0625, -0.425);
+          backPivot.position.set(0, HINGE_Y, HINGE_Z);
           const backGroup = new THREE.Group();
           backPivot.add(backGroup);
 
-          const lowerGeo = cushion(1.275, 0.9, 0.25, 0.1125, 8);
-          taperY(lowerGeo, 0.45, -0.05, -0.09);
-          wrapZ(lowerGeo, 2.0);
-          const lower = new THREE.Mesh(lowerGeo, soft);
-          lower.position.set(0, 0.5625, 0);
-          backGroup.add(lower);
-
-          const upperGeo = cushion(1.2, 0.775, 0.225, 0.1125, 8);
-          taperY(upperGeo, 0.3875, -0.1, -0.02);
-          wrapZ(upperGeo, 2.3);
-          const upper = new THREE.Mesh(upperGeo, soft);
-          upper.position.set(0, 1.375, 0.019);
-          backGroup.add(upper);
+          const shellLo = backPanel(BW + 0.03, loH + 0.035, 0.05, 0.022, hard, 0.75, -0.04, -0.1);
+          shellLo.position.set(0, loY, -0.055);
+          backGroup.add(shellLo);
+          const shellUp = backPanel(BW + 0.01, upH + 0.03, 0.045, 0.02, hard, 0.8, -0.09, -0.02);
+          shellUp.position.set(0, upY, -0.05);
+          backGroup.add(shellUp);
+          const backLo = backPanel(BW, loH, BTH, 0.035, soft, 0.7, -0.04, -0.1);
+          backLo.position.set(0, loY, 0);
+          backGroup.add(backLo);
+          const backUp = backPanel(BW - 0.02, upH, BTH - 0.008, 0.033, soft, 0.75, -0.09, -0.02);
+          backUp.position.set(0, upY, 0.004);
+          backGroup.add(backUp);
+          const seam = new THREE.Mesh(cushion(BW - 0.06, 0.022, 0.055, 0.01, 6), hard);
+          seam.position.set(0, (loY + upY) / 2, 0.028);
+          backGroup.add(seam);
+          const lumbar = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.006, 0.006, loH * 0.72, 8),
+            hard,
+          );
+          lumbar.position.set(0, loY, BTH / 2 - 0.006);
+          backGroup.add(lumbar);
 
           backGroup.rotation.x = -0.22;
           group.add(backPivot);
 
-          // spine connecting the hinge down to the seat
-          const spine = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.4, 0.15), hard);
-          spine.position.set(0, 0.1, -0.375);
+          // spine + hinge cap: the fixed link between hinge and seat
+          const spine = new THREE.Mesh(cushion(0.1, 0.14, 0.07, 0.018, 6), hard);
+          spine.position.set(0, HINGE_Y + 0.03, HINGE_Z + 0.015);
           spine.rotation.x = -0.1;
           group.add(spine);
-
-          // hinge cap bridging the recline pivot (stays with the seat)
-          const hingeCap = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.34, 14), hard);
+          const hingeCap = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.028, 0.028, 0.13, 16),
+            mech,
+          );
           hingeCap.rotation.z = Math.PI / 2;
-          hingeCap.position.set(0, 0.09, -0.425);
+          hingeCap.position.set(0, HINGE_Y + 0.055, HINGE_Z);
           group.add(hingeCap);
 
-          // seat
-          const seatGeo = cushion(1.3125, 0.275, 1.25, 0.125, 8);
-          sculptSeat(seatGeo, 1.3125, 1.25);
+          // ---- seat: sculpted cushion, leather piping, underside pan ----
+          const SEAT_TOP = 0.47, SEAT_TH = 0.105, SW = 0.5, SD = 0.47;
+          const seatGeo = cushion(SW, SEAT_TH, SD, 0.045, 14);
+          sculptSeatV3(seatGeo, SW, SD);
           const seat = new THREE.Mesh(seatGeo, soft);
-          seat.position.set(0, 0, 0.075);
+          seat.position.set(0, SEAT_TOP - SEAT_TH / 2, 0.015);
           group.add(seat);
 
-          // tilt mechanism block, knob and paddle lever tucked under the seat
-          const mechBlock = new THREE.Mesh(cushion(0.34, 0.09, 0.36, 0.03, 6), mech);
-          mechBlock.position.set(0, -0.09, 0.075);
-          group.add(mechBlock);
-          const knob = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.05, 14), hard);
-          knob.rotation.x = Math.PI / 2;
-          knob.position.set(0.16, -0.09, 0.24);
-          group.add(knob);
-          const lever = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.26, 8), mech);
-          lever.rotation.z = Math.PI / 2;
-          lever.rotation.y = 0.35;
-          lever.position.set(-0.2, -0.1, 0.18);
-          group.add(lever);
+          const pipPts = [];
+          const pipN = 64, rw = SW / 2 - 0.012, rd = SD / 2 - 0.012, pipK = 2.6;
+          for (let i = 0; i <= pipN; i++) {
+            const a = (i / pipN) * Math.PI * 2;
+            const ca = Math.cos(a), sa = Math.sin(a);
+            const x = Math.sign(ca) * Math.pow(Math.abs(ca), 2 / pipK) * rw;
+            const z = Math.sign(sa) * Math.pow(Math.abs(sa), 2 / pipK) * rd;
+            pipPts.push(new THREE.Vector3(x, z > rd * 0.6 ? -0.012 : 0, z));
+          }
+          const piping = new THREE.Mesh(
+            new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pipPts, true), 110, 0.011, 8, true),
+            soft,
+          );
+          piping.position.set(0, SEAT_TOP - SEAT_TH + 0.028, 0.015);
+          group.add(piping);
 
-          // mirrored armrests: pole, collar, bracket and pad
+          const pan = new THREE.Mesh(cushion(SW - 0.06, 0.03, SD - 0.07, 0.015, 8), hard);
+          pan.position.set(0, SEAT_TOP - SEAT_TH - 0.005, 0.015);
+          group.add(pan);
+
+          // ---- tilt mechanism: chassis, side plates, swing bar, knob, lever ----
+          const MECH_Y = 0.385;
+          const chassis = new THREE.Mesh(cushion(0.2, 0.055, 0.22, 0.014, 6), hard);
+          chassis.position.set(0, MECH_Y, 0.01);
+          group.add(chassis);
+          [-1, 1].forEach((s) => {
+            const pl = new THREE.Mesh(cushion(0.014, 0.07, 0.17, 0.006, 5), mech);
+            pl.position.set(s * 0.105, MECH_Y + 0.005, 0.01);
+            group.add(pl);
+          });
+          const swing = new THREE.Mesh(
+            new THREE.TorusGeometry(0.115, 0.008, 10, 30, Math.PI * 0.8),
+            mech,
+          );
+          swing.position.set(-0.13, MECH_Y - 0.02, 0.07);
+          swing.rotation.set(Math.PI / 2, 0, 0.55);
+          group.add(swing);
+          const knob = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.042, 0.042, 22), hard);
+          knob.rotation.x = Math.PI / 2;
+          knob.position.set(0.045, MECH_Y - 0.025, 0.165);
+          group.add(knob);
+          const lever = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.17, 10), mech);
+          lever.rotation.z = Math.PI / 2;
+          lever.rotation.y = 0.3;
+          lever.position.set(-0.145, MECH_Y - 0.03, 0.12);
+          group.add(lever);
+          const lvHandle = new THREE.Mesh(cushion(0.05, 0.03, 0.018, 0.008, 5), hard);
+          lvHandle.position.set(-0.225, MECH_Y - 0.03, 0.145);
+          lvHandle.rotation.y = 0.3;
+          group.add(lvHandle);
+
+          // ---- mirrored armrests: pole, collar, bracket, crowned pad ----
           function arm(side) {
             const g = new THREE.Group();
-            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.056, 0.625, 12), hard);
-            pole.position.set(0, 0.4375, 0.025);
+            const y0 = SEAT_TOP - 0.075, y1 = 0.625;
+            const pole = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.016, 0.019, y1 - y0, 20),
+              hard,
+            );
+            pole.position.set(0, (y0 + y1) / 2, -0.01);
             g.add(pole);
-            const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.062, 0.03, 12), mech);
-            collar.position.set(0, 0.62, 0.025);
+            const collar = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.022, 0.022, 0.032, 20),
+              mech,
+            );
+            collar.position.set(0, y0 + (y1 - y0) * 0.42, -0.01);
             g.add(collar);
-            const bracket = new THREE.Mesh(cushion(0.09, 0.07, 0.22, 0.025, 5), hard);
-            bracket.position.set(0, 0.745, 0.07);
+            const bracket = new THREE.Mesh(cushion(0.032, 0.05, 0.07, 0.012, 5), hard);
+            bracket.position.set(0, y0 + 0.012, -0.01);
             g.add(bracket);
-            const pad = new THREE.Mesh(cushion(0.1875, 0.0875, 0.575, 0.05, 6), soft);
-            pad.position.set(0, 0.7875, 0.1);
+            const cap = new THREE.Mesh(new THREE.SphereGeometry(0.019, 16, 12), hard);
+            cap.position.set(0, y1, -0.005);
+            g.add(cap);
+
+            const PY = y1 + 0.016, PZ = 0.025, yaw = 0.1;
+            const plate = new THREE.Mesh(cushion(0.062, 0.014, 0.2, 0.008, 7), hard);
+            plate.position.set(0, PY - 0.007, PZ);
+            plate.rotation.y = yaw;
+            g.add(plate);
+
+            const padGeo = cushion(0.068, 0.028, 0.215, 0.013, 10);
+            const padPos = padGeo.attributes.position;
+            const pv = new THREE.Vector3();
+            for (let i = 0; i < padPos.count; i++) {
+              pv.fromBufferAttribute(padPos, i);
+              if (pv.y > 0) {
+                const t = pv.z / 0.1075;
+                pv.y += (1 - t * t) * 0.004;
+              }
+              padPos.setXYZ(i, pv.x, pv.y, pv.z);
+            }
+            padGeo.computeVertexNormals();
+            const pad = new THREE.Mesh(padGeo, soft);
+            pad.position.set(0, PY + 0.016, PZ);
+            pad.rotation.y = yaw;
             g.add(pad);
-            g.position.x = side * 0.725;
+
+            g.position.x = side * 0.265;
+            g.scale.x = side;
             return g;
           }
           group.add(arm(1));
           group.add(arm(-1));
 
-          // gas-lift column, with a shroud ring near the top
-          const lift = new THREE.Mesh(new THREE.CylinderGeometry(0.081, 0.094, 0.775, 16), hard);
-          lift.position.set(0, -0.4375, 0.075);
-          group.add(lift);
-          const shroudRing = new THREE.Mesh(new THREE.TorusGeometry(0.088, 0.012, 8, 16), mech);
-          shroudRing.rotation.x = Math.PI / 2;
-          shroudRing.position.set(0, -0.14, 0.075);
-          group.add(shroudRing);
+          // ---- gas-lift column ----
+          const topCap = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.045, 24), hard);
+          topCap.position.set(0, 0.355, 0.01);
+          group.add(topCap);
+          const shroud = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.026, 0.033, 0.115, 24),
+            hard,
+          );
+          shroud.position.set(0, 0.275, 0.01);
+          group.add(shroud);
+          const shroudLip = new THREE.Mesh(new THREE.TorusGeometry(0.033, 0.004, 8, 24), hard);
+          shroudLip.rotation.x = Math.PI / 2;
+          shroudLip.position.set(0, 0.219, 0.01);
+          group.add(shroudLip);
+          const piston = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.0165, 0.0165, 0.115, 20),
+            mech,
+          );
+          piston.position.set(0, 0.165, 0.01);
+          group.add(piston);
+          const pRing = new THREE.Mesh(new THREE.TorusGeometry(0.017, 0.0025, 8, 20), mech);
+          pRing.rotation.x = Math.PI / 2;
+          pRing.position.set(0, 0.115, 0.01);
+          group.add(pRing);
 
-          // 5-star base with tapered, ridged legs and twin-wheel casters
+          // ---- 5-star base, tapered ridged legs, twin-wheel casters ----
           const baseGroup = new THREE.Group();
-          baseGroup.position.set(0, -0.85, 0.075);
-          const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.1625, 0.2, 0.175, 16), hard);
+          baseGroup.position.set(0, 0.112, 0.01);
+          const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.062, 0.062, 30), hard);
           baseGroup.add(hub);
-          const hubCap = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.04, 16), mech);
-          hubCap.position.y = 0.1;
-          baseGroup.add(hubCap);
+          const hubTop = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.012, 26), hard);
+          hubTop.position.y = 0.036;
+          baseGroup.add(hubTop);
+          const hubCollar = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.04, 0.046, 0.016, 26),
+            hard,
+          );
+          hubCollar.position.y = 0.028;
+          baseGroup.add(hubCollar);
 
           function leg(angle) {
             const g = new THREE.Group();
             g.rotation.y = angle;
-            const L = 0.975, fw = 0.15, fh = 0.1125;
-            g.add(new THREE.Mesh(legGeometry(L, fw, fh), hard));
-            const casterZ = L + HUB_OFF - 0.05;
-            const boss = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.058, 0.07, 10), hard);
-            boss.position.set(0, -0.09, casterZ);
+            const L = 0.27;
+            g.add(new THREE.Mesh(legGeometryV3(L, 0.055, 0.042), hard));
+            const boss = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.03, 0.034, 18), hard);
+            boss.position.set(0, -0.048, L + 0.028);
             g.add(boss);
-            const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.16, 8), mech);
+
+            const cast = new THREE.Group();
+            cast.position.set(0, -0.068, L + 0.028);
+            const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.03, 12), mech);
+            stem.position.y = 0.014;
+            cast.add(stem);
+            const fork = new THREE.Mesh(cushion(0.062, 0.022, 0.032, 0.008, 5), hard);
+            fork.position.y = -0.004;
+            cast.add(fork);
+            const spin = new THREE.Group();
+            spin.position.y = -0.018;
+            const axle = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.005, 0.005, 0.056, 10),
+              mech,
+            );
             axle.rotation.z = Math.PI / 2;
-            axle.position.set(0, -0.135, casterZ);
-            g.add(axle);
-            [-0.062, 0.062].forEach((ox) => {
-              const wheel = new THREE.Mesh(new THREE.SphereGeometry(0.072, 10, 8), mech);
-              wheel.position.set(ox, -0.14, casterZ);
-              g.add(wheel);
+            spin.add(axle);
+            [-0.023, 0.023].forEach((ox) => {
+              const w = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.026, 0.026, 0.016, 26),
+                mech,
+              );
+              w.rotation.z = Math.PI / 2;
+              w.position.x = ox;
+              spin.add(w);
+              const wh = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.011, 0.011, 0.018, 14),
+                mech,
+              );
+              wh.rotation.z = Math.PI / 2;
+              wh.position.x = ox;
+              spin.add(wh);
             });
+            cast.add(spin);
+            cast.rotation.y = (angle * 1.9) % Math.PI;
+            g.add(cast);
             return g;
           }
           for (let i = 0; i < 5; i++) {
-            baseGroup.add(leg((i / 5) * Math.PI * 2));
+            baseGroup.add(leg((i / 5) * Math.PI * 2 + Math.PI * 0.12));
           }
           group.add(baseGroup);
 
-          // recenter vertically, then nudge the whole assembly toward the
-          // upper-left of the frame (left: negative x, up: less-negative y)
-          group.position.set(-0.5, -0.1, 0);
+          // auto-fit: scale this meter-scale model to fill the frame while
+          // *guaranteeing* it never clips, at any yaw and any mouse-driven
+          // tilt. The caller sets rotation.y = autoBase (unbounded — the
+          // chair spins fully around) and rotation.x = 0.3 + rotX, where
+          // rotX swings up to ±MAX_PITCH (0.28) with the cursor, on
+          // whatever buildChair() returns — and rotation always pivots
+          // around an object's own local origin. Fitting to the plain
+          // axis-aligned bounding box (as before) only accounts for the
+          // untilted height, but a Y-then-X rotation mixes the model's
+          // *depth* into its vertical extent, so the true worst case is
+          // taller than that box — which is exactly what clipped at the
+          // top and bottom in earlier passes. Solving it analytically
+          // instead of nudging by eye: for half-extents (hx,hy,hz) and
+          // tilt angle φ, the worst-case vertical half-height over a full
+          // 360° spin is hy·cosφ + sinφ·√(hx²+hz²) (the second term comes
+          // from the horizontal spin radius in the XZ-plane tipping into
+          // Y as φ grows). Fitting to the worst φ (base + max pitch) keeps
+          // it safe regardless of where the cursor is.
+          const box = new THREE.Box3().setFromObject(group);
+          const size = new THREE.Vector3();
+          box.getSize(size);
+          const center = new THREE.Vector3();
+          box.getCenter(center);
+          const hx = size.x / 2, hy = size.y / 2, hz = size.z / 2;
+          const PHI_MAX = 0.3 + 0.28; // base tilt + MAX_PITCH swing, see mesh.rotation.x below
+          const worstHalfHeight =
+            hy * Math.cos(PHI_MAX) + Math.sin(PHI_MAX) * Math.sqrt(hx * hx + hz * hz);
+          const FRAME_FILL = 3.2; // worst-case rendered height; leaves a safety margin
+          const fitScale = FRAME_FILL / (2 * worstHalfHeight);
+          group.scale.setScalar(fitScale);
+          group.position.set(
+            -center.x * fitScale,
+            -center.y * fitScale,
+            -center.z * fitScale,
+          );
 
-          return group;
+          // outer wrapper: local origin == chair's visual center (for
+          // rotation). Horizontal extent is untouched by the X-tilt (it
+          // only mixes Y/Z), so there's much more spare width than height
+          // — safe to nudge well left. The Y nudge trades some of the
+          // safety margin above for extra headroom, per request.
+          const rig = new THREE.Group();
+          rig.add(group);
+          rig.position.set(-0.38, 0.03, 0);
+          return rig;
         }
 
         function initThree() {
