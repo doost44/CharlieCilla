@@ -171,7 +171,7 @@
       }
 
       .modal-inner {
-        max-width: 900px;
+        max-width: 1320px;
         margin: 0 auto;
         padding: 44px 32px 90px;
       }
@@ -575,8 +575,11 @@
 
           const viewportW = window.innerWidth || 1200;
           const viewportH = window.innerHeight || 800;
-          const availableW = Math.max(360, Math.min(1420, viewportW - 80));
-          const availableH = Math.max(380, viewportH - 320);
+          const containerEl = document.getElementById("modal-content");
+          const containerW =
+            (containerEl && containerEl.clientWidth) || viewportW - 80;
+          const availableW = Math.max(360, Math.min(1420, containerW));
+          const availableH = Math.max(380, viewportH - 260);
           const widthFromH = Math.floor(availableH / 0.72);
           const width = Math.min(availableW, widthFromH);
           const height = Math.floor(width * 0.72);
