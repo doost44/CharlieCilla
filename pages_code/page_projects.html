@@ -176,6 +176,28 @@
         padding: 44px 32px 90px;
       }
 
+      .modal-grid {
+        display: grid;
+        grid-template-columns: minmax(260px, 400px) 1fr;
+        gap: 48px;
+        align-items: start;
+      }
+
+      .modal-text {
+        min-width: 0;
+      }
+
+      .modal-media {
+        min-width: 0;
+      }
+
+      @media (max-width: 900px) {
+        .modal-grid {
+          grid-template-columns: 1fr;
+          gap: 28px;
+        }
+      }
+
       .modal-top {
         margin-bottom: 40px;
         font-family: var(--mono);
@@ -496,9 +518,13 @@
         const nextProject = order[(currentIdx + 1) % order.length];
 
         content.innerHTML = `
-          <h1>${project.title || "Untitled"}</h1>
-          <p class="desc">${project.description || "Project details coming soon."}</p>
-          ${mediaHtml}
+          <div class="modal-grid">
+            <div class="modal-text">
+              <h1>${project.title || "Untitled"}</h1>
+              <p class="desc">${project.description || "Project details coming soon."}</p>
+            </div>
+            <div class="modal-media" id="modal-media">${mediaHtml}</div>
+          </div>
           <div class="modal-footer">
             <button type="button" onclick="openProjectModal('${prevProject.id}')">&larr; ${prevProject.title.toLowerCase()}</button>
             <button type="button" onclick="openProjectModal('${nextProject.id}')">${nextProject.title.toLowerCase()} &rarr;</button>
@@ -575,7 +601,7 @@
 
           const viewportW = window.innerWidth || 1200;
           const viewportH = window.innerHeight || 800;
-          const containerEl = document.getElementById("modal-content");
+          const containerEl = document.getElementById("modal-media");
           const containerW =
             (containerEl && containerEl.clientWidth) || viewportW - 80;
           const availableW = Math.max(360, Math.min(1420, containerW));

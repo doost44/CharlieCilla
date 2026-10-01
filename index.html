@@ -245,6 +245,28 @@
         padding: 44px 32px 90px;
       }
 
+      .modal-grid {
+        display: grid;
+        grid-template-columns: minmax(260px, 400px) 1fr;
+        gap: 48px;
+        align-items: start;
+      }
+
+      .modal-text {
+        min-width: 0;
+      }
+
+      .modal-media {
+        min-width: 0;
+      }
+
+      @media (max-width: 900px) {
+        .modal-grid {
+          grid-template-columns: 1fr;
+          gap: 28px;
+        }
+      }
+
       .modal-top {
         display: flex;
         justify-content: space-between;
@@ -347,6 +369,70 @@
         flex-direction: column;
         align-items: center;
         gap: 10px;
+      }
+
+      .media-carousel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .carousel-viewport {
+        position: relative;
+        width: 100%;
+      }
+
+      .carousel-track {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        background: #000;
+      }
+
+      .carousel-track::-webkit-scrollbar {
+        display: none;
+      }
+
+      .carousel-track img {
+        flex: 0 0 100%;
+        width: 100%;
+        max-height: 80vh;
+        object-fit: contain;
+        scroll-snap-align: center;
+        display: block;
+      }
+
+      .carousel-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid var(--line);
+        font-family: var(--mono);
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .carousel-nav:hover {
+        color: var(--link-blue);
+      }
+
+      .carousel-prev {
+        left: 10px;
+      }
+
+      .carousel-next {
+        right: 10px;
       }
 
       .flipbook-controls {
@@ -471,6 +557,7 @@
 
       let homeProjectCache = {};
       const homeViewers = {};
+      const homeCarousels = {};
 
       function stripHtml(input) {
         return (input || "")
@@ -542,11 +629,15 @@
       // flipbook project later feels instant instead of loading on demand.
       function preloadFlipbookImages() {
         const projects = AdminData.getHomeProjects().filter(
-          (p) => p.visible !== false && p.type === "flipbook-images",
+          (p) =>
+            p.visible !== false &&
+            (p.type === "flipbook-images" || p.type === "carousel-images"),
         );
         const urls = [];
         projects.forEach((p) => {
-          urls.push(...getFlipbookPageUrls(p.flipbookImages || {}));
+          urls.push(
+            ...getFlipbookPageUrls(p.flipbookImages || p.carouselImages || {}),
+          );
         });
 
         let idx = 0;
@@ -636,6 +727,18 @@
               ${(p.images || []).map((img) => `<img src="${normalizeFlipbookPath(img)}" alt="${p.title}">`).join("")}
             </div>
           `;
+        } else if (type === "carousel-images") {
+          const carouselId = "carousel-" + p.id;
+          mediaHtml = `
+            <div class="media-block media-carousel">
+              <div class="carousel-viewport">
+                <div id="${carouselId}" class="carousel-track"></div>
+                <button type="button" class="carousel-nav carousel-prev" onclick="carouselPrev('${carouselId}')" aria-label="Previous slide">&larr;</button>
+                <button type="button" class="carousel-nav carousel-next" onclick="carouselNext('${carouselId}')" aria-label="Next slide">&rarr;</button>
+              </div>
+              <div id="${carouselId}-info" class="flipbook-info">Loading...</div>
+            </div>
+          `;
         } else if (type === "flipbook-pdf" || type === "flipbook-images") {
           const flipbookId = "flipbook-" + p.id;
           mediaHtml = `
@@ -657,11 +760,15 @@
         const nextProject = order[(currentIdx + 1) % order.length];
 
         content.innerHTML = `
-          <p class="modal-meta">${p.year || "Current"} &middot; ${p.category || "Project"}</p>
-          <h1>${p.title || "Untitled"}</h1>
-          ${p.description ? `<p class="desc">${p.description}</p>` : ""}
-          ${p.credit ? `<p class="credit">Credit &mdash; ${p.credit}</p>` : ""}
-          ${mediaHtml}
+          <div class="modal-grid">
+            <div class="modal-text">
+              <p class="modal-meta">${p.year || "Current"} &middot; ${p.category || "Project"}</p>
+              <h1>${p.title || "Untitled"}</h1>
+              ${p.description ? `<p class="desc">${p.description}</p>` : ""}
+              ${p.credit ? `<p class="credit">Credit &mdash; ${p.credit}</p>` : ""}
+            </div>
+            <div class="modal-media" id="modal-media">${mediaHtml}</div>
+          </div>
           <div class="modal-footer">
             <button type="button" onclick="openProject('${prevProject.id}')">&larr; ${prevProject.title.toLowerCase()}</button>
             <button type="button" onclick="openProject('${nextProject.id}')">${nextProject.title.toLowerCase()} &rarr;</button>
@@ -678,6 +785,11 @@
             () => initHomeFlipbookImages(p.id, p.flipbookImages || {}),
             60,
           );
+        } else if (type === "carousel-images") {
+          setTimeout(
+            () => initHomeCarousel(p.id, p.carouselImages || {}),
+            60,
+          );
         }
       }
 
@@ -688,6 +800,7 @@
         setTimeout(() => {
           document.getElementById("modal-content").innerHTML = "";
           Object.keys(homeViewers).forEach((k) => delete homeViewers[k]);
+          Object.keys(homeCarousels).forEach((k) => delete homeCarousels[k]);
         }, 260);
       }
 
@@ -756,7 +869,7 @@
 
             const viewportW = window.innerWidth || 1200;
             const viewportH = window.innerHeight || 800;
-            const containerEl = document.getElementById("modal-content");
+            const containerEl = document.getElementById("modal-media");
             const containerW =
               (containerEl && containerEl.clientWidth) || viewportW - 80;
             const availableW = Math.max(360, Math.min(1420, containerW));
@@ -882,7 +995,7 @@
 
         const viewportW = window.innerWidth || 1200;
         const viewportH = window.innerHeight || 800;
-        const containerEl = document.getElementById("modal-content");
+        const containerEl = document.getElementById("modal-media");
         const containerW =
           (containerEl && containerEl.clientWidth) || viewportW - 80;
         const availableW = Math.max(360, Math.min(1420, containerW));
@@ -941,6 +1054,72 @@
             );
           });
         });
+      }
+
+      function initHomeCarousel(projectId, config) {
+        const carouselId = "carousel-" + projectId;
+        const track = document.getElementById(carouselId);
+        const pageInfo = document.getElementById(carouselId + "-info");
+        if (!track || !pageInfo) return;
+
+        const urls = getFlipbookPageUrls(config);
+        if (!urls.length) {
+          pageInfo.textContent = "No slides found";
+          return;
+        }
+
+        track.innerHTML = urls
+          .map(
+            (url, i) =>
+              `<img src="${url}" alt="Slide ${i + 1}" loading="${i === 0 ? "eager" : "lazy"}" decoding="async">`,
+          )
+          .join("");
+
+        let current = 0;
+        const update = (n) => {
+          current = n;
+          pageInfo.textContent = `Slide ${n + 1} of ${urls.length}`;
+        };
+        update(0);
+
+        const slides = Array.from(track.children);
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+                update(slides.indexOf(entry.target));
+              }
+            });
+          },
+          { root: track, threshold: [0.6] },
+        );
+        slides.forEach((slide) => observer.observe(slide));
+
+        homeCarousels[carouselId] = { track, count: urls.length, observer };
+      }
+
+      function carouselGoTo(carouselId, index) {
+        const state = homeCarousels[carouselId];
+        if (!state) return;
+        const clamped = Math.max(0, Math.min(state.count - 1, index));
+        const slide = state.track.children[clamped];
+        if (slide) slide.scrollIntoView({ behavior: "smooth", inline: "center" });
+      }
+
+      function carouselPrev(carouselId) {
+        const state = homeCarousels[carouselId];
+        if (!state) return;
+        const slideW = state.track.clientWidth || 1;
+        const idx = Math.round(state.track.scrollLeft / slideW) - 1;
+        carouselGoTo(carouselId, idx);
+      }
+
+      function carouselNext(carouselId) {
+        const state = homeCarousels[carouselId];
+        if (!state) return;
+        const slideW = state.track.clientWidth || 1;
+        const idx = Math.round(state.track.scrollLeft / slideW) + 1;
+        carouselGoTo(carouselId, idx);
       }
 
       function flipPrev(flipbookId) {

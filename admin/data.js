@@ -148,6 +148,22 @@ const DEFAULT_HOME_PROJECTS = [
     visible: true,
   },
   {
+    id: "home-9",
+    title: "BLOCKCHAIN AND BEER",
+    year: "2025",
+    category: "WATERLOO BLOCKCHAIN",
+    description:
+      "A concept merchandise line pitched for the Waterloo Blockchain club. The line went unused, but it was my first introduction to merchandising and designing apparel concepts.",
+    credit: "",
+    type: "carousel-images",
+    carouselImages: {
+      basePath: "Assets/blockchain-beer-merch/slide-",
+      pageCount: 10,
+      extension: ".jpg",
+    },
+    visible: true,
+  },
+  {
     id: "home-8",
     title: "STUDENT MEAL PLAN APP PROTOTYPE",
     year: "2025",
