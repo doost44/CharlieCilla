@@ -115,6 +115,22 @@ const DEFAULT_HOME_PROJECTS = [
     visible: true,
   },
   {
+    id: "home-10",
+    title: "BLOCKCHAIN 2026 MERCH",
+    year: "2026",
+    category: "WATERLOO BLOCKCHAIN",
+    description:
+      "Commissioned by Waterloo Blockchain for a potential 2026 merch line. The designs didn't make it to production due to logistical issues on the club's end, but they stand as a continued exploration of apparel and merch design.",
+    credit: "",
+    type: "carousel-images",
+    carouselImages: {
+      basePath: "Assets/blockchain-2026-merch/slide-",
+      pageCount: 8,
+      extension: ".jpg",
+    },
+    visible: true,
+  },
+  {
     id: "home-1",
     title: "DESIGNER HANDBOOK 2025",
     year: "2025",
