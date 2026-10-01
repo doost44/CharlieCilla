@@ -87,11 +87,12 @@ const DEFAULT_HOME_PROJECTS = [
     category: "PRINT / EDITORIAL",
     description: "A VISUAL GUIDE TO THE FUNDAMENTALS OF DESIGN",
     credit: "",
-    type: "flipbook-images",
-    flipbookImages: {
+    type: "carousel-images",
+    carouselImages: {
       basePath: "Handbook_Files/handbook-pages/handbook2026-",
       pageCount: 28,
       extension: ".jpg",
+      spread: true,
     },
     visible: true,
   },
@@ -102,11 +103,12 @@ const DEFAULT_HOME_PROJECTS = [
     category: "PUBLICATION",
     description: "A MULTIMEDIA EXPLORATION OF CONTEMPORARY VOICES",
     credit: "",
-    type: "flipbook-images",
-    flipbookImages: {
+    type: "carousel-images",
+    carouselImages: {
       basePath: "Handbook_Files/handbook-pages/voices-",
       pageCount: 36,
       extension: ".jpg",
+      spread: true,
     },
     visible: true,
   },
@@ -117,11 +119,12 @@ const DEFAULT_HOME_PROJECTS = [
     category: "PRINT / EDITORIAL",
     description: "A VISUAL GUIDE TO THE FUNDAMENTALS OF DESIGN",
     credit: "",
-    type: "flipbook-images",
-    flipbookImages: {
+    type: "carousel-images",
+    carouselImages: {
       basePath: "Handbook_Files/handbook-pages/page-",
       pageCount: 22,
       extension: ".jpg",
+      spread: true,
     },
     visible: true,
   },
@@ -340,11 +343,12 @@ I <br>created in a physical medium. <br> <br> Each piece displays my ability to 
     description: `A comprehensive visual guide exploring the fundamental principles of design.<br><br>
 This handbook serves as both a personal reference and a creative exploration of typography, color theory, composition, and visual hierarchy.<br><br>
 Each spread demonstrates practical applications of design principles through carefully crafted layouts and thoughtful use of whitespace.`,
-    type: "flipbook-images",
-    flipbookImages: {
+    type: "carousel-images",
+    carouselImages: {
       basePath: "Handbook_Files/handbook-pages/page-",
       pageCount: 22,
       extension: ".jpg",
+      spread: true,
     },
     displayStyle: "default",
     visible: true,
@@ -355,11 +359,12 @@ Each spread demonstrates practical applications of design principles through car
     description: `An immersive multimedia project capturing diverse perspectives and stories.<br><br>
 Voices combines visual storytelling with audio narratives to create a time capsule of contemporary experiences.<br><br>
 The project explores themes of identity, community, and aspiration through a series of interviews and artistic interpretations.`,
-    type: "flipbook-images",
-    flipbookImages: {
+    type: "carousel-images",
+    carouselImages: {
       basePath: "Handbook_Files/handbook-pages/voices-",
       pageCount: 36,
       extension: ".jpg",
+      spread: true,
     },
     displayStyle: "default",
     visible: true,

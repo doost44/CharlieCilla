@@ -391,19 +391,26 @@
         scroll-behavior: smooth;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
-        background: #000;
+        background: #fff;
       }
 
       .carousel-track::-webkit-scrollbar {
         display: none;
       }
 
-      .carousel-track img {
+      .carousel-slide {
         flex: 0 0 100%;
-        width: 100%;
+        scroll-snap-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .carousel-slide img {
+        flex: 1 1 0;
+        min-width: 0;
         max-height: 80vh;
         object-fit: contain;
-        scroll-snap-align: center;
         display: block;
       }
 
@@ -433,6 +440,75 @@
 
       .carousel-next {
         right: 10px;
+      }
+
+      .carousel-footer {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .carousel-zoom {
+        color: var(--link-blue);
+        background: none;
+        border: none;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      .carousel-lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 900;
+        background: rgba(0, 0, 0, 0.92);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.18s ease,
+          visibility 0.18s;
+      }
+
+      .carousel-lightbox.is-open {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .carousel-lightbox-imgs {
+        display: flex;
+        align-items: center;
+        max-width: 92vw;
+        max-height: 92vh;
+      }
+
+      .carousel-lightbox-imgs img {
+        max-width: 92vw;
+        max-height: 92vh;
+        flex: 1 1 0;
+        min-width: 0;
+        object-fit: contain;
+        display: block;
+      }
+
+      .carousel-lightbox-close {
+        position: absolute;
+        top: 24px;
+        right: 28px;
+        background: none;
+        border: none;
+        color: #fff;
+        font-family: var(--mono);
+        font-size: 0.9rem;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      .carousel-lightbox-close:hover {
+        color: var(--link-blue);
       }
 
       .flipbook-controls {
@@ -543,6 +619,11 @@
         </div>
         <div id="modal-content"></div>
       </div>
+    </div>
+
+    <div id="carousel-lightbox" class="carousel-lightbox">
+      <button type="button" class="carousel-lightbox-close" onclick="closeCarouselZoom()">&times; close</button>
+      <div id="carousel-lightbox-imgs" class="carousel-lightbox-imgs"></div>
     </div>
 
     <link rel="stylesheet" href="admin/admin.css" />
@@ -736,7 +817,10 @@
                 <button type="button" class="carousel-nav carousel-prev" onclick="carouselPrev('${carouselId}')" aria-label="Previous slide">&larr;</button>
                 <button type="button" class="carousel-nav carousel-next" onclick="carouselNext('${carouselId}')" aria-label="Next slide">&rarr;</button>
               </div>
-              <div id="${carouselId}-info" class="flipbook-info">Loading...</div>
+              <div class="carousel-footer">
+                <div id="${carouselId}-info" class="flipbook-info">Loading...</div>
+                <button type="button" class="carousel-zoom" onclick="carouselZoom('${carouselId}')">zoom</button>
+              </div>
             </div>
           `;
         } else if (type === "flipbook-pdf" || type === "flipbook-images") {
@@ -797,6 +881,7 @@
         const modal = document.getElementById("project-modal");
         modal.classList.remove("is-open");
         document.body.classList.remove("modal-open");
+        closeCarouselZoom();
         setTimeout(() => {
           document.getElementById("modal-content").innerHTML = "";
           Object.keys(homeViewers).forEach((k) => delete homeViewers[k]);
@@ -806,9 +891,21 @@
 
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
-          closeProject();
+          const lightbox = document.getElementById("carousel-lightbox");
+          if (lightbox && lightbox.classList.contains("is-open")) {
+            closeCarouselZoom();
+          } else {
+            closeProject();
+          }
         }
       });
+
+      document.getElementById("carousel-lightbox").addEventListener(
+        "click",
+        (event) => {
+          if (event.target.id === "carousel-lightbox") closeCarouselZoom();
+        },
+      );
 
       function initHomeFlipbook(projectId, pdfPath) {
         const flipbookId = "flipbook-" + projectId;
@@ -1056,6 +1153,37 @@
         });
       }
 
+      // Groups flat page-image URLs into carousel slides. With useSpreads,
+      // page 1 stands alone (cover) and the rest pair up two-at-a-time to
+      // recreate an open-book spread, matching how the source PDFs were
+      // split down the middle into single pages.
+      function buildCarouselGroups(urls, useSpreads) {
+        if (!useSpreads) {
+          return urls.map((url, i) => ({ urls: [url], pages: [i + 1] }));
+        }
+        const groups = [];
+        if (!urls.length) return groups;
+        groups.push({ urls: [urls[0]], pages: [1] });
+        for (let i = 1; i < urls.length; i += 2) {
+          if (i + 1 < urls.length) {
+            groups.push({ urls: [urls[i], urls[i + 1]], pages: [i + 1, i + 2] });
+          } else {
+            groups.push({ urls: [urls[i]], pages: [i + 1] });
+          }
+        }
+        return groups;
+      }
+
+      function carouselGroupLabel(group, totalPages, useSpreads) {
+        const label =
+          group.pages.length === 2
+            ? `Pages ${group.pages[0]}–${group.pages[1]}`
+            : `Page ${group.pages[0]}`;
+        return useSpreads
+          ? `${label} of ${totalPages}`
+          : `Slide ${group.pages[0]} of ${totalPages}`;
+      }
+
       function initHomeCarousel(projectId, config) {
         const carouselId = "carousel-" + projectId;
         const track = document.getElementById(carouselId);
@@ -1068,34 +1196,43 @@
           return;
         }
 
-        track.innerHTML = urls
-          .map(
-            (url, i) =>
-              `<img src="${url}" alt="Slide ${i + 1}" loading="${i === 0 ? "eager" : "lazy"}" decoding="async">`,
-          )
+        const useSpreads = config.spread === true;
+        const groups = buildCarouselGroups(urls, useSpreads);
+
+        track.innerHTML = groups
+          .map((group, i) => {
+            const imgs = group.urls
+              .map(
+                (url, j) =>
+                  `<img src="${url}" alt="Page ${group.pages[j]}" loading="${i === 0 ? "eager" : "lazy"}" decoding="async">`,
+              )
+              .join("");
+            return `<div class="carousel-slide">${imgs}</div>`;
+          })
           .join("");
 
-        let current = 0;
+        const state = { track, groups, count: groups.length, current: 0 };
+        homeCarousels[carouselId] = state;
+
         const update = (n) => {
-          current = n;
-          pageInfo.textContent = `Slide ${n + 1} of ${urls.length}`;
+          state.current = n;
+          pageInfo.textContent = carouselGroupLabel(
+            groups[n],
+            urls.length,
+            useSpreads,
+          );
         };
         update(0);
 
-        const slides = Array.from(track.children);
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
-                update(slides.indexOf(entry.target));
-              }
-            });
-          },
-          { root: track, threshold: [0.6] },
-        );
-        slides.forEach((slide) => observer.observe(slide));
-
-        homeCarousels[carouselId] = { track, count: urls.length, observer };
+        let scrollTimer = null;
+        track.addEventListener("scroll", () => {
+          clearTimeout(scrollTimer);
+          scrollTimer = setTimeout(() => {
+            const slideW = track.clientWidth || 1;
+            const idx = Math.round(track.scrollLeft / slideW);
+            update(Math.max(0, Math.min(groups.length - 1, idx)));
+          }, 80);
+        });
       }
 
       function carouselGoTo(carouselId, index) {
@@ -1103,7 +1240,13 @@
         if (!state) return;
         const clamped = Math.max(0, Math.min(state.count - 1, index));
         const slide = state.track.children[clamped];
-        if (slide) slide.scrollIntoView({ behavior: "smooth", inline: "center" });
+        if (slide) {
+          slide.scrollIntoView({
+            behavior: "smooth",
+            inline: "center",
+            block: "nearest",
+          });
+        }
       }
 
       function carouselPrev(carouselId) {
@@ -1120,6 +1263,25 @@
         const slideW = state.track.clientWidth || 1;
         const idx = Math.round(state.track.scrollLeft / slideW) + 1;
         carouselGoTo(carouselId, idx);
+      }
+
+      function carouselZoom(carouselId) {
+        const state = homeCarousels[carouselId];
+        if (!state) return;
+        const lightbox = document.getElementById("carousel-lightbox");
+        const container = document.getElementById("carousel-lightbox-imgs");
+        if (!lightbox || !container) return;
+        const group = state.groups[state.current];
+        container.innerHTML = group.urls
+          .map((url, j) => `<img src="${url}" alt="Page ${group.pages[j]}">`)
+          .join("");
+        lightbox.classList.add("is-open");
+      }
+
+      function closeCarouselZoom() {
+        const lightbox = document.getElementById("carousel-lightbox");
+        if (!lightbox) return;
+        lightbox.classList.remove("is-open");
       }
 
       function flipPrev(flipbookId) {
