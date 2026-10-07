@@ -24,11 +24,14 @@ export function basic(opts, tone = 0.9, revealBias = 0) {
   return m;
 }
 
-// Light painted onto a surface (additive). The only see-through material in the room:
-// never sampled for glyphs, and hidden whenever the lamp is off (see swagLamp).
+// Light painted onto a surface (additive). The only see-through material in the room,
+// tagged userData.glow: never sampled for glyphs, best left out of the build-out, and
+// hidden whenever the lamp is off (see swagLamp).
+const GLOW = { glow: true, tone: 0, revealBias: BIAS.prop };
+
 export function glowMesh(geometry, map, color) {
   const material = new THREE.MeshBasicMaterial({ map, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
-  material.userData.glow = true;
+  Object.assign(material.userData, GLOW);
   const mesh = new THREE.Mesh(geometry, material);
   mesh.userData.noAscii = true;
   mesh.userData.noEdges = true;
@@ -138,7 +141,7 @@ export function windowFitting(w = 0.72, h = 1.25) {
 
 // A doorway with a dark frame onto an unlit hall, and a honey-oak slab standing open
 // into the room, hinged on the left jamb. Centred on x = 0, standing on y = 0.
-export function doorway(w = 0.78, h = 2.03, open = 0.87) {
+export function doorway(w = 0.78, h = 2.03, open = 0.98) {
   const g = new THREE.Group();
   const dark = basic({ map: tex.doorwayTexture() }, 0.2, BIAS.fitting);
   const hole = new THREE.Mesh(new THREE.PlaneGeometry(w, h), dark);
@@ -303,7 +306,7 @@ export function swagLamp(drop = 0.72) {
   const halo = new THREE.Sprite(new THREE.SpriteMaterial({
     map: tex.glowTexture(), color: LAMP.color, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, depthTest: false,
   }));
-  halo.material.userData.glow = true;
+  Object.assign(halo.material.userData, GLOW);
   halo.userData.noAscii = true;
   halo.position.y = bulbY;
   halo.scale.setScalar(0.6);
@@ -382,7 +385,5 @@ export function swagLamp(drop = 0.72) {
       onSpot = THREE.MathUtils.clamp(spot, 0, 1);
       apply();
     },
-    // How far the chain is from hanging straight down (radians), for testing.
-    get swing() { return Math.acos(THREE.MathUtils.clamp((pivot.y - bob.y) / length, -1, 1)); },
   };
 }

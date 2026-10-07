@@ -15,7 +15,9 @@ const { width: W, depth: D, height: H, wall: T } = config.room;
 const BASEBOARD = 0.075;
 const HOOK = new THREE.Vector3(W / 2 - 0.17, H, -D / 2 + 0.16); // the lamp's ceiling hook
 const DROP = 0.72; // chain from the hook to the shade
-const FOCUS = new THREE.Vector3(W / 2, 1.1, -D / 2); // the corner, just under the lamp (see the report)
+// The corner the chair faces, a little under the shade so the seated view takes in
+// the box and the carpet, as REF-B does.
+const FOCUS = new THREE.Vector3(W / 2, 1.1, -D / 2);
 const DOOR_X = 0.14, WINDOW_X = 1.27, CORD_Z = -0.85; // along their walls
 const WALL_LIGHT = 1.1; // radius of the lamp's painted light on the walls and ceiling
 
@@ -105,6 +107,8 @@ export function buildRoom(scene) {
     group.add(pivot);
     const halves = [-1, 1].map((side) => {
       const half = new THREE.Group();
+      const doors = []; // open doors fall shut with their wall (see pose)
+      half.userData.doors = doors;
       pivot.add(half);
       const [lo, hi] = side < 0 ? [-spec.length / 2, spec.split] : [spec.split, spec.length / 2];
       box(half, hi - lo, H, T, plywood, (lo + hi) / 2, H / 2, T / 2).userData.noAscii = true;
@@ -120,7 +124,7 @@ export function buildRoom(scene) {
         f.position.set(x, y, T + 0.003 + z);
         half.add(f);
         if (f.material?.userData.glow) lights.push(f);
-        f.traverse((o) => o.userData.open && (half.userData.doors = [...(half.userData.doors ?? []), o]));
+        f.traverse((o) => o.userData.open && doors.push(o));
       }
       return { group: half, side };
     });
@@ -219,7 +223,6 @@ function createCollapse(scene, walls, ceiling, lamp) {
   const split = mode === 'split';
   const dust = [];
   const dustMat = new THREE.SpriteMaterial({ map: puffTexture('170,150,128'), transparent: true, opacity: 0.6, depthWrite: false });
-  const H = config.room.height;
   let landed = new Set();
 
   // Pose one half-wall for time `local` seconds after it starts to fall.
@@ -230,7 +233,7 @@ function createCollapse(scene, walls, ceiling, lamp) {
     if (b > 0 && b < BOUNCE) angle -= 0.09 * Math.sin((b / BOUNCE) * Math.PI);
     h.group.rotation.x = -angle;
     // An open door falls shut as its wall tips over.
-    for (const door of h.group.userData.doors ?? []) door.rotation.y = -door.userData.open * (1 - THREE.MathUtils.smoothstep(u, 0.35, 0.95));
+    for (const door of h.group.userData.doors) door.rotation.y = -door.userData.open * (1 - THREE.MathUtils.smoothstep(u, 0.35, 0.95));
     if (split) {
       h.group.position.x = h.side * 0.6 * u * u; // the halves pull apart...
       h.group.rotation.z = -h.side * 0.12 * u; // ...and twist away from each other
