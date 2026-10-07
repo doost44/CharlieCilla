@@ -1,4 +1,5 @@
 import THREE from './three.js';
+import { config } from './config.js';
 import { canvas } from './textures.js';
 import { settings } from './options.js';
 import {
@@ -58,20 +59,20 @@ function pictureTexture(img) {
   return smoothTexture(c);
 }
 
-// Stand-in for a film whose thumbnail can't load: a dark title card.
-function filmCard(p) {
+// Stand-in when there is no picture to show (e.g. a film whose thumbnail can't load): a dark title card.
+function titleCard(p, kind) {
   const c = canvas(1024, 576);
   const g = c.getContext('2d');
   g.fillStyle = '#141414';
   g.fillRect(0, 0, 1024, 576);
   g.textAlign = 'center';
   g.fillStyle = '#f4f4f2';
-  g.font = FONT.yr.replace('14.72px', '56px');
+  g.font = `600 56px ${config.serif}`;
   const lines = wrap(g.font, titleOf(p), 820);
   lines.forEach((line, i) => g.fillText(line, 512, 150 + i * 68)); // above the play button
   g.fillStyle = COLOR.faint;
-  g.font = FONT.mono.replace('12px', '24px');
-  g.fillText([yearOf(p), p.category, 'film'].filter(Boolean).join(' · ').toLowerCase(), 512, 520);
+  g.font = `400 24px ${config.font}`;
+  g.fillText([yearOf(p), p.category, kind].filter(Boolean).join(' · ').toLowerCase(), 512, 520);
   return smoothTexture(c);
 }
 
@@ -218,7 +219,7 @@ export function createProjectPanel(project, index) {
 
   function videoFailed() {
     st.noVideo = true;
-    if (!pictureMaterial.map || pictureMaterial.map === videoTexture) show(filmCard(project), 16 / 9);
+    if (!pictureMaterial.map || pictureMaterial.map === videoTexture) show(titleCard(project, 'video'), 16 / 9);
     else redraw();
   }
 
@@ -288,6 +289,7 @@ export function createProjectPanel(project, index) {
     }
     if (media.kind === 'video') return [{ id: 'note', text: st.noVideo ? 'plays on the site: expand' : 'click the video to play or pause', off: true }];
     if (media.kind === 'youtube') return [{ id: 'note', text: 'plays on the site', off: true }];
+    if (media.kind === 'cover') return [{ id: 'note', text: 'opens on the site: expand', off: true }];
     return null;
   }
 
@@ -308,9 +310,9 @@ export function createProjectPanel(project, index) {
     }, { signal });
     video.addEventListener('error', videoFailed, { signal });
     video.src = media.src;
-    if (media.poster) showPicture(media.poster, () => filmCard(project));
+    if (media.poster) showPicture(media.poster, () => titleCard(project, 'video'));
   } else {
-    showPicture(media.poster, () => filmCard(project));
+    showPicture(media.poster, () => titleCard(project, media.kind === 'youtube' ? 'film' : ''));
   }
   return panel;
 }
