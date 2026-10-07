@@ -18,7 +18,7 @@ const LIFT = 0.004; // metres a landed glyph floats off its surface
 const LANDED = 0.995; // flight progress from which a glyph is on its surface (see render)
 const SHRINK = 0.12; // metres of build-out front over which a glyph shrinks away
 const VIEW_MARGIN = THREE.MathUtils.degToRad(62); // beyond the intro look limits: about half the widest screen's view
-export const REVEAL_NOISE = 0.12; // metres the build-out front wanders, so its edge is organic
+const REVEAL_NOISE = 0.12; // metres the build-out front wanders, so its edge is organic
 
 const f = (x) => x.toFixed(5); // a JS number as a GLSL float
 
@@ -44,7 +44,7 @@ float rvNoise(vec3 x) {
     mix(mix(rvHash(i + vec3(0, 0, 1)), rvHash(i + vec3(1, 0, 1)), u.x), mix(rvHash(i + vec3(0, 1, 1)), rvHash(i + vec3(1, 1, 1)), u.x), u.y),
     u.z);
 }
-// How far the front is ahead of (-) or behind (+) its plain height at p.
+// Added to a point's height: the front reaches it a little early (-) or late (+).
 float revealNoise(vec3 p) {
   return (rvNoise(p * 2.7) * 0.7 + rvNoise(p * 7.3) * 0.3 - 0.5) * ${f(2 * REVEAL_NOISE)};
 }
