@@ -216,7 +216,7 @@ function without([a, b], gaps) {
 
 const easeIn = (u) => u * u * u;
 const BOUNCE = 0.35; // seconds of rebound after a wall hits the ground
-const GONE = config.hall.height + 0.5; // the ceiling is hidden once it is up past the hall's roof
+const GONE = 7.2; // the ceiling has faded out by this height, below the hall's roof trusses (about 7.4 m)
 
 function createCollapse(scene, walls, ceiling, lamp) {
   const { order, stagger, fall, mode } = config.collapse;
@@ -244,13 +244,21 @@ function createCollapse(scene, walls, ceiling, lamp) {
   // The ceiling breaks loose with a yank (which sets the lamp swinging), then is
   // hauled up and away over the corner, fast. The lamp dims as it goes; the light it
   // painted on the walls fades as soon as it leaves its spot.
+  const ceilingMats = new Set();
+  ceiling.traverse((m) => m.isMesh && !m.material.userData.glow && ceilingMats.add(m.material));
   function lift(t) {
     const loose = THREE.MathUtils.smoothstep(t, 0, 0.45);
     const yank = Math.sin(Math.PI * Math.min(1, t / 0.45));
     const up = Math.max(0, t - 0.35) ** 2;
     ceiling.position.set(0.3 * yank + 0.45 * up, H + 0.2 * loose + 2.6 * up, -0.06 * yank - 0.35 * up);
     ceiling.rotation.set(-0.04 * up, 0, 0.06 * yank + 0.05 * up);
-    ceiling.visible = ceiling.position.y < GONE;
+    // It fades out on the way up rather than passing through the hall's roof steel.
+    const fade = 1 - THREE.MathUtils.smoothstep(ceiling.position.y, GONE - 1.6, GONE);
+    for (const m of ceilingMats) {
+      m.transparent = fade < 1;
+      m.opacity = fade;
+    }
+    ceiling.visible = fade > 0;
     lamp.setPresence(1 - THREE.MathUtils.smoothstep(ceiling.position.y, H + 1.2, H + 5), 1 - THREE.MathUtils.smoothstep(t, 0.1, 0.7));
   }
 
