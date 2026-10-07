@@ -24,6 +24,7 @@ const TRUSS_X = Array.from({ length: W / BAY }, (_, i) => -HX + BAY * (i + 0.5))
 const COLUMN_Z = HZ - 0.9; // the columns stand this far out, in front of both long walls
 
 const AMBIENT = [0x7484aa, 0.4];
+const LIGHT_FADE = 2; // seconds for the hall's light to reach the room set once revealed (0: at once)
 const TOP_LIGHT = [0xcfd6e4, 0.22]; // cool light from above: shape for the floor and rubble
 const FOG = [0x262f40, 2, 75];
 const SKY = 0xe4e6e2; // seen through the hole in the roof
@@ -50,19 +51,29 @@ export function buildWarehouse(scene) {
   scene.add(group);
 
   // The lights stay in the scene at zero while hidden, so no material recompiles on reveal.
+  // They also light the room set, so after reveal(true) they fade up (in update) rather
+  // than flattening the lamp-lit room in one frame.
   const ambient = new THREE.AmbientLight(AMBIENT[0], 0);
   const top = new THREE.DirectionalLight(TOP_LIGHT[0], 0);
   top.position.set(-0.2, 1, -0.35);
   scene.add(ambient, top);
+  let level = 0;
+  const setLevel = (k) => {
+    level = k;
+    ambient.intensity = AMBIENT[1] * k;
+    top.intensity = TOP_LIGHT[1] * k;
+    light.uniforms.uStrength.value = SHAFT_STRENGTH * k; // the god-rays and dust come up with it
+    dust.uniforms.uLevel.value = k;
+  };
 
   const sky = new THREE.Color(SKY);
   const paper = new THREE.Color(config.site.paper);
   const fog = new THREE.Fog(...FOG);
 
   function reveal(on) {
+    if (!on) setLevel(0);
+    else if (!LIGHT_FADE) setLevel(1);
     group.visible = on;
-    ambient.intensity = on ? AMBIENT[1] : 0;
-    top.intensity = on ? TOP_LIGHT[1] : 0;
     scene.background = on ? sky : paper;
     scene.fog = on ? fog : null;
   }
@@ -74,6 +85,7 @@ export function buildWarehouse(scene) {
     reveal,
     update(dt, camera) {
       if (!group.visible) return;
+      if (level < 1) setLevel(Math.min(1, level + dt / LIGHT_FADE));
       time += dt;
       light.uniforms.uTime.value = time;
       dust.uniforms.uTime.value = time;
@@ -630,7 +642,7 @@ function buildLight(group, walls) {
   for (const [x0, x1] of HOLE_BEAMS) {
     const z0 = HOLE.z0 + 0.1, z1 = HOLE.z1 - 0.1;
     const opening = [new V3(x0, H, z0), new V3(x1, H, z0), new V3(x1, H, z1), new V3(x0, H, z1)];
-    sunbeam(opening, scale(WARM, 1.25), r());
+    sunbeam(opening, scale(WARM, 0.95), r());
     pool(opening.map((p) => toFloor(p)), soft, scale(WARM, 1.1));
   }
 
@@ -663,7 +675,7 @@ function buildLight(group, walls) {
 // --- Dust: motes drifting in a box that follows the camera, bright in the sunbeams ------
 
 const DUST_VERTEX = /* glsl */ `
-uniform float uTime, uSize, uViewH, uRoof;
+uniform float uTime, uSize, uViewH, uRoof, uLevel;
 uniform vec3 uCenter, uBox, uSun;
 uniform vec4 uWindows; // spacing, half width, last window x, wall z
 uniform vec2 uSill;    // sill and head heights
@@ -686,7 +698,7 @@ void main() {
   gl_Position = projectionMatrix * mv;
   float d = -mv.z;
   gl_PointSize = clamp(uSize * uViewH * 0.5 * projectionMatrix[1][1] / d, 1.0, 5.0);
-  vAlpha = smoothstep(0.3, 1.0, d) * (1.0 - smoothstep(9.0, 15.0, d));
+  vAlpha = uLevel * smoothstep(0.3, 1.0, d) * (1.0 - smoothstep(9.0, 15.0, d));
 }`;
 
 const DUST_FRAGMENT = /* glsl */ `
@@ -714,6 +726,7 @@ function buildDust(group) {
   const material = new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
+      uLevel: { value: 1 },
       uSize: { value: DUST.size },
       uViewH: { value: 800 },
       uRoof: { value: H },
