@@ -511,7 +511,8 @@ function buildProps(group, { timber }) {
         for (let iz = 0; iz < nz; iz++) {
           if (ly === layers - 1 && r() < 0.35) continue;
           const g = 0.8 + r() * 0.25;
-          blocks.push({ p: [cx + (ix - (nx - 1) / 2) * 0.41, 0.23 + ly * 0.2, cz + (iz - (nz - 1) / 2) * 0.21], s: [0.4, 0.19, 0.2], r: [0, (r() - 0.5) * 0.05, 0], c: [g, g, g * 0.98] });
+          const p = [cx + (ix - (nx - 1) / 2) * 0.41, 0.23 + ly * 0.2, cz + (iz - (nz - 1) / 2) * 0.21];
+          blocks.push({ p, s: [0.4, 0.19, 0.2], r: [0, (r() - 0.5) * 0.05, 0], c: [g, g, g * 0.98] });
         }
       }
     }
@@ -613,22 +614,24 @@ function buildLight(group, walls) {
   };
 
   for (const wall of walls) {
+    // Rectangles just in front of the wall (s along it, t up) and on the floor (d out from it).
+    const onWall = (s0, s1, t0, t1) => [[s0, t0], [s1, t0], [s1, t1], [s0, t1]].map(([s, t]) => wall.at(s, t, -0.05));
+    const onFloor = (s0, s1, d0, d1) => [[s0, d0], [s1, d0], [s1, d1], [s0, d1]].map(([s, d]) => wall.at(s, 0.012, -d));
     for (const o of wall.openings) {
       if (o.door) {
         // Daylight leaking under the shutter.
-        add([wall.at(o.s0, 0, -0.05), wall.at(o.s1, 0, -0.05), wall.at(o.s1, 0.7, -0.05), wall.at(o.s0, 0.7, -0.05)], scale(WARM, 0.8), r(), 1);
-        pools.poly([wall.at(o.s0, 0.01, 0), wall.at(o.s1, 0.01, 0), wall.at(o.s1, 0.01, -1.2), wall.at(o.s0, 0.01, -1.2)], soft, { color: scale(WARM, 0.5) }, UP);
+        add(onWall(o.s0, o.s1, 0, 0.7), scale(WARM, 0.8), r(), 1);
+        pools.poly(onFloor(o.s0, o.s1, 0, 1.2), soft, { color: scale(WARM, 0.5) }, UP);
         continue;
       }
       // A soft glow round every window.
-      const g = 1.2;
-      add([wall.at(o.s0 - g, o.t0 - g, -0.05), wall.at(o.s1 + g, o.t0 - g, -0.05), wall.at(o.s1 + g, o.t1 + g, -0.05), wall.at(o.s0 - g, o.t1 + g, -0.05)], scale(wall.sun ? WARM : COOL, wall.sun ? 0.9 : 0.5), r(), 2);
+      add(onWall(o.s0 - 1.2, o.s1 + 1.2, o.t0 - 1.2, o.t1 + 1.2), scale(wall.sun ? WARM : COOL, wall.sun ? 0.9 : 0.5), r(), 2);
       if (!wall.sun) {
         // Overcast light from the shady side: faint, cool, falling steeply just inside.
         const sky = new V3(0, -1.6, 0).add(wall.n).normalize();
         const [a, b] = [wall.at(o.s0, o.t1), wall.at(o.s1, o.t1)];
         add([a, b, toFloor(b, sky), toFloor(a, sky)], scale(COOL, 0.3), r(), 0);
-        pools.poly([wall.at(o.s0 - 0.8, 0, -0.3), wall.at(o.s1 + 0.8, 0, -0.3), wall.at(o.s1 + 0.8, 0, -4.5), wall.at(o.s0 - 0.8, 0, -4.5)].map((p) => p.setY(0.012)), soft, { color: scale(COOL, 0.22) }, UP);
+        pools.poly(onFloor(o.s0 - 0.8, o.s1 + 0.8, 0.3, 4.5), soft, { color: scale(COOL, 0.22) }, UP);
         continue;
       }
       const opening = [wall.at(o.s0, o.t0), wall.at(o.s1, o.t0), wall.at(o.s1, o.t1), wall.at(o.s0, o.t1)];
