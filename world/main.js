@@ -5,7 +5,7 @@ import { createLook } from './mouse.js';
 import { createOptions, settings } from './options.js';
 import { startSound, stopSound, resumeSound, updateSound, sfx } from './sound.js';
 import { buildWorld } from './world-island.js';
-import { buildChair, seatPose, homePose } from './chair.js';
+import { buildChair, seatPose } from './chair.js';
 import { buildRoom } from './room.js';
 import { createAscii } from './ascii.js';
 import { createPlayer } from './player.js';
@@ -40,11 +40,10 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
   const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.05, 400);
 
   const island = buildWorld(scene);
-  const chair = buildChair(home);
-  scene.add(chair);
-  const startPose = homePose(home, chair); // the home page's view of the chair, right now
-  const seat = seatPose(chair);
   const room = buildRoom(scene);
+  const chair = buildChair(home, room.focus); // facing the room's focal point
+  scene.add(chair);
+  const seat = seatPose(chair, room.focus);
   const ascii = createAscii({ canvas: $('ascii'), room, center: new THREE.Vector3(seat.pos.x, 0, seat.pos.z), eye: seat.pos, chair });
   const look = createLook(camera, root, signal);
   const player = createPlayer(camera, look);
@@ -58,7 +57,6 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
     renderer, camera, look, signal,
     onOpen: () => showOverlay(false),
     onClose: () => showOverlay(!look.isLocked),
-    onResetOrbs: () => resetOrbs(),
   });
 
   // --- Pause screen, pointer lock, leaving -------------------------------------
@@ -152,15 +150,11 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
   let shake = 0;
   const toWall = new THREE.Vector3(), right = new THREE.Vector3();
   const sequence = createSequence({
+    // In the chair from the first frame; the head stays turned to the room while it forms.
     sit: {
       start(instant) {
-        player.begin(startPose, seat);
+        player.seat(seat, true);
         if (!instant) sfx.creak();
-      },
-      update: (t, k) => player.ease(k),
-      finish() {
-        player.seated();
-        options.seated = true;
       },
     },
     swirl: {
@@ -182,6 +176,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
         room.setOpacity(1);
         ascii.show(false);
         island.reveal(true); // hidden behind the solid room until the walls fall
+        player.freeLook();
       },
     },
     collapse: {

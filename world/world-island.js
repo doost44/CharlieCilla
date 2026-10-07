@@ -3,7 +3,7 @@ import { config } from './config.js';
 import { grassTexture, dirtTexture, skyTexture, rng, flatMaterial } from './textures.js';
 
 // Automation Map's floating grass island, dusk sky and fog. Until the room's walls
-// come down the island and sky are hidden: the chair sits in a black void.
+// come down the island and sky are hidden: the chair sits in a white void.
 
 export const PLATFORM_RADIUS = 8;
 const SIDES = 16; // the grass top and rock underside must match so their edges meet
@@ -70,12 +70,12 @@ export function buildWorld(scene) {
 
   const sky = skyTexture();
   const fog = new THREE.Fog(0x8a8590, 45, 150);
-  const black = new THREE.Color(0x000000);
+  const white = new THREE.Color(config.site.paper);
 
   // Show the island, sky and fog (once the room hides the void), or the black void.
   function reveal(on) {
     platform.visible = on;
-    scene.background = on ? sky : black;
+    scene.background = on ? sky : white;
     scene.fog = on ? fog : null;
   }
   reveal(false);

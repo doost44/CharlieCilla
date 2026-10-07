@@ -83,18 +83,18 @@ export function skyTexture() {
   return crunchy(c);
 }
 
-// The office chair's skins: worn white leather, moulded plastic, dull metal.
+// The office chair's skins: worn black leather, black moulded plastic, dark gunmetal.
 export function leatherTexture() {
-  const { c, g, r } = noisy(64, 64, [222, 218, 206], 16, 21);
-  for (let i = 0; i < 30; i++) {
-    g.fillStyle = r() > 0.5 ? '#b8b2a2' : '#f4f0e6';
+  const { c, g, r } = noisy(64, 64, [30, 29, 28], 10, 21);
+  for (let i = 0; i < 40; i++) {
+    g.fillStyle = r() > 0.6 ? '#4a4846' : '#141312'; // creases and scuffs
     g.fillRect((r() * 64) | 0, (r() * 64) | 0, 1 + ((r() * 3) | 0), 1);
   }
   return crunchy(c, 2);
 }
 
-export const plasticTexture = () => crunchy(noisy(32, 32, [196, 196, 192], 10, 22).c);
-export const metalTexture = () => crunchy(noisy(32, 32, [128, 130, 134], 22, 23).c);
+export const plasticTexture = () => crunchy(noisy(32, 32, [24, 24, 26], 8, 22).c);
+export const metalTexture = () => crunchy(noisy(32, 32, [62, 64, 70], 16, 23).c);
 
 // A word rendered for a sprite. Returns the texture and its aspect ratio.
 export function wordTexture(text, color = '#ffd27a') {
