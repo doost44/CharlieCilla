@@ -20,6 +20,8 @@ const SUN = new THREE.Vector3(-0.55, -0.62, 1).normalize(); // sunlight, in thro
 const HOLE = { x0: 17.5, x1: 25, z0: -11.25, z1: -6.75 }; // roof sheets missing here
 const HOLE_BEAMS = [[17.7, 19.9], [20.5, 22.4], [22.9, 24.3]]; // light between the hanging sheets (x)
 const CLEAR = 7; // nothing on the floor within this radius of the origin (the room and its fallen walls)
+const TRUSS_X = Array.from({ length: W / BAY }, (_, i) => -HX + BAY * (i + 0.5)); // over the piers between windows
+const COLUMN_Z = HZ - 0.9; // the columns stand this far out, in front of both long walls
 
 const AMBIENT = [0x7484aa, 0.4];
 const TOP_LIGHT = [0xcfd6e4, 0.22]; // cool light from above: shape for the floor and rubble
@@ -37,10 +39,12 @@ const toFloor = (p, dir = SUN) => p.clone().addScaledVector(dir, p.y / -dir.y);
 
 export function buildWarehouse(scene) {
   const group = new THREE.Group();
-  const walls = buildWalls(group);
+  const parts = { sheets: [], timber: [] }; // corrugated sheets and timber from every builder, drawn once each
+  const walls = buildWalls(group, parts);
   buildFloor(group);
-  buildRoof(group);
-  const colliders = buildProps(group);
+  const colliders = [...buildRoof(group, parts), ...buildProps(group, parts)];
+  boxes(group, flatMaterial({ map: tex.corrugatedTexture() }), parts.sheets);
+  boxes(group, flatMaterial({ map: tex.timberTexture() }), parts.timber);
   const light = buildLight(group, walls);
   const dust = buildDust(group);
   scene.add(group);
@@ -81,6 +85,7 @@ export function buildWarehouse(scene) {
       scene.remove(group, ambient, top);
       group.traverse((o) => {
         o.geometry?.dispose();
+        if (o.isInstancedMesh) o.dispatchEvent({ type: 'dispose' }); // frees its instance buffers (r128 has no dispose())
         for (const m of [o.material].flat()) {
           if (!m) continue;
           for (const v of [...Object.values(m), ...Object.values(m.uniforms || {}).map((u) => u.value)]) if (v?.isTexture) v.dispose();
@@ -197,9 +202,9 @@ function wallSpecs() {
   ];
 }
 
-function buildWalls(group) {
+function buildWalls(group, parts) {
   const r = rng(501);
-  const paint = merger(), red = merger(), peel = merger(), glassSun = merger(), glass = merger(), shutter = [];
+  const paint = merger(), red = merger(), peel = merger(), glassSun = merger(), glass = merger();
   const specs = wallSpecs();
 
   for (const wall of specs) {
@@ -256,7 +261,7 @@ function buildWalls(group) {
         // A rolled-down shutter (a corrugated sheet turned so the ridges run across).
         const c = at((o.s0 + o.s1) / 2, o.t1 / 2, WIN.depth - 0.05);
         const turn = new THREE.Matrix4().makeBasis(UP, n, new V3(ux, 0, uz)); // box x up, y out of the wall, z along it
-        shutter.push({ p: c.toArray(), s: [o.t1, 0.06, o.s1 - o.s0], q: new THREE.Quaternion().setFromRotationMatrix(turn), c: [0.36, 0.33, 0.32] });
+        parts.sheets.push({ p: c.toArray(), s: [o.t1, 0.06, o.s1 - o.s0], q: new THREE.Quaternion().setFromRotationMatrix(turn), c: [0.36, 0.33, 0.32] });
         continue;
       }
       // Glass from a random window variant, cropped for the small windows, sometimes mirrored.
@@ -279,6 +284,7 @@ function buildWalls(group) {
       peel.poly(corners.map(([s, t]) => at(s, t, -0.01)), uv, { color: corners.map(([s, t]) => shade(s, t).map((c) => c * 1.5)) }, n);
     }
     wall.at = at;
+    wall.n = n;
   }
 
   const mesh = (m, mat) => group.add(new THREE.Mesh(m.geometry(), mat));
@@ -287,8 +293,7 @@ function buildWalls(group) {
   mesh(peel, flatMaterial({ map: tex.peelTexture(), vertexColors: true, alphaTest: 0.5 }));
   const windowTex = tex.windowTexture();
   mesh(glassSun, glowFog(new THREE.MeshBasicMaterial({ map: windowTex, color: 0xfff4e2 }), false));
-  mesh(glass, glowFog(new THREE.MeshBasicMaterial({ map: windowTex, color: 0xa8b8cc }), false));
-  boxes(group, flatMaterial({ map: tex.corrugatedTexture() }), shutter);
+  mesh(glass, glowFog(new THREE.MeshBasicMaterial({ map: windowTex, color: 0xbcc6d4 }), false));
   return specs;
 }
 
@@ -344,11 +349,11 @@ function buildFloor(group) {
   group.add(new THREE.Mesh(dust.geometry(), flatMaterial(decalMat({ map: tex.dustTexture() }))));
 }
 
-// --- Roof: corrugated sheets, timber purlins, steel trusses and columns ---------------
+// --- Roof: corrugated sheets, timber purlins, steel trusses and the columns under them --
 
-function buildRoof(group) {
+function buildRoof(group, { sheets, timber }) {
   const r = rng(503);
-  const sheets = [], timber = [], steel = [];
+  const steel = [];
   const inHole = (x, z) => x > HOLE.x0 && x < HOLE.x1 && z > HOLE.z0 && z < HOLE.z1;
   const grey = () => { const g = 0.45 + r() * 0.35; return [g, g, g]; };
 
@@ -377,12 +382,9 @@ function buildRoof(group) {
   for (const [x, z, a, b] of [[20.2, -8.4, 0.35, 0.2], [22.5, -10, -0.3, 1.1], [23.6, -7.3, 0.15, 2.4]]) {
     sheets.push({ p: [x, 0.55, z], s: [2.5, 0.03, 2.25], r: [a, b, 0.1], c: grey() });
   }
-  boxes(group, flatMaterial({ map: tex.corrugatedTexture() }), sheets);
 
   // Purlins run along the hall between the trusses (one is broken over the hole).
-  const trussX = [];
-  for (let x = -HX + BAY / 2; x < HX; x += BAY) trussX.push(x);
-  const stops = [-HX, ...trussX, HX];
+  const stops = [-HX, ...TRUSS_X, HX];
   for (let k = 0; k <= D / 2.25; k++) {
     const z = -HZ + 2.25 * k;
     for (let i = 1; i < stops.length; i++) {
@@ -397,7 +399,8 @@ function buildRoof(group) {
   // Steel trusses across the hall, on black columns standing in front of the long walls.
   const dark = [0.55, 0.55, 0.58];
   const yb = 7.62, yt = H - 0.33, P = 2.25;
-  for (const x of trussX) {
+  const colliders = [];
+  for (const x of TRUSS_X) {
     beam(steel, new V3(x, yb, -HZ), new V3(x, yb, HZ), 0.2, 0.22, dark);
     beam(steel, new V3(x, yt, -HZ), new V3(x, yt, HZ), 0.2, 0.2, dark);
     for (let k = 0; k <= D / P; k++) {
@@ -409,14 +412,15 @@ function buildRoof(group) {
       }
     }
     for (const side of [-1, 1]) {
-      const z = side * (HZ - 0.9), h = yb - 0.11;
+      const z = side * COLUMN_Z, h = yb - 0.11; // an I-section: two flanges, a web, a base plate
       steel.push({ p: [x, h / 2, z - 0.16], s: [0.34, h, 0.03], c: dark }, { p: [x, h / 2, z + 0.16], s: [0.34, h, 0.03], c: dark });
       steel.push({ p: [x, h / 2, z], s: [0.03, h, 0.3], c: dark }, { p: [x, 0.02, z], s: [0.6, 0.04, 0.6], c: dark });
+      colliders.push({ x, z, r: 0.45 });
     }
   }
-  for (const side of [-1, 1]) steel.push({ p: [0, 7.4, side * (HZ - 0.9)], s: [W, 0.3, 0.2], c: dark });
-  boxes(group, flatMaterial({ map: tex.timberTexture() }), timber);
+  for (const side of [-1, 1]) steel.push({ p: [0, 7.4, side * COLUMN_Z], s: [W, 0.3, 0.2], c: dark });
   boxes(group, flatMaterial({ map: tex.steelTexture() }), steel);
+  return colliders;
 }
 
 // --- Rubble, bricks, cinder blocks, planks: everything that stands on the floor -----
@@ -434,13 +438,12 @@ const STACKS = [
   [-31.6, 3.4, 3, 4, 3],
 ];
 
-function buildProps(group) {
+function buildProps(group, { timber }) {
   const r = rng(504);
   const colliders = [];
-  for (let x = -HX + BAY / 2; x < HX; x += BAY) for (const side of [-1, 1]) colliders.push({ x, z: side * (HZ - 0.9), r: 0.45 });
 
   // Sand and broken mortar mounds, with bricks strewn over and round them.
-  const sand = merger(), bricks = [], timber = [], blocks = [];
+  const sand = merger(), bricks = [], blocks = [];
   const brickColor = () => {
     const p = r();
     const c = p < 0.6 ? [0.62, 0.3, 0.22] : p < 0.88 ? [0.86, 0.84, 0.8] : [0.3, 0.26, 0.24];
@@ -516,7 +519,6 @@ function buildProps(group) {
   group.add(new THREE.Mesh(sand.geometry(), flatMaterial({ map: tex.sandTexture(), vertexColors: true })));
   boxes(group, flatMaterial({ map: tex.brickBitTexture() }), bricks);
   boxes(group, flatMaterial({ map: tex.cinderTexture() }), blocks);
-  boxes(group, flatMaterial({ map: tex.timberTexture() }), timber);
   return colliders;
 }
 
@@ -525,6 +527,7 @@ function buildProps(group) {
 const SHAFT_VERTEX = /* glsl */ `
 attribute vec3 aTint;
 attribute vec2 aMeta; // seed, kind (0 shaft, 1 haze on the floor, 2 glow round a window)
+uniform float uTime;
 varying vec2 vUv;
 varying vec3 vTint, vWorld, vNormal;
 varying vec2 vMeta;
@@ -533,6 +536,7 @@ void main() {
   vTint = aTint;
   vMeta = aMeta;
   vec4 world = modelMatrix * vec4(position, 1.0);
+  if (aMeta.y > 0.5 && aMeta.y < 1.5) world.xz += 0.6 * vec2(sin(uTime * 0.11 + aMeta.x * 6.0), cos(uTime * 0.07 + aMeta.x * 4.0)); // haze drifts
   vWorld = world.xyz;
   vNormal = normalize(mat3(modelMatrix) * normal);
   gl_Position = projectionMatrix * viewMatrix * world;
@@ -583,8 +587,14 @@ function buildLight(group, walls) {
     const c = pts.reduce((a, p) => a.add(p), new V3()).multiplyScalar(0.25);
     pools.poly(pts.map((p) => p.clone().sub(c).multiplyScalar(1.8).add(c).setY(0.012)), soft, { color: scale(tint, 0.3) }, UP);
   };
-  // A shaft between the edge a-b and its shadow on the floor (u across, v along the light).
+  // A plane of light from the edge a-b down to its shadow on the floor (u across, v along).
   const shaft = (a, b, tint, seed) => add([a, b, toFloor(b), toFloor(a)], tint, seed, 0);
+  // Sunlight through the opening a-b-c-d: the four sides of the beam and two planes through it.
+  const sunbeam = ([a, b, c, d], tint, seed) => {
+    const mid = (p, q) => p.clone().lerp(q, 0.5);
+    for (const [p, q] of [[a, b], [d, c], [a, d], [b, c], [mid(a, d), mid(b, c)], [mid(a, b), mid(d, c)]]) shaft(p, q, tint, seed);
+    haze(toFloor(mid(a, c)), 7, 3, scale(WARM, 0.75), seed);
+  };
   const haze = (c, w, h, tint, seed) => {
     add([new V3(c.x - w / 2, 0, c.z), new V3(c.x + w / 2, 0, c.z), new V3(c.x + w / 2, h, c.z), new V3(c.x - w / 2, h, c.z)], tint, seed, 1);
     add([new V3(c.x, 0, c.z - w / 2), new V3(c.x, 0, c.z + w / 2), new V3(c.x, h, c.z + w / 2), new V3(c.x, h, c.z - w / 2)], tint, seed + 0.3, 1);
@@ -601,35 +611,27 @@ function buildLight(group, walls) {
       // A soft glow round every window.
       const g = 1.2;
       add([wall.at(o.s0 - g, o.t0 - g, -0.05), wall.at(o.s1 + g, o.t0 - g, -0.05), wall.at(o.s1 + g, o.t1 + g, -0.05), wall.at(o.s0 - g, o.t1 + g, -0.05)], scale(wall.sun ? WARM : COOL, wall.sun ? 0.9 : 0.5), r(), 2);
-      if (!wall.sun) continue;
-      // Sun through the window: four sides of the beam plus two planes through its middle.
-      const [A, B, C, Dd] = [wall.at(o.s0, o.t0), wall.at(o.s1, o.t0), wall.at(o.s1, o.t1), wall.at(o.s0, o.t1)];
-      const seed = r();
+      if (!wall.sun) {
+        // Overcast light from the shady side: faint, cool, falling steeply just inside.
+        const sky = new V3(0, -1.6, 0).add(wall.n).normalize();
+        const [a, b] = [wall.at(o.s0, o.t1), wall.at(o.s1, o.t1)];
+        add([a, b, toFloor(b, sky), toFloor(a, sky)], scale(COOL, 0.3), r(), 0);
+        pools.poly([wall.at(o.s0 - 0.8, 0, -0.3), wall.at(o.s1 + 0.8, 0, -0.3), wall.at(o.s1 + 0.8, 0, -4.5), wall.at(o.s0 - 0.8, 0, -4.5)].map((p) => p.setY(0.012)), soft, { color: scale(COOL, 0.22) }, UP);
+        continue;
+      }
+      const opening = [wall.at(o.s0, o.t0), wall.at(o.s1, o.t0), wall.at(o.s1, o.t1), wall.at(o.s0, o.t1)];
       const tint = scale(WARM, 0.85 + r() * 0.3);
-      const mid = (p, q) => p.clone().lerp(q, 0.5);
-      shaft(A, B, tint, seed);
-      shaft(Dd, C, tint, seed);
-      shaft(A, Dd, tint, seed);
-      shaft(B, C, tint, seed);
-      shaft(mid(A, Dd), mid(B, C), tint, seed);
-      shaft(mid(A, B), mid(Dd, C), tint, seed);
-      pool([A, B, C, Dd].map((p) => toFloor(p)), paneUvs(o, tex.WINDOW_VARIANTS + 1), tint);
-      haze(toFloor(mid(A, C)), 6, 2.2, scale(WARM, 0.7), seed);
+      sunbeam(opening, tint, r());
+      pool(opening.map((p) => toFloor(p)), paneUvs(o, tex.WINDOW_VARIANTS + 1), tint);
     }
   }
 
   // Sun through the hole in the roof, in strips between the hanging sheets.
   for (const [x0, x1] of HOLE_BEAMS) {
-    const z0 = HOLE.z0 + 0.1, z1 = HOLE.z1 - 0.1, y = H;
-    const [E, F, G, K] = [new V3(x0, y, z0), new V3(x1, y, z0), new V3(x1, y, z1), new V3(x0, y, z1)];
-    const seed = r(), tint = scale(WARM, 1.25);
-    shaft(E, F, tint, seed);
-    shaft(K, G, tint, seed);
-    shaft(E, K, tint, seed);
-    shaft(F, G, tint, seed);
-    shaft(E.clone().lerp(K, 0.5), F.clone().lerp(G, 0.5), tint, seed);
-    pool([E, F, G, K].map((p) => toFloor(p)), soft, scale(WARM, 1.1));
-    haze(toFloor(E.clone().lerp(G, 0.5)), 5, 2.4, scale(WARM, 0.8), seed);
+    const z0 = HOLE.z0 + 0.1, z1 = HOLE.z1 - 0.1;
+    const opening = [new V3(x0, H, z0), new V3(x1, H, z0), new V3(x1, H, z1), new V3(x0, H, z1)];
+    sunbeam(opening, scale(WARM, 1.25), r());
+    pool(opening.map((p) => toFloor(p)), soft, scale(WARM, 1.1));
   }
 
   const material = new THREE.ShaderMaterial({
