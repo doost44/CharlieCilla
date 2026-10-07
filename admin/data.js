@@ -156,6 +156,7 @@ const DEFAULT_HOME_PROJECTS = [
     credit: "",
     type: "video-file",
     videoSrc: "Assets/videos/amna-tech-week-2025.mp4",
+    cover: "Assets/covers/amna-tech-week-2025.jpg",
     visible: true,
   },
   {
@@ -167,6 +168,7 @@ const DEFAULT_HOME_PROJECTS = [
     credit: "",
     type: "video-file",
     videoSrc: "Assets/videos/bbinb-blockchain-industry-2025.mp4",
+    cover: "Assets/covers/bbinb-blockchain-industry-2025.jpg",
     visible: true,
   },
   {
@@ -205,6 +207,7 @@ const DEFAULT_HOME_PROJECTS = [
     credit: "",
     type: "video-file",
     videoSrc: "Assets/videos/waterloo-blockchain-eth-anniversary-2025.mp4",
+    cover: "Assets/covers/waterloo-blockchain-eth-anniversary-2025.jpg",
     visible: true,
   },
   {

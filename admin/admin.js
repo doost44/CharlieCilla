@@ -79,6 +79,9 @@
             <textarea id="edit-home-description" rows="3"></textarea>
             <label>Credit (optional)</label>
             <input type="text" id="edit-home-credit">
+            <label>Cover image (optional)</label>
+            <input type="text" id="edit-home-cover" placeholder="Assets/covers/my-project.jpg">
+            <p class="admin-form-hint">Shown on the project's orb in the chair world. Leave empty to use the first slide, image or video thumbnail.</p>
 
             <label>Project Type</label>
             <select id="edit-home-type" onchange="AdminPanel.toggleHomeTypeFields()">
@@ -576,6 +579,7 @@
       document.getElementById("edit-home-category").value = "SHORT FILM";
       document.getElementById("edit-home-description").value = "";
       document.getElementById("edit-home-credit").value = "";
+      document.getElementById("edit-home-cover").value = "";
       document.getElementById("edit-home-type").value = "video";
       document.getElementById("edit-home-youtube").value = "";
       document.getElementById("edit-home-pdf").value = "";
@@ -603,6 +607,8 @@
           project.description;
         document.getElementById("edit-home-credit").value =
           project.credit || "";
+        document.getElementById("edit-home-cover").value =
+          project.cover || "";
 
         const projectType = project.type || "video";
         document.getElementById("edit-home-type").value = projectType;
@@ -652,6 +658,7 @@
         category: document.getElementById("edit-home-category").value,
         description: document.getElementById("edit-home-description").value,
         credit: document.getElementById("edit-home-credit").value,
+        cover: document.getElementById("edit-home-cover").value.trim(),
         type: projectType,
         visible: true,
       };

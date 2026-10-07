@@ -634,11 +634,16 @@
 
         <div class="ascii-wrap">
           <pre id="asciiCanvas" aria-hidden="true"></pre>
+          <!-- chair world (world/entry.js): shown when the chair is clicked -->
+          <div id="chair-hint" aria-live="polite" hidden>click E for more</div>
         </div>
       </div>
     </div>
 
     <footer class="site-footer">&copy; 2026 Charlie Cilla</footer>
+
+    <!-- chair world: the full-screen 3D world opened from the ASCII chair -->
+    <div id="world-root" hidden></div>
 
     <div id="project-modal" class="modal">
       <div class="modal-inner">
@@ -1523,6 +1528,8 @@
         // ---- interaction state, shared by both the three.js path and the fallback ----
         let excited = 0; // 0..1, eased toward 1 while hovering a link
         let targetExcited = 0;
+        let selected = false; // chair world: clicked, holds the accent colour
+        let paused = false; // chair world: the world is open over the page
         let rotY = 0.4,
           rotX = 0.18;
         let targetRotY = 0,
@@ -1557,7 +1564,7 @@
 
         function tickInteraction() {
           autoBase += 0.0025 + excited * 0.01;
-          excited += (targetExcited - excited) * 0.08;
+          excited += ((selected ? 1 : targetExcited) - excited) * 0.08;
           if (isTracking) {
             rotY += (targetRotY - rotY) * LERP;
             rotX += (targetRotX - rotX) * LERP;
@@ -2082,6 +2089,7 @@
 
           function loop() {
             requestAnimationFrame(loop);
+            if (paused) return;
             tickInteraction();
             mesh.rotation.y = autoBase + rotY;
             mesh.rotation.x = 0.3 + rotX;
@@ -2091,6 +2099,31 @@
             sampleToAscii(renderer.domElement);
           }
           loop();
+
+          // Hook for the chair world (world/entry.js): hit-testing clicks on the
+          // chair, placing the hint, and the same chair model for the 3D seat.
+          // Client px map onto the glyph grid, which is what the frame is drawn into.
+          const raycaster = new THREE.Raycaster();
+          window.asciiChair = {
+            THREE, camera, mesh, buildChair, domEl: outEl,
+            setSelected(on) { selected = on; },
+            setPaused(on) { paused = on; },
+            hitTest(x, y) {
+              const r = outEl.getBoundingClientRect();
+              const u = (x - r.left) / (cols * charWidth), v = (y - r.top) / (rows * LINE_HEIGHT);
+              if (u < 0 || u > 1 || v < 0 || v > 1) return false;
+              raycaster.setFromCamera({ x: u * 2 - 1, y: 1 - v * 2 }, camera);
+              if (raycaster.intersectObject(mesh, true).length) return true;
+              const line = outEl.textContent.split("\n")[Math.floor(v * rows)] || "";
+              return (line[Math.floor(u * cols)] || " ") !== " "; // or any ink under the cursor
+            },
+            projectToScreen(point) {
+              const p = point.clone().project(camera);
+              const r = outEl.getBoundingClientRect();
+              return { x: r.left + ((p.x + 1) / 2) * cols * charWidth, y: r.top + ((1 - p.y) / 2) * rows * LINE_HEIGHT };
+            },
+          };
+          window.dispatchEvent(new Event("asciichairready"));
         }
 
         function initFallback() {
@@ -2185,5 +2218,6 @@
         document.head.appendChild(threeScript);
       })();
     </script>
+    <script type="module" src="world/entry.js"></script>
   </body>
 </html>
