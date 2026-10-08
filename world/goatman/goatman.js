@@ -218,7 +218,11 @@ export async function createGoatMan() {
         }
       }
       hold += ((gm.holding ? 1 : 0) - hold) * Math.min(1, dt * 6);
-      const P = motion.update(dt, { grounded: true, vy: 0, sprint: 0, ...move }, scripted, hold);
+      let P = motion.update(dt, { grounded: true, vy: 0, sprint: 0, ...move }, scripted, hold);
+      if (!Number.isFinite(P.hipY)) { // a bad number would stay in the springs for good
+        motion.reset();
+        P = motion.update(0, { grounded: true, vy: 0, sprint: 0, ...move, speed: 0 }, null, 0);
+      }
       apply(P);
       headMount.rotation.y += look.yaw;
       headMount.rotation.x += look.pitch;

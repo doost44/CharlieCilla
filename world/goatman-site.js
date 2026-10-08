@@ -8,10 +8,11 @@ import { ACTIONS, STAND, place } from './goatman/poses.js';
 // warehouse sets aside for him (hall.work), with his project's station (the project marked
 // `companion: "goatman"` in admin/data.js) hanging beside it. He works from behind it, tucked
 // between it and the big stack by the wall, and carries the blocks lying about (most of them
-// back there, a few out in front, which he walks round to fetch) back one at a time: over to a block, down on his knees, up with it, over to
-// the stack, and set it on top, filling the top layer and starting another. Once none are
-// left on the floor, the top of the stack tumbles off again and he starts over. When the
-// visitor comes close he stops what he is doing and stares at them until they go.
+// back there, a few out in front, which he walks round to fetch) back one at a time: over to
+// a block, down on his knees, up with it, over to the stack, and set it on top, filling the
+// top layer and starting another. Once none are left on the floor, the top of the stack
+// tumbles off again and he starts over. When the visitor comes close he stares at them,
+// his head following them, and goes on working all the while.
 //
 // The blocks are the warehouse's own instances (hall.work.mesh); he moves them by
 // rewriting their matrices. Everything is in world space.
@@ -19,8 +20,8 @@ import { ACTIONS, STAND, place } from './goatman/poses.js';
 const LAYERS = 2; // layers of the stack that are his: its old top and one more on it
 const WALK = 0.9; // his pace, metres a second
 const TURN = 2.4; // radians a second
-const STARE = 5, STARE_OFF = 6.5; // he stops to stare inside the first, goes back to work outside the second
-const GAZE = { yaw: 1.2, pitch: 0.5 }; // how far his head turns before his body has to
+const STARE = 5, STARE_OFF = 6.5; // he starts staring inside the first, stops outside the second
+const GAZE = { yaw: 1.5, pitch: 0.5 }; // how far his head turns (over his shoulder, near enough)
 const EYES = 1.55; // his eye height in his stoop
 const PLACE_TIME = 1.6; // seconds, matching place() in poses.js
 const FRONT = 0.25; // of the blocks that tumble off, about this many land out in front
@@ -114,7 +115,6 @@ export async function buildGoatmanSite(stations, hall) {
   const collider = { x: me.pos.x, z: me.pos.z, r: 0.45 }; // for the visitor to bump into
   let goal = null; // { spot, yaw, resolve }: walking somewhere, then turning to face a way
   let staring = false, stare = 0;
-  let down = false; // on his knees
   let carried = null; // the block in his hand: { b, from: { pos, quat }, k }
   let setting = null; // putting it down: { b, slot, t, from }
   const falling = []; // blocks tumbling off the top
@@ -152,8 +152,6 @@ export async function buildGoatmanSite(stations, hall) {
     await moveTo(spot, yaw);
   }
   const wait = (s) => new Promise((resolve) => { let t = 0; waits.push((dt) => (t += dt) >= s && (resolve(), true)); });
-  const calm = () => new Promise((resolve) => waits.push(() => !staring && (resolve(), true)));
-  const play = async (act) => { await calm(); return gm.play(act); };
 
   // A block held in his right hand, in the hand's space: across his palm.
   const HELD = { pos: new THREE.Vector3(0, -0.06, -0.08), quat: new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 2, 0)) };
@@ -169,19 +167,14 @@ export async function buildGoatmanSite(stations, hall) {
       while (loose.length && nextSlot() >= 0 && alive) {
         loose.sort((a, b) => a.pos.distanceTo(me.pos) - b.pos.distanceTo(me.pos));
         const b = loose.shift();
-        await calm();
         await walkTo(standFor(b.pos, kneelGrip));
-        await play('kneel');
-        down = true;
+        await gm.play('kneel');
         carried = { b, from: { pos: b.pos.clone(), quat: b.quat.clone() }, k: 0 };
         gm.holding = true;
-        await play('stand');
-        down = false;
+        await gm.play('stand');
         const s = nextSlot();
         taken[s] = b;
-        await calm();
         await walkTo(standFor(slots[s], placeGrip(slots[s].y), faceStack));
-        await calm();
         setting = { b, slot: s, t: 0 };
         gm.holding = false;
         await gm.play(place(slots[s].y));
@@ -213,7 +206,8 @@ export async function buildGoatmanSite(stations, hall) {
 
   const eye = new THREE.Vector3(), q = new THREE.Quaternion(), m = new THREE.Matrix4();
   function update(dt, camera) {
-    // The visitor: near enough, he stops and stares.
+    if (!(dt > 0)) return; // two frames in the same millisecond: nothing has moved
+    // The visitor: near enough, he stares at them.
     eye.copy(camera.position);
     const away = Math.hypot(eye.x - me.pos.x, eye.z - me.pos.z);
     if (away < STARE) staring = true;
@@ -221,15 +215,7 @@ export async function buildGoatmanSite(stations, hall) {
     stare += ((staring ? 1 : 0) - stare) * Math.min(1, dt * 3);
 
     me.speed = 0;
-    if (staring) {
-      // Turn to face them once his head can't turn far enough (not while kneeling).
-      const want = yawTo(me.pos, eye);
-      if (!gm.acting && !down && Math.abs(wrap(want - me.yaw)) > GAZE.yaw * 0.8) {
-        me.yaw = wrap(turnToward(me.yaw, want, 1.2 * dt));
-        me.speed = 0.3; // shuffling round
-        me.stride += 0.25 * dt;
-      }
-    } else if (goal) {
+    if (goal) {
       const to = new THREE.Vector3().subVectors(goal.spot, me.pos).setY(0);
       const d = to.length();
       if (goal.yaw === null && d < 0.2) {
@@ -326,7 +312,7 @@ export async function buildGoatmanSite(stations, hall) {
     station,
     // For testing: where he is and how the stack stands.
     get state() {
-      return { pos: me.pos.clone(), yaw: me.yaw, stacked: taken.filter(Boolean).length, loose: loose.length, falling: falling.length, staring, down, holding: gm.holding, goal: !!goal, acting: gm.acting, setting: !!setting };
+      return { pos: me.pos.clone(), yaw: me.yaw, stacked: taken.filter(Boolean).length, loose: loose.length, falling: falling.length, staring, holding: gm.holding, goal: !!goal, acting: gm.acting, setting: !!setting };
     },
     colliders: [collider], // him, moving with him (the stack's own is the hall's)
     update,
