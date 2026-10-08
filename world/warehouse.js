@@ -527,7 +527,21 @@ function buildProps(group, { timber }) {
     colliders.push({ x: cx, z: cz, r: Math.hypot(w, d) / 2 + 0.2 });
   });
   for (let k = 0; k < 9; k++) {
-    work.push({ p: [-29.2 + r() * 2.5, 0.1, -3 + r() * 7], s: [0.4, 0.19, 0.2], r: [r() < 0.3 ? Math.PI / 2 : 0, r() * Math.PI, 0], c: [0.85, 0.85, 0.84] });
+    blocks.push({ p: [-29.2 + r() * 2.5, 0.1, -3 + r() * 7], s: [0.4, 0.19, 0.2], r: [r() < 0.3 ? Math.PI / 2 : 0, r() * Math.PI, 0], c: [0.85, 0.85, 0.84] });
+  }
+  // Blocks lying round the stack GoatMan tends: most behind it, towards the wall and the big
+  // stack (where he works), a few out in front. Their own random numbers, so nothing else moves.
+  const wr = rng(505);
+  const [wx, wz] = STACKS[WORK];
+  for (let k = 0, tries = 0; k < 17 && tries < 600; tries++) {
+    const a = (k < 14 ? Math.PI : 0) + (wr() - 0.5) * 2.2; // behind is towards -x, the wall
+    const d = 1.2 + wr() * 1.6;
+    const p = [wx + Math.cos(a) * d, 0.1, wz + Math.sin(a) * d];
+    const onStack = STACKS.some(([x, z, nx, nz]) => Math.abs(p[0] - x) < nx * 0.205 + 0.45 && Math.abs(p[2] - z) < nz * 0.105 + 0.45);
+    if (onStack || p[0] < -HX + 1 || p[2] < wz - 1.5 || work.some((b) => Math.hypot(b.p[0] - p[0], b.p[2] - p[2]) < 0.55)) continue;
+    const g = 0.8 + wr() * 0.25;
+    work.push({ p, s: [0.4, 0.19, 0.2], r: [wr() < 0.3 ? Math.PI / 2 : 0, wr() * Math.PI, 0], c: [g, g, g * 0.98] });
+    k++;
   }
 
   // Planks lying about, and a few leaning on the far wall.
