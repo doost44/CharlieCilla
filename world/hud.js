@@ -3,7 +3,7 @@
 // is built inside #world-root on launch and removed on leaving. Ids start with cw-
 // (chair world) so they never clash with the site's own.
 
-const HELP = 'mouse look · click links · e stand / sit · w a s d walk · o options · esc pause';
+const HELP = 'mouse look · click links · z zoom · e stand / sit · w a s d walk · o options · esc pause';
 
 const TEMPLATE = `
 <canvas id="cw-view"></canvas>
@@ -92,9 +92,10 @@ export function showHint(text, slot = 'main') {
   if (shown) el.textContent = shown;
 }
 
-// The crosshair: a small dot, or a ring while it is over something clickable.
+// The crosshair: a small dot, a ring while it is over something clickable, or 'none'.
 export function setCrosshair(mode) {
   $('crosshair').classList.toggle('cw-ring', mode === 'ring');
+  $('crosshair').classList.toggle('cw-hidden', mode === 'none');
 }
 
 export function showError(msg) {

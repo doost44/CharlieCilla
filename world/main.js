@@ -19,13 +19,18 @@ import { createSequence } from './sequence.js';
 
 let world = null;
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+// After the next paint: lets the load screen's swirl draw a frame between heavy builds.
+const breathe = () => new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve)));
 const ROOM_AMBIENT = 0.3; // the only other light in the room is its swag lamp
+const ZOOM = 2.5; // Z narrows the view this many times (and slows the mouse to match)
 
 // home: the page's ASCII chair hook (window.asciiChair). audio: an AudioContext made
-// inside the E key press. phase: where to start (?phase= for testing). onLeft: called
-// once the world is gone and the page should show again.
-export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) {
+// inside the E key press. phase: where to start (?phase= for testing). portal: the
+// load screen's swirl (portal.js), if one is running; the world's own swirl takes over
+// from it. onLeft: called once the world is gone and the page should show again.
+export async function launchWorld({ root, home, audio, phase = 'sit', portal, onLeft }) {
   if (world) return;
+  await portal?.seated; // building stutters the main thread: not while the chair glides and grows
   await Promise.all([ // the canvases draw text in the site's fonts
     document.fonts.load(`500 16px ${config.font}`),
     document.fonts.load(`600 16px ${config.serif}`),
@@ -45,16 +50,20 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
   const ambient = new THREE.AmbientLight(0xfff0dd, ROOM_AMBIENT);
   scene.add(ambient);
 
+  await breathe();
   const hall = buildWarehouse(scene);
+  await breathe();
   const room = buildRoom(scene);
   const reveal = createReveal(room); // the room is invisible (but hides glyphs) until it builds out
   room.lamp.setLevel(0);
   const chair = buildChair(home, room.focus); // facing the lamp corner
   scene.add(chair);
   const seat = seatPose(chair, room.focus);
+  await breathe();
   const ascii = createAscii({ canvas: $('ascii'), room, chair, eye: seat.pos });
   const look = createLook(camera, root, signal);
   const player = createPlayer({ camera, look, signal, chair, seat });
+  await breathe();
   const stations = buildStations(scene, { bounds: hall.bounds, avoid: hall.colliders, start: room.focus }); // station 0 the way the chair faces
   player.setWorld({ bounds: hall.bounds, colliders: [...hall.colliders, ...stations.colliders] });
   setSubtitle(`selected works · ${stations.stations.length} projects`);
@@ -66,8 +75,12 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
     onExpand: openWork,
     onTick: (i) => sfx.cardTick(i),
   });
+  // Z toggles a zoomed-in view; the field of view eases between the two (see updateZoom).
+  // Options re-apply the plain field of view, so the zoom is applied again after them.
+  let zoom = 0, zoomTo = 0, zoomStale = false;
   const options = createOptions({
     renderer, camera, look, signal,
+    onApply: () => { zoomStale = true; },
     onOpen: () => showOverlay(false),
     onClose: () => showOverlay(!look.isLocked),
   });
@@ -116,6 +129,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
       else options.open();
     }
     if (e.code === 'Space' && sequence.intro) sequence.skip();
+    if (e.code === 'KeyZ' && !options.isOpen) zoomTo = 1 - zoomTo;
   });
 
   // "expand" on a project opens the site's own project view over the world; closing it comes back here.
@@ -141,6 +155,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     $('white').classList.add('cw-on');
     await wait(config.fade * 1000);
+    portal?.stop(); // if it was still turning
     leaveWorld();
     onLeft?.();
   }
@@ -152,13 +167,24 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
     ascii.resize();
   });
 
+  function updateZoom(dt) {
+    if (zoom === zoomTo && !zoomStale) return;
+    zoomStale = false;
+    zoom += (zoomTo - zoom) * Math.min(1, dt * 8);
+    if (Math.abs(zoomTo - zoom) < 0.002) zoom = zoomTo;
+    const factor = THREE.MathUtils.lerp(1, ZOOM, zoom);
+    camera.fov = settings.fov / factor;
+    camera.updateProjectionMatrix();
+    look.pointerSpeed = settings.sensitivity / factor;
+  }
+
   // --- The intro ------------------------------------------------------------------
   let shake = 0;
   const toWall = new THREE.Vector3(), right = new THREE.Vector3();
   const revealTop = config.room.height + 1.7; // past the ceiling's bias, the noise and the edge band
   const sequence = createSequence({
     // In the chair from the first frame; the head stays turned to the room while it forms.
-    sit: {
+    sit: { // skipped (instant) after the load screen, which did the sitting down
       start(instant) {
         player.seat(seat, true);
         room.lamp.setLevel(0); // the bulb comes up as the room builds out
@@ -167,7 +193,8 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
     },
     swirl: {
       start(instant) {
-        ascii.show(true);
+        ascii.show(true, portal ? 2 : 0); // most glyphs already out, as the load screen's swirl fades over them
+        portal?.finish();
         if (!instant) sfx.riser(config.durations.swirl);
       },
     },
@@ -228,18 +255,26 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
   world = { root, renderer, scene, abort, watcher, ascii, reveal, room, hall, stations };
 
   // Compile the hall's shaders (and the fogged versions of the rest) now, so the reveal doesn't stutter.
+  await breathe();
+  if (leaving) return; // back to the site while it was loading
   hall.reveal(true);
   renderer.compile(scene, camera);
   hall.reveal(false);
+  await portal?.swirling;
+  if (leaving) return;
 
-  // Fade the page to white first (entry.js), then start, already in the chair.
+  // Fade the page to white first (entry.js), then start, already in the chair. After
+  // the load screen the page is long white and the visitor already sat down: go
+  // straight to the swirl.
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let startIn = config.fade;
+  let startIn = portal ? 0 : config.fade;
+  let started = false;
   const clock = new THREE.Clock();
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.1);
-    if (startIn > 0 && (startIn -= dt) <= 0) {
-      sequence.start(reduced ? 'projects' : phase);
+    if (!started && (startIn -= dt) <= 0) {
+      started = true;
+      sequence.start(reduced ? 'projects' : portal ? 'swirl' : phase);
       view.classList.add('cw-shown');
     }
     sequence.update(dt);
@@ -248,10 +283,11 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
     hall.update(dt, camera);
     stations.update(dt, camera);
     player.update(dt);
+    updateZoom(dt);
     interaction.update(dt);
     updateSound(dt, camera, { hall: state.hall });
 
-    const intro = sequence.intro && startIn <= 0;
+    const intro = sequence.intro && started;
     showHint(intro ? 'space or click to skip' : null, 'skip');
     showHint(!intro && player.seated ? 'e or w a s d to stand' : player.canSit ? 'e to sit' : null, 'stand');
     showHint(!look.isLocked && !everLocked ? 'click to look around' : null, 'lock');
