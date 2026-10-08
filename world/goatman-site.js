@@ -9,15 +9,14 @@ import { ACTIONS, STAND, place } from './goatman/poses.js';
 // `companion: "goatman"` in admin/data.js) hanging beside it. He works from behind it, tucked
 // between it and the big stack by the wall, and carries the blocks lying about (most of them
 // back there, a few out in front, which he walks round to fetch) back one at a time: over to
-// a block, down on his knees, up with it, over to the stack, and set it on top, filling the
-// top layer and starting another. Once none are left on the floor, the top of the stack
+// a block, down on his knees, up with it, over to the stack, and set it on top, until the
+// stack is whole again (what is on the floor is always what is missing from it). Once none are left on the floor, the top of the stack
 // tumbles off again and he starts over. When the visitor comes close he stares at them,
 // his head following them, and goes on working all the while.
 //
 // The blocks are the warehouse's own instances (hall.work.mesh); he moves them by
 // rewriting their matrices. Everything is in world space.
 
-const LAYERS = 2; // layers of the stack that are his: its old top and one more on it
 const WALK = 0.9; // his pace, metres a second
 const TURN = 2.4; // radians a second
 const STARE = 5, STARE_OFF = 6.5; // he starts staring inside the first, stops outside the second
@@ -51,9 +50,11 @@ export async function buildGoatmanSite(stations, hall) {
   const halfAlong = Math.abs(out.x) * stack.nx * 0.205 + Math.abs(out.z) * stack.nz * 0.105; // the stack's half depth, seen from behind
   const ROUND = Math.hypot(stack.nx * 0.205, stack.nz * 0.105) + 0.3; // keep this far from its middle walking past
 
-  // The stack's slots that are his, layer by layer, the far side of each first.
+  // The stack's slots that are his (its top layers), layer by layer, the far side of each
+  // first. There are as many blocks as slots: those not on the stack lie on the floor.
+  const LAYERS = stack.layers - stack.from;
   const slots = [];
-  for (let ly = stack.top; ly < stack.top + LAYERS; ly++) {
+  for (let ly = stack.from; ly < stack.layers; ly++) {
     const layer = [];
     for (let ix = 0; ix < stack.nx; ix++) {
       for (let iz = 0; iz < stack.nz; iz++) {
@@ -88,12 +89,12 @@ export async function buildGoatmanSite(stations, hall) {
   const bounds = hall.bounds;
   const lying = (n, keepOff) => {
     const spots = [];
-    for (let tries = 0; spots.length < n && tries < 800; tries++) {
+    for (let tries = 0; spots.length < n && tries < 1500; tries++) {
       const a = Math.atan2(out.x, out.z) + (r() < FRONT ? Math.PI : 0) + (r() - 0.5) * 2;
-      const d = 1.3 + r() * 1.7;
+      const d = 1.3 + r() * (tries < 400 ? 1.7 : 2.3);
       const p = new THREE.Vector3(stack.x + Math.sin(a) * d, 0, stack.z + Math.cos(a) * d);
       if (p.x < bounds.minX + 0.5 || p.x > bounds.maxX - 0.5 || p.z < bounds.minZ + 0.5 || p.z > bounds.maxZ - 0.5) continue;
-      if ([...spots, ...keepOff].some((o) => Math.hypot(o.x - p.x, o.z - p.z) < 0.6)) continue;
+      if ([...spots, ...keepOff].some((o) => Math.hypot(o.x - p.x, o.z - p.z) < (tries < 500 ? 0.6 : 0.45))) continue;
       if (avoid.some((c) => Math.hypot(c.x - p.x, c.z - p.z) < c.r + 0.3)) continue;
       spots.push(p);
     }
