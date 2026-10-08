@@ -6,8 +6,9 @@ import { ACTIONS, STAND, place } from './goatman/poses.js';
 
 // GoatMan (from doost44/the-goatman) at work on the cinder-block stack by the wall that the
 // warehouse sets aside for him (hall.work), with his project's station (the project marked
-// `companion: "goatman"` in admin/data.js) hanging beside it. He carries the blocks lying in
-// front of it back one at a time: over to a block, down on his knees, up with it, over to
+// `companion: "goatman"` in admin/data.js) hanging beside it. He works from behind it, tucked
+// between it and the big stack by the wall, and carries the blocks lying about (most of them
+// back there, a few out in front, which he walks round to fetch) back one at a time: over to a block, down on his knees, up with it, over to
 // the stack, and set it on top, filling the top layer and starting another. Once none are
 // left on the floor, the top of the stack tumbles off again and he starts over. When the
 // visitor comes close he stops what he is doing and stares at them until they go.
@@ -22,6 +23,8 @@ const STARE = 5, STARE_OFF = 6.5; // he stops to stare inside the first, goes ba
 const GAZE = { yaw: 1.2, pitch: 0.5 }; // how far his head turns before his body has to
 const EYES = 1.55; // his eye height in his stoop
 const PLACE_TIME = 1.6; // seconds, matching place() in poses.js
+const FRONT = 0.25; // of the blocks that tumble off, about this many land out in front
+const CLEAR = 0.35; // metres he keeps from the stack's side when he reaches over it
 
 const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 const turnToward = (from, to, step) => from + Math.max(-step, Math.min(step, wrap(to - from)));
@@ -40,19 +43,24 @@ export async function buildGoatmanSite(stations, hall) {
   group.add(gm.group);
   stations.group.add(group); // dark and hidden with the stations until the hall is revealed
 
-  // The stack's slots that are his, layer by layer, the wall side first.
+  // Behind the stack, away from the middle of the hall towards the wall: his side.
+  const out = new THREE.Vector3(stack.x, 0, stack.z).normalize();
+  const faceStack = Math.atan2(out.x, out.z); // the yaw that faces the stack from behind it
+  const centre = new THREE.Vector3(stack.x, 0, stack.z);
+  const halfAlong = Math.abs(out.x) * stack.nx * 0.205 + Math.abs(out.z) * stack.nz * 0.105; // the stack's half depth, seen from behind
+  const ROUND = Math.hypot(stack.nx * 0.205, stack.nz * 0.105) + 0.3; // keep this far from its middle walking past
+
+  // The stack's slots that are his, layer by layer, the far side of each first.
   const slots = [];
   for (let ly = stack.top; ly < stack.top + LAYERS; ly++) {
+    const layer = [];
     for (let ix = 0; ix < stack.nx; ix++) {
       for (let iz = 0; iz < stack.nz; iz++) {
-        slots.push(new THREE.Vector3(stack.x + (ix - (stack.nx - 1) / 2) * 0.41, 0.23 + ly * 0.2, stack.z + (iz - (stack.nz - 1) / 2) * 0.21));
+        layer.push(new THREE.Vector3(stack.x + (ix - (stack.nx - 1) / 2) * 0.41, 0.23 + ly * 0.2, stack.z + (iz - (stack.nz - 1) / 2) * 0.21));
       }
     }
+    slots.push(...layer.sort((a, b) => a.clone().sub(centre).dot(out) - b.clone().sub(centre).dot(out)));
   }
-  // Out from the stack towards the middle of the hall: the side the blocks lie on, and his.
-  const out = new THREE.Vector3(-stack.x, 0, -stack.z).normalize();
-  const faceStack = Math.atan2(out.x, out.z); // the yaw that faces the stack from out there
-  const centre = new THREE.Vector3(stack.x, 0, stack.z);
 
   // The blocks: where each is, in which slot (if any), and its size.
   const blocks = items.map((it, i) => ({
@@ -76,12 +84,14 @@ export async function buildGoatmanSite(stations, hall) {
     ...hall.colliders.filter((c) => Math.hypot(c.x - stack.x, c.z - stack.z) > 0.5),
     { x: station.holder.position.x, z: station.holder.position.z, r: 1.2 },
   ];
+  const bounds = hall.bounds;
   const lying = (n, keepOff) => {
     const spots = [];
     for (let tries = 0; spots.length < n && tries < 800; tries++) {
-      const a = Math.atan2(out.x, out.z) + (r() - 0.5) * 2;
-      const d = 1.4 + r() * 1.9;
+      const a = Math.atan2(out.x, out.z) + (r() < FRONT ? Math.PI : 0) + (r() - 0.5) * 2;
+      const d = 1.3 + r() * 1.7;
       const p = new THREE.Vector3(stack.x + Math.sin(a) * d, 0, stack.z + Math.cos(a) * d);
+      if (p.x < bounds.minX + 0.5 || p.x > bounds.maxX - 0.5 || p.z < bounds.minZ + 0.5 || p.z > bounds.maxZ - 0.5) continue;
       if ([...spots, ...keepOff].some((o) => Math.hypot(o.x - p.x, o.z - p.z) < 0.6)) continue;
       if (avoid.some((c) => Math.hypot(c.x - p.x, c.z - p.z) < c.r + 0.3)) continue;
       spots.push(p);
@@ -100,7 +110,7 @@ export async function buildGoatmanSite(stations, hall) {
   const kneelGrip = gm.gripIn(ACTIONS.kneel.at(1, STAND).pose);
   const placeGrip = (h) => gm.gripIn(place(h).at(0.5, STAND).pose);
   gm.gripIn(STAND);
-  const me = { pos: centre.clone().addScaledVector(out, 1.8), yaw: faceStack, speed: 0, stride: 0 };
+  const me = { pos: centre.clone().addScaledVector(out, 1.5), yaw: faceStack, speed: 0, stride: 0 };
   const collider = { x: me.pos.x, z: me.pos.z, r: 0.45 }; // for the visitor to bump into
   let goal = null; // { spot, yaw, resolve }: walking somewhere, then turning to face a way
   let staring = false, stare = 0;
@@ -111,12 +121,36 @@ export async function buildGoatmanSite(stations, hall) {
   const waits = []; // things the work is waiting for, checked every frame
   let alive = true;
 
-  // Where to stand for his grip (offset `grip` in his own space) to reach `target`, facing `yaw`.
+  // Where to stand for his grip (offset `grip` in his own space) to reach `target`, facing
+  // `yaw`; never inside the stack (reaching over to its far side, the block goes the rest).
   const standFor = (target, grip, yaw = yawTo(me.pos, target)) => {
     const g = new THREE.Vector3(grip.x, 0, grip.z).applyAxisAngle(UP, yaw);
-    return { spot: new THREE.Vector3(target.x - g.x, 0, target.z - g.z), yaw };
+    const spot = new THREE.Vector3(target.x - g.x, 0, target.z - g.z);
+    const behind = spot.clone().sub(centre).dot(out);
+    if (behind < halfAlong + CLEAR && Math.abs(spot.clone().sub(centre).cross(out).y) < ROUND) {
+      spot.addScaledVector(out, halfAlong + CLEAR - behind);
+    }
+    return { spot, yaw };
   };
-  const walkTo = ({ spot, yaw }) => new Promise((resolve) => { goal = { spot, yaw, resolve }; });
+  // A point to walk by so as to go round the stack, not through it (null: the way is clear).
+  const roundBy = (from, to) => {
+    const way = new THREE.Vector3().subVectors(to, from).setY(0);
+    const t = THREE.MathUtils.clamp(new THREE.Vector3().subVectors(centre, from).dot(way) / way.lengthSq(), 0, 1);
+    const nearest = from.clone().addScaledVector(way, t);
+    if (t <= 0 || t >= 1 || nearest.distanceTo(centre) > ROUND) return null;
+    const side = nearest.sub(centre).setY(0);
+    if (side.lengthSq() < 1e-4) side.set(-way.z, 0, way.x);
+    return centre.clone().addScaledVector(side.normalize(), ROUND + 0.25);
+  };
+  const moveTo = (spot, yaw = null) => new Promise((resolve) => { goal = { spot, yaw, resolve }; });
+  async function walkTo({ spot, yaw }) {
+    for (let i = 0; i < 2; i++) {
+      const by = roundBy(me.pos, spot);
+      if (!by) break;
+      await moveTo(by);
+    }
+    await moveTo(spot, yaw);
+  }
   const wait = (s) => new Promise((resolve) => { let t = 0; waits.push((dt) => (t += dt) >= s && (resolve(), true)); });
   const calm = () => new Promise((resolve) => waits.push(() => !staring && (resolve(), true)));
   const play = async (act) => { await calm(); return gm.play(act); };
@@ -198,10 +232,14 @@ export async function buildGoatmanSite(stations, hall) {
     } else if (goal) {
       const to = new THREE.Vector3().subVectors(goal.spot, me.pos).setY(0);
       const d = to.length();
-      if (d > 0.03) {
+      if (goal.yaw === null && d < 0.2) {
+        const done = goal; // a point on the way: walk on
+        goal = null;
+        done.resolve();
+      } else if (d > 0.03) {
         // Over a step or two he shuffles there still facing his work (backing off the
         // stack, say); further, he turns and walks.
-        const near = d < 1.2;
+        const near = d < 1.2 && goal.yaw !== null;
         const want = near ? goal.yaw : Math.atan2(-to.x, -to.z);
         me.yaw = wrap(turnToward(me.yaw, want, TURN * dt));
         const step = Math.min(d, WALK * dt * (near ? 0.6 : Math.max(0, Math.cos(wrap(want - me.yaw))) ** 2));
