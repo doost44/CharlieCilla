@@ -240,9 +240,11 @@ export function createAscii({ canvas: el, room, chair, eye }) {
   }
   resize();
 
-  function show(on) {
+  // headStart: seconds of the glyphs' staggered fade-in to skip (the load screen's swirl came first).
+  function show(on, headStart = 0) {
     visible = on;
     el.style.display = on ? '' : 'none';
+    uniforms.uTime.value = Math.max(uniforms.uTime.value, headStart);
   }
   show(false);
 

@@ -4,8 +4,10 @@
 // Phones, tablets, narrow windows and browsers without WebGL keep the chair as it
 // always was: decorative, with no hint.
 
+import { startPortal } from './portal.js';
+
 const MIN_WIDTH = 900;
-const LOADING_DELAY = 300; // ms before a LOADING… box shows
+const LOADING_DELAY = 300; // ms before a "loading…" line shows (only without the swirl)
 
 const hint = document.getElementById('chair-hint');
 const root = document.getElementById('world-root');
@@ -48,6 +50,10 @@ function placeHint() {
 async function launch(phase) {
   if (inWorld) return;
   inWorld = true;
+  // The load screen is the chair itself, swirling (not when testing a ?phase=, nor with reduced motion).
+  const still = phase || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const portal = still ? null : startPortal(home);
+  home.setPaused(true); // the ASCII render is hidden behind the load screen and the world: save the work
   select(false);
   home.domEl.blur(); // or Space and Enter in the world would reach the chair's own key handler
   root.hidden = false;
@@ -59,15 +65,15 @@ async function launch(phase) {
   const AC = window.AudioContext || window.webkitAudioContext;
   const audio = AC ? new AC() : null;
 
-  const loading = setTimeout(() => root.classList.add('cw-loading'), LOADING_DELAY);
+  const loading = portal ? 0 : setTimeout(() => root.classList.add('cw-loading'), LOADING_DELAY);
   try {
     const world = await import('./main.js');
     clearTimeout(loading);
     root.classList.remove('cw-loading');
-    await world.launchWorld({ root, home, audio, phase, onLeft: backToSite });
-    home.setPaused(true); // the ASCII render is hidden behind the world: save the work
+    await world.launchWorld({ root, home, audio, phase, portal, onLeft: backToSite });
   } catch (err) {
     clearTimeout(loading);
+    portal?.stop();
     console.error('Chair world failed to start:', err);
     audio?.close?.();
     document.exitPointerLock?.();
