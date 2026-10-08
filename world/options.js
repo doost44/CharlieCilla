@@ -1,8 +1,9 @@
 // Options menu (ported from Automation Map): O, or OPTIONS on the pause screen.
 // Settings are remembered in this browser via localStorage.
 
-const KEY = 'chair-world-options-v2';
-const DEFAULTS = { fov: 70, sensitivity: 1, pixel: 1, hud: true, shake: true, bob: true, volume: 0.6, music: 0.7, mute: false };
+const KEY = 'chair-world-options-v3';
+const OLD_KEY = 'chair-world-options-v2'; // from when 70 was the default field of view
+const DEFAULTS = { fov: 90, sensitivity: 1, pixel: 1, hud: true, shake: true, bob: true, volume: 0.6, music: 0.7, mute: false };
 
 // Other modules read this (e.g. sound.js checks settings.volume).
 export const settings = { ...DEFAULTS };
@@ -14,11 +15,16 @@ const PIXEL_SIZES = [
   [1, 'sharp (default)'],
 ];
 
+// Read at import, so the load screen (portal.js) already sees the field of view.
+// Settings saved under the old key carry over, except the old default view.
 function load() {
   try {
-    Object.assign(settings, JSON.parse(localStorage.getItem(KEY)) ?? {});
+    const old = JSON.parse(localStorage.getItem(OLD_KEY)) ?? {};
+    if (old.fov === 70) delete old.fov;
+    Object.assign(settings, old, JSON.parse(localStorage.getItem(KEY)) ?? {});
   } catch { /* storage blocked or bad JSON: keep defaults */ }
 }
+load();
 
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(settings)); } catch { /* ignore */ }

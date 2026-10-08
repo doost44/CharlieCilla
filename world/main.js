@@ -46,7 +46,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', portal, on
   const view = $('view');
   const renderer = new THREE.WebGLRenderer({ canvas: view, antialias: true });
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.05, 400);
+  const camera = new THREE.PerspectiveCamera(settings.fov, innerWidth / innerHeight, 0.05, 400);
   const ambient = new THREE.AmbientLight(0xfff0dd, ROOM_AMBIENT);
   scene.add(ambient);
 
@@ -308,7 +308,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', portal, on
   });
 
   // Handy for debugging in the browser console.
-  window.chairWorld = { scene, camera, renderer, sequence, player, room, hall, stations, look, interaction, chair };
+  window.chairWorld = { scene, camera, renderer, sequence, player, room, hall, stations, look, interaction, chair, ascii };
 }
 
 // Stop everything and free it: loop, listeners, sound, GPU memory, DOM.

@@ -53,7 +53,7 @@ async function launch(phase) {
   // The load screen is the chair itself, swirling (not when testing a ?phase=, nor with reduced motion).
   const still = phase || matchMedia('(prefers-reduced-motion: reduce)').matches;
   const portal = still ? null : startPortal(home);
-  home.setPaused(true); // the ASCII render is hidden behind the load screen and the world: save the work
+  if (!portal) home.setPaused(true); // hidden behind the world: save the work (the load screen still draws it, then pauses it)
   select(false);
   home.domEl.blur(); // or Space and Enter in the world would reach the chair's own key handler
   root.hidden = false;
