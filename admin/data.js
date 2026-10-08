@@ -81,6 +81,19 @@ const REPOSITORY_FLIPBOOK_IMAGES = [
 // Default home page projects (video/film)
 const DEFAULT_HOME_PROJECTS = [
   {
+    id: "home-11",
+    title: "AUTOMATION MAP",
+    year: "2026",
+    category: "INTERACTIVE / 3D",
+    description:
+      "For two weeks I logged every time a system made a choice for me &mdash; a feed deciding what came next, an app sorting, pricing or filtering, a keyboard finishing my sentence. Automation Map turns that field log into a place you can walk around: a floating island at dusk where each of the ten apps I logged orbits as a spinning low-poly logo. The more often I use it, the bigger it is; the longer I spend on it, the brighter it glows; the less control I have over it, the further out and faster it flies.<br><br>Grab an orb to read its log, throw rocks at the screens, or sit in the folding chair in the middle and watch the feeds circle you. Built for a design class in plain JavaScript and Three.js with the look of an early-2000s PC shooter: every texture is painted in code and every sound is synthesised, apart from a bass line from one of my own tracks.",
+    credit: "",
+    type: "interactive",
+    url: "https://doost44.github.io/automation-map/",
+    cover: "Assets/covers/automation-map.jpg",
+    visible: true,
+  },
+  {
     id: "home-0",
     title: "DESIGNER HANDBOOK",
     year: "2026",

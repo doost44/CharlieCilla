@@ -12,9 +12,9 @@ import {
 // work itself. images / carousel-images / flipbook-images: pages with prev and next;
 // books marked `spread` open like the site shows them, the cover alone and then two
 // pages side by side, the frame sliding out to the right to make room.
-// video-file: a VideoTexture, click to play or pause. video (YouTube): its thumbnail
-// with a play button that hands over to the site's own player (iframes cannot be
-// textures). Media load only when the panel opens, and everything is freed on close.
+// video-file: a VideoTexture, click to play or pause. video (YouTube) and interactive
+// (a whole website, like another 3D world): the cover with a play button that hands
+// over to the site's own project view (iframes cannot be textures). Media load only when the panel opens, and everything is freed on close.
 
 const AREA = 1; // square metres the media box takes, whatever its shape
 const MAX_W = 1.5, MAX_H = 1.1; // metres
@@ -34,6 +34,7 @@ function mediaOf(p) {
     const id = window.youtubeIdFromProject(p);
     return { kind: 'youtube', poster: p.cover ? norm(p.cover) : id && youtubeThumb(id) };
   }
+  if (p.type === 'interactive') return { kind: 'site', poster: p.cover && norm(p.cover) };
   const book = p.carouselImages || p.flipbookImages;
   const pages = p.type === 'images' ? (p.images || []).map(norm) : book ? window.getFlipbookPageUrls(book) : [];
   // Groups of one or two pages, paired as the site's own carousel pairs them.
@@ -116,7 +117,8 @@ export function createProjectPanel(project, index) {
   const pageCount = media.pages?.length ?? 1;
   const groups = media.groups ?? [];
   const maxSpan = Math.max(1, ...groups.map((g) => g.urls.length));
-  const caption = [project.category, media.kind === 'pages' && pageCount > 1 && `${pageCount} pages`, media.kind === 'youtube' && 'film']
+  const handOver = media.kind === 'youtube' || media.kind === 'site'; // played by the site, not here
+  const caption = [project.category, media.kind === 'pages' && pageCount > 1 && `${pageCount} pages`, media.kind === 'youtube' && 'film', media.kind === 'site' && 'interactive']
     .filter(Boolean).join(' · ').toLowerCase();
 
   const group = new THREE.Group(); // anchored at the panel's top-left corner
@@ -156,7 +158,7 @@ export function createProjectPanel(project, index) {
       // On the picture itself: play/pause a video, hand a film to the site, turn a page
       // (back on a spread's left-hand page, on everywhere else).
       if (media.kind === 'video' && !st.noVideo) return { id: 'play', action: 'play', label: video && !video.paused ? 'pause' : 'play' };
-      if (media.kind === 'youtube') return { id: 'play', action: 'expand', label: 'play' };
+      if (handOver) return { id: 'play', action: 'expand', label: 'play' };
       if (media.kind !== 'pages' || st.failed) return { id: 'play', action: 'expand', label: 'expand' };
       if (groups.length < 2) return null;
       return object === leaves[0].mesh && spread() ? { id: 'prev', action: 'prev', label: 'prev' } : { id: 'next', action: 'next', label: 'next' };
@@ -190,7 +192,7 @@ export function createProjectPanel(project, index) {
       }
       if (video) video.volume = settings.mute ? 0 : THREE.MathUtils.clamp(settings.volume ?? 1, 0, 1);
       const paused = !video || video.paused;
-      play.visible = !st.loading && (media.kind === 'youtube' || (media.kind === 'video' && paused && !st.noVideo));
+      play.visible = !st.loading && (handOver || (media.kind === 'video' && paused && !st.noVideo));
       play.scale.setScalar(st.hover === 'play' ? 1.12 : 1);
     },
     dispose() {
@@ -347,7 +349,7 @@ export function createProjectPanel(project, index) {
       ];
     }
     if (media.kind === 'video') return [{ id: 'note', text: st.noVideo ? 'plays on the site: expand' : 'click the video to play or pause', off: true }];
-    if (media.kind === 'youtube') return [{ id: 'note', text: 'plays on the site', off: true }];
+    if (handOver) return [{ id: 'note', text: 'plays on the site', off: true }];
     if (media.kind === 'cover') return [{ id: 'note', text: 'opens on the site: expand', off: true }];
     return null;
   }
@@ -371,7 +373,7 @@ export function createProjectPanel(project, index) {
     video.src = media.src;
     if (media.poster) showPicture(media.poster, () => titleCard(project, 'video'));
   } else {
-    showPicture(media.poster, () => titleCard(project, media.kind === 'youtube' ? 'film' : ''));
+    showPicture(media.poster, () => titleCard(project, { youtube: 'film', site: 'interactive' }[media.kind] ?? ''));
   }
   return panel;
 }

@@ -89,7 +89,15 @@
               <option value="images">Images</option>
               <option value="flipbook-images">Flipbook Images</option>
               <option value="flipbook-pdf">Flipbook PDF</option>
+              <option value="interactive">Interactive (website)</option>
             </select>
+
+            <!-- Interactive Type Fields -->
+            <div id="home-type-interactive" class="project-type-fields" style="display: none;">
+              <label>Website URL</label>
+              <input type="url" id="edit-home-url" placeholder="https://doost44.github.io/my-project/">
+              <p class="admin-form-hint">Plays inside the project view once clicked; the cover image shows until then.</p>
+            </div>
 
             <!-- Video Type Fields -->
             <div id="home-type-video" class="project-type-fields">
@@ -582,6 +590,7 @@
       document.getElementById("edit-home-cover").value = "";
       document.getElementById("edit-home-type").value = "video";
       document.getElementById("edit-home-youtube").value = "";
+      document.getElementById("edit-home-url").value = "";
       document.getElementById("edit-home-pdf").value = "";
       document.getElementById("edit-home-basepath").value = "";
       document.getElementById("edit-home-pagecount").value = "1";
@@ -640,6 +649,10 @@
             project.flipbookPdf || "";
           this.selectedHomeImages = [];
           this.selectedHomeFlipbookImages = [];
+        } else if (projectType === "interactive") {
+          document.getElementById("edit-home-url").value = project.url || "";
+          this.selectedHomeImages = [];
+          this.selectedHomeFlipbookImages = [];
         }
 
         this.toggleHomeTypeFields();
@@ -686,6 +699,8 @@
       } else if (projectType === "flipbook-pdf") {
         projectData.flipbookPdf =
           document.getElementById("edit-home-pdf").value;
+      } else if (projectType === "interactive") {
+        projectData.url = document.getElementById("edit-home-url").value.trim();
       }
 
       const projects = AdminData.getHomeProjects();

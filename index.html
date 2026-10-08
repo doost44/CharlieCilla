@@ -344,6 +344,63 @@
         border: 0;
       }
 
+      /* An interactive piece (a whole 3D world) loads only once asked to. */
+      .media-interactive {
+        position: relative;
+        aspect-ratio: 4 / 3;
+        border: 1px solid var(--line);
+        background: #000;
+        overflow: hidden;
+      }
+
+      .media-interactive iframe,
+      .interactive-start {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        padding: 0;
+        background: #000;
+      }
+
+      .interactive-start {
+        cursor: pointer;
+      }
+
+      .interactive-start img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        image-rendering: pixelated;
+      }
+
+      .interactive-start span,
+      .interactive-open {
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        color: var(--text);
+        text-transform: lowercase;
+      }
+
+      .interactive-start span {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid var(--line);
+        padding: 6px 10px;
+        white-space: nowrap;
+      }
+
+      .interactive-start:hover span,
+      .interactive-open:hover {
+        color: var(--link-blue);
+        text-decoration: underline;
+      }
+
       .media-images img {
         width: 100%;
         display: block;
@@ -859,6 +916,16 @@
               </div>
             </div>
           `;
+        } else if (type === "interactive") {
+          mediaHtml = `
+            <div class="media-block media-interactive">
+              <button type="button" class="interactive-start" onclick="startInteractive(this, '${p.url}')">
+                ${p.cover ? `<img src="${normalizeFlipbookPath(p.cover)}" alt="${p.title}">` : ""}
+                <span>click to play &middot; mouse and keyboard</span>
+              </button>
+            </div>
+            <a class="interactive-open" href="${p.url}" target="_blank" rel="noopener">open full screen &nearr;</a>
+          `;
         } else if (type === "flipbook-pdf" || type === "flipbook-images") {
           const flipbookId = "flipbook-" + p.id;
           mediaHtml = `
@@ -911,6 +978,17 @@
             60,
           );
         }
+      }
+
+      // Swaps an interactive project's cover for the live piece, focused so its
+      // keys work straight away. Closing the project removes it again.
+      function startInteractive(button, url) {
+        const frame = document.createElement("iframe");
+        frame.src = url;
+        frame.title = "Interactive project";
+        frame.allow = "fullscreen; autoplay";
+        button.replaceWith(frame);
+        frame.focus();
       }
 
       function closeProject() {
