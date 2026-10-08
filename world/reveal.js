@@ -6,8 +6,8 @@ import { glyphAtlas, GLYPH_GLSL } from './ascii.js';
 // space, at world Y plus each material's userData.revealBias (so the door, window and
 // lamp come after the walls, the ceiling last). Above the front nothing is drawn and
 // the white void shows; at the front each surface turns into a thin band of blue
-// glyphs on a grid laid on the surface, which resolves into its own texture and
-// lighting below. Done by patching the room's own materials (onBeforeCompile);
+// glyphs on a grid laid on the surface, over its own texture and lighting (never on
+// white, so the build-out has no white edge), thinning out below. Done by patching the room's own materials (onBeforeCompile);
 // finish() puts them back exactly as they were.
 
 const EDGE = 0.2; // metres of glyph band at the front
@@ -54,15 +54,14 @@ const FRAGMENT_START = /* glsl */ `
   if (rvPast < 0.0) discard;
 `;
 
-// End of the fragment shader: at the front, glyphs on paper, dense at first and
-// thinning out as the lit texture comes through.
+// End of the fragment shader: at the front, glyphs over the lit surface, dense at
+// first and thinning out.
 const FRAGMENT_END = /* glsl */ `
   if (rvPast < ${f(EDGE)} && uRevealEdge > 0.5) {
     float rvK = rvPast / ${f(EDGE)};
     float rvDensity = clamp(1.0 - rvK + (rvHash(rvCentre * 7.31) - 0.5) * 0.6, 0.0, 1.0);
     float rvInk = texture2D(uRevealAtlas, glyphUv(1.0 + floor(rvDensity * (GLYPH_RAMP - 2.0)), rvSt - rvCell)).a;
-    vec3 rvPaper = mix(vec3(1.0), gl_FragColor.rgb, smoothstep(0.3, 1.0, rvK));
-    gl_FragColor.rgb = mix(rvPaper, uRevealInk, rvInk * (1.0 - smoothstep(0.55, 1.0, rvK)));
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, uRevealInk, rvInk * (1.0 - smoothstep(0.55, 1.0, rvK)));
   }
 `;
 
@@ -83,7 +82,7 @@ export function createReveal(room) {
     const uniforms = {
       ...shared,
       uRevealBias: { value: m.userData.revealBias ?? 0 },
-      uRevealEdge: { value: m.transparent ? 0 : 1 }, // no paper band on anything see-through
+      uRevealEdge: { value: m.transparent ? 0 : 1 }, // no glyph band on anything see-through
     };
     m.onBeforeCompile = (shader, renderer) => {
       before.call(m, shader, renderer);

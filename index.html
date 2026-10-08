@@ -1613,6 +1613,7 @@
         let targetRotY = 0,
           targetRotX = 0;
         let autoBase = 0;
+        let spin = 0; // chair world: extra turn per frame while its load screen runs
         let isTracking = false;
         let resumeTimeout = null;
         const MAX_YAW = 0.5,
@@ -1641,7 +1642,7 @@
         });
 
         function tickInteraction() {
-          autoBase += 0.0025 + excited * 0.01;
+          autoBase += 0.0025 + excited * 0.01 + spin;
           excited += ((selected ? 1 : targetExcited) - excited) * 0.08;
           if (isTracking) {
             rotY += (targetRotY - rotY) * LERP;
@@ -2186,6 +2187,7 @@
             THREE, camera, mesh, buildChair, domEl: outEl,
             setSelected(on) { selected = on; },
             setPaused(on) { paused = on; },
+            setSpin(v) { spin = v; },
             hitTest(x, y) {
               const r = outEl.getBoundingClientRect();
               const u = (x - r.left) / (cols * charWidth), v = (y - r.top) / (rows * LINE_HEIGHT);
