@@ -155,12 +155,15 @@ export const linksWidth = (links) => links.reduce((w, l, i) => w + textWidth(FON
 export const MONO = { line: MONO_LINE, base: 13 };
 
 // A blank sheet of the site's paper with its thin --line border, in CSS pixels.
-export function paper(w, h) {
-  const c = canvas(Math.ceil(w * SCALE), Math.ceil(h * SCALE));
+// reuse: a canvas from an earlier call, drawn over again if it is big enough (a panel
+// growing into it frame by frame; the sheet shows only its top-left w x h).
+export function paper(w, h, reuse) {
+  const big = reuse && reuse.width >= w * SCALE && reuse.height >= h * SCALE;
+  const c = big ? reuse : canvas(Math.ceil(w * SCALE), Math.ceil(h * SCALE));
   const g = c.getContext('2d');
-  g.scale(SCALE, SCALE);
+  g.setTransform(SCALE, 0, 0, SCALE, 0, 0);
   g.fillStyle = COLOR.paper;
-  g.fillRect(0, 0, w, h);
+  g.fillRect(0, 0, c.width / SCALE, c.height / SCALE);
   g.strokeStyle = COLOR.line;
   g.lineWidth = 1;
   g.strokeRect(0.5, 0.5, w - 1, h - 1);
@@ -214,6 +217,8 @@ export function createSheet(anchor = 0.5) {
         material.needsUpdate = true;
         old?.dispose();
       }
+      material.map.repeat.set((w * SCALE) / c.width, (h * SCALE) / c.height); // the canvas's top-left w x h
+      material.map.offset.set(0, 1 - material.map.repeat.y);
       if (w !== size.w || h !== size.h) {
         mesh.geometry.dispose();
         mesh.geometry = back.geometry = new THREE.PlaneGeometry(w * PX, h * PX).translate((0.5 - anchor) * w * PX, (-h * PX) / 2, 0);
@@ -241,7 +246,7 @@ export function linkAt(rects, p) {
 }
 
 const GAP = 0.06; // metres between the card and an open project panel
-const TILT = 0.2; // the panel turns this much (radians) towards the visitor
+const TILT = 0.25; // with a project open, the card turns in this much (radians) beside it
 
 export function createCard(project, index) {
   const color = linkColor(index);
@@ -251,6 +256,7 @@ export function createCard(project, index) {
   let pages = null; // the full description in pages, made on first open
   let rects = [];
   let disposed = false;
+  let tilt = 0;
 
   const group = new THREE.Group(); // the card, plus the project panel when one is open
   const sheet = createSheet(0.5);
@@ -292,16 +298,23 @@ export function createCard(project, index) {
       card.panel = panel;
       if (panel) {
         panel.group.position.set(sheet.width / 2 + GAP, 0, 0);
-        panel.group.rotation.y = -TILT;
         group.add(panel.group);
       }
       redraw();
     },
     setLevel: (k) => sheet.setLevel(k),
     update(dt) {
-      // With a panel open the pair slides over so it stays centred under the lamp.
-      const shift = card.panel ? -(GAP + card.panel.width * Math.cos(TILT)) / 2 : 0;
-      group.position.x += (shift - group.position.x) * Math.min(1, dt * 6);
+      // An open project is what the visitor reads: the pair slides over until the panel
+      // is centred under the lamp, square to them (the holder turns to face them), and
+      // the card turns in beside it about its right edge. A book's spread slides out to
+      // the right, then the pair settles centred on it.
+      const k = Math.min(1, dt * 6);
+      const shift = card.panel ? -(sheet.width / 2 + GAP + card.panel.width / 2) : 0;
+      group.position.x += (shift - group.position.x) * k;
+      tilt += ((card.panel ? TILT : 0) - tilt) * k;
+      const half = sheet.width / 2;
+      sheet.mesh.rotation.y = tilt;
+      sheet.mesh.position.set(half * (1 - Math.cos(tilt)), 0, half * Math.sin(tilt));
       card.panel?.update(dt);
     },
     dispose() {

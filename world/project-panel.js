@@ -3,13 +3,15 @@ import { config } from './config.js';
 import { canvas } from './textures.js';
 import { settings } from './options.js';
 import {
-  PX, FONT, COLOR, MONO, paper, createSheet, smoothTexture, lineBox, titleLines, drawTitle, drawLinks,
+  PX, SCALE, FONT, COLOR, MONO, paper, createSheet, smoothTexture, lineBox, titleLines, drawTitle, drawLinks,
   linksWidth, linkAt, yearOf, titleOf, linkColor, wrap,
 } from './cards.js';
 
 // A project opened beside its title card, on the same white paper: the card's
 // "2026. title" caption with "expand" and "close", the category in italics, and the
-// work itself. images / carousel-images / flipbook-images: pages with prev and next.
+// work itself. images / carousel-images / flipbook-images: pages with prev and next;
+// books marked `spread` open like the site shows them, the cover alone and then two
+// pages side by side, the frame sliding out to the right to make room.
 // video-file: a VideoTexture, click to play or pause. video (YouTube): its thumbnail
 // with a play button that hands over to the site's own player (iframes cannot be
 // textures). Media load only when the panel opens, and everything is freed on close.
@@ -21,6 +23,7 @@ const PAD_X = 20, PAD_Y = 16;
 const BODY_LINE = 21.12;
 const BOX_BG = '#f3f3f1';
 const PLAY_SIZE = 0.16;
+const EXTEND = 0.6; // seconds for the frame to slide out to a spread, or back
 const youtubeThumb = (id) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 
 // What to show for a project, from its admin-panel fields.
@@ -33,7 +36,10 @@ function mediaOf(p) {
   }
   const book = p.carouselImages || p.flipbookImages;
   const pages = p.type === 'images' ? (p.images || []).map(norm) : book ? window.getFlipbookPageUrls(book) : [];
-  if (pages.length) return { kind: 'pages', pages };
+  // Groups of one or two pages, paired as the site's own carousel pairs them.
+  const spread = book?.spread === true && window.buildCarouselGroups;
+  const groups = spread ? window.buildCarouselGroups(pages, true) : pages.map((url, i) => ({ urls: [url], pages: [i + 1] }));
+  if (pages.length) return { kind: 'pages', pages, groups };
   return { kind: 'cover', poster: p.cover && norm(p.cover) }; // e.g. a PDF flipbook: the site shows it
 }
 
@@ -101,46 +107,59 @@ function boxFor(a) {
   return { w: w * k, h: h * k };
 }
 
+const smooth = (k) => k * k * (3 - 2 * k);
+
 export function createProjectPanel(project, index) {
   const media = mediaOf(project);
   const color = linkColor(index);
   const year = yearOf(project), title = titleOf(project);
   const pageCount = media.pages?.length ?? 1;
+  const groups = media.groups ?? [];
+  const maxSpan = Math.max(1, ...groups.map((g) => g.urls.length));
   const caption = [project.category, media.kind === 'pages' && pageCount > 1 && `${pageCount} pages`, media.kind === 'youtube' && 'film']
     .filter(Boolean).join(' · ').toLowerCase();
 
   const group = new THREE.Group(); // anchored at the panel's top-left corner
   const sheet = createSheet(0);
-  const pictureMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-  const picture = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), pictureMaterial);
-  picture.visible = false;
+  // Two leaves for the pictures: the left (or only) one, and a spread's right-hand page.
+  const leaves = [0, 1].map(() => {
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1).translate(0.5, 0, 0), material); // from its left edge
+    mesh.visible = false;
+    return { mesh, material, aspect: 1 };
+  });
   const playMaterial = new THREE.MeshBasicMaterial({ map: playTexture(), transparent: true, depthWrite: false });
   const play = new THREE.Mesh(new THREE.PlaneGeometry(PLAY_SIZE, PLAY_SIZE), playMaterial);
   play.visible = false;
-  group.add(sheet.mesh, picture, play);
+  group.add(sheet.mesh, ...leaves.map((l) => l.mesh), play);
 
   const abort = new AbortController(); // the video's listeners
   // failed: nothing could be shown. noVideo: the video can't play here (the site's player can).
-  const st = { page: 0, loading: true, failed: false, noVideo: false, hover: null, aspect: 0 };
-  let box = boxFor(4 / 3); // until the first picture says otherwise
+  // span: how many pages wide the media box is right now, easing between 1 and 2.
+  const st = { page: 0, loading: true, failed: false, noVideo: false, hover: null, aspect: 0, span: 1, spanFrom: 1, spanTo: 1, spanT: 1 };
+  let box = boxFor(4 / 3); // one page (or picture), until the first picture says otherwise
   let boxTop = 0; // CSS pixels
   let rects = [];
   let token = 0; // newest picture request; older ones are dropped when they arrive
   let video = null, videoTexture = null, disposed = false;
+  let drawn = null; // the sheet's canvas, drawn over again while the frame slides
+  const spread = () => (groups[st.page]?.urls.length ?? 1) === 2;
 
   const panel = {
     project, index, group,
-    targets: [sheet.mesh, picture, play],
+    targets: [sheet.mesh, ...leaves.map((l) => l.mesh), play],
     get width() { return sheet.width; },
     get height() { return sheet.height; },
 
     linkAt(object, uv) {
       if (object === sheet.mesh) return linkAt(rects, sheet.toCss(uv));
-      // On the picture itself: play/pause a video, hand a film to the site, turn a page.
+      // On the picture itself: play/pause a video, hand a film to the site, turn a page
+      // (back on a spread's left-hand page, on everywhere else).
       if (media.kind === 'video' && !st.noVideo) return { id: 'play', action: 'play', label: video && !video.paused ? 'pause' : 'play' };
       if (media.kind === 'youtube') return { id: 'play', action: 'expand', label: 'play' };
       if (media.kind !== 'pages' || st.failed) return { id: 'play', action: 'expand', label: 'expand' };
-      return pageCount > 1 ? { id: 'next', action: 'next', label: 'next' } : null;
+      if (groups.length < 2) return null;
+      return object === leaves[0].mesh && spread() ? { id: 'prev', action: 'prev', label: 'prev' } : { id: 'next', action: 'next', label: 'next' };
     },
     setHover(id) {
       if (id === st.hover) return;
@@ -148,8 +167,8 @@ export function createProjectPanel(project, index) {
       redraw();
     },
     turnPage(step) {
-      if (media.kind !== 'pages' || pageCount < 2) return;
-      showPage((st.page + step + pageCount) % pageCount);
+      if (media.kind !== 'pages' || groups.length < 2) return;
+      showPage((st.page + step + groups.length) % groups.length);
     },
     togglePlay() {
       if (!video) return;
@@ -157,13 +176,18 @@ export function createProjectPanel(project, index) {
       video.play().then(() => {
         if (disposed) return;
         videoTexture ??= new THREE.VideoTexture(video);
-        show(videoTexture, video.videoWidth / video.videoHeight);
+        show(pic(videoTexture, video.videoWidth / video.videoHeight));
       }).catch(() => {
         if (!disposed && video.error) videoFailed();
       });
     },
     pause: () => video?.pause(),
-    update() {
+    update(dt) {
+      if (st.spanT < 1) {
+        st.spanT = Math.min(1, st.spanT + dt / EXTEND);
+        st.span = THREE.MathUtils.lerp(st.spanFrom, st.spanTo, smooth(st.spanT));
+        redraw();
+      }
       if (video) video.volume = settings.mute ? 0 : THREE.MathUtils.clamp(settings.volume ?? 1, 0, 1);
       const paused = !video || video.paused;
       play.visible = !st.loading && (media.kind === 'youtube' || (media.kind === 'video' && paused && !st.noVideo));
@@ -180,9 +204,11 @@ export function createProjectPanel(project, index) {
         video = null;
       }
       videoTexture?.dispose();
-      if (pictureMaterial.map !== videoTexture) pictureMaterial.map?.dispose();
-      pictureMaterial.dispose();
-      picture.geometry.dispose();
+      for (const leaf of leaves) {
+        if (leaf.material.map !== videoTexture) leaf.material.map?.dispose();
+        leaf.material.dispose();
+        leaf.mesh.geometry.dispose();
+      }
       playMaterial.map.dispose();
       playMaterial.dispose();
       play.geometry.dispose();
@@ -192,23 +218,27 @@ export function createProjectPanel(project, index) {
   };
   for (const m of panel.targets) m.userData.owner = panel;
 
-  // Put a texture in the media box (contain-fit), sizing the box to the first one shown.
-  function show(texture, aspect) {
-    const old = pictureMaterial.map;
-    if (old !== texture) {
-      if (old && old !== videoTexture) old.dispose();
-      pictureMaterial.map = texture;
-      pictureMaterial.needsUpdate = true;
-    }
+  const pic = (texture, aspect = texture.image.width / texture.image.height) => ({ texture, aspect });
+
+  // Put pictures in the media box: one, or a spread's left and right pages (a missing
+  // one stays empty). The box is one page, sized to the first picture ever shown.
+  function show(...pics) {
+    leaves.forEach((leaf, i) => {
+      const next = pics[i]?.texture ?? null;
+      const old = leaf.material.map;
+      if (old !== next) {
+        if (old && old !== videoTexture) old.dispose();
+        leaf.material.map = next;
+        leaf.material.needsUpdate = true;
+      }
+      if (pics[i]) leaf.aspect = pics[i].aspect;
+    });
     st.loading = st.failed = false;
-    if (!st.aspect && aspect) {
-      st.aspect = aspect;
-      box = boxFor(aspect);
+    if (!st.aspect && pics[0]) {
+      st.aspect = pics[0].aspect;
+      box = boxFor(st.aspect);
     }
     redraw();
-    const fit = Math.min(box.w / aspect, box.h);
-    picture.scale.set(fit * aspect, fit, 1);
-    picture.visible = true;
   }
 
   function fail() {
@@ -219,7 +249,8 @@ export function createProjectPanel(project, index) {
 
   function videoFailed() {
     st.noVideo = true;
-    if (!pictureMaterial.map || pictureMaterial.map === videoTexture) show(titleCard(project, 'video'), 16 / 9);
+    const shown = leaves[0].material.map;
+    if (!shown || shown === videoTexture) show(pic(titleCard(project, 'video'), 16 / 9));
     else redraw();
   }
 
@@ -228,29 +259,44 @@ export function createProjectPanel(project, index) {
     const img = src ? await loadImage(src) : null;
     if (mine !== token || disposed) return;
     const texture = img ? pictureTexture(img) : fallback?.();
-    if (texture) show(texture, texture.image.width / texture.image.height);
-    else if (!pictureMaterial.map) fail();
+    if (texture) show(pic(texture));
+    else if (!leaves[0].material.map) fail();
   }
 
-  function showPage(i) {
+  // A page, or a spread of two: the frame starts sliding to its width straight away,
+  // and the pictures swap in once both have loaded.
+  async function showPage(i) {
     st.page = i;
+    const span = groups[i].urls.length;
+    if (span !== st.spanTo) Object.assign(st, { spanFrom: st.span, spanTo: span, spanT: 0 });
     redraw();
-    showPicture(media.pages[i]);
+    const mine = ++token;
+    const imgs = await Promise.all(groups[i].urls.map(loadImage));
+    if (mine !== token || disposed) return;
+    if (imgs.some(Boolean)) show(...imgs.map((img) => img && pic(pictureTexture(img))));
+    else if (!leaves[0].material.map) fail();
+    groups[(i + 1) % groups.length].urls.forEach(loadImage); // so the next turn is quick
   }
 
   function redraw() {
     if (disposed) return;
-    const w = Math.ceil(box.w / PX + 2 * PAD_X);
+    // The frame is st.span pages wide; the title keeps its one-page wrapping so nothing
+    // moves while it slides, and "expand close" ride along its right edge.
+    const restW = Math.ceil(box.w / PX + 2 * PAD_X); // with one page
+    const w = Math.ceil((box.w * st.span) / PX + 2 * PAD_X);
     const inner = w - 2 * PAD_X;
     const links = [{ id: 'expand', text: 'expand' }, { id: 'close', text: 'close' }];
-    const head = titleLines(year, title, inner - linksWidth(links) - 16);
+    const head = titleLines(year, title, restW - 2 * PAD_X - linksWidth(links) - 16);
     const yr = lineBox(FONT.yr);
     const body = lineBox(FONT.body, BODY_LINE);
     boxTop = PAD_Y + head.length * yr.lh + 2 + (caption ? BODY_LINE : 0) + 10;
     const boxH = Math.round(box.h / PX);
     const footer = footerLinks();
     const h = Math.ceil(boxTop + boxH + (footer ? 10 + MONO.line : 0) + PAD_Y);
-    const { c, g } = paper(w, h);
+    // One canvas, big enough for the widest spread, drawn over again as the frame slides.
+    const maxW = Math.ceil((box.w * maxSpan) / PX + 2 * PAD_X);
+    if (!drawn || drawn.width < maxW * SCALE || drawn.height < h * SCALE) drawn = canvas(Math.ceil(maxW * SCALE), Math.ceil(h * SCALE));
+    const { c, g } = paper(w, h, drawn);
 
     rects = drawTitle(g, head, PAD_X, PAD_Y, color, st.hover === 'title')
       .map((r) => ({ ...r, id: 'title', action: 'expand', label: 'expand' }));
@@ -273,17 +319,30 @@ export function createProjectPanel(project, index) {
     if (footer) rects.push(...drawLinks(g, footer, PAD_X, boxTop + boxH + 10 + MONO.base, st.hover));
     sheet.set(c, w, h);
 
-    // The picture and the play button sit over the box, just in front of the paper.
-    const cx = (PAD_X + inner / 2) * PX, cy = -(boxTop + boxH / 2) * PX;
-    picture.position.set(cx, cy, 0.002);
-    play.position.set(cx, cy, 0.004);
+    // The pictures and the play button sit over the box, just in front of the paper.
+    const x0 = PAD_X * PX, cy = -(boxTop + boxH / 2) * PX;
+    const pair = !!leaves[1].material.map;
+    leaves.forEach((leaf, i) => {
+      const map = leaf.material.map;
+      const fitH = Math.min(box.w / leaf.aspect, box.h), fitW = fitH * leaf.aspect;
+      // Alone: centred in the first page. A spread: the pages meet in the middle, the
+      // right-hand one showing only as far as the frame has slid out.
+      const left = !pair ? x0 + (box.w - fitW) / 2 : i === 0 ? x0 + box.w - fitW : x0 + box.w;
+      const part = pair && i === 1 ? THREE.MathUtils.clamp(((st.span - 1) * box.w) / fitW, 0, 1) : 1;
+      leaf.mesh.visible = !!map && part > 0.001;
+      if (!leaf.mesh.visible) return;
+      map.repeat.x = part;
+      leaf.mesh.scale.set(fitW * part, fitH, 1);
+      leaf.mesh.position.set(left, cy, 0.002);
+    });
+    play.position.set(x0 + (inner * PX) / 2, cy, 0.004);
   }
 
   function footerLinks() {
-    if (media.kind === 'pages' && pageCount > 1) {
+    if (media.kind === 'pages' && groups.length > 1) {
       return [
         { id: 'prev', text: 'prev' },
-        { id: 'count', text: `${st.page + 1} / ${pageCount}`, off: true },
+        { id: 'count', text: `${groups[st.page].pages.join('–')} / ${pageCount}`, off: true },
         { id: 'next', text: 'next' },
       ];
     }
@@ -304,9 +363,9 @@ export function createProjectPanel(project, index) {
     video.preload = media.poster ? 'metadata' : 'auto'; // without a poster, its first frame is the picture
     const { signal } = abort;
     video.addEventListener('loadeddata', () => {
-      if (pictureMaterial.map) return;
+      if (leaves[0].material.map) return;
       videoTexture ??= new THREE.VideoTexture(video);
-      show(videoTexture, video.videoWidth / video.videoHeight);
+      show(pic(videoTexture, video.videoWidth / video.videoHeight));
     }, { signal });
     video.addEventListener('error', videoFailed, { signal });
     video.src = media.src;
