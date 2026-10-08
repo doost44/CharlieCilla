@@ -118,6 +118,7 @@ export async function buildGoatmanSite(stations, hall) {
   let staring = false, stare = 0;
   let carried = null; // the block in his hand: { b, from: { pos, quat }, k }
   let setting = null; // putting it down: { b, slot, t, from }
+  let reach = 0; // (for testing) how far his hand was from the last block he picked up
   const falling = []; // blocks tumbling off the top
   const waits = []; // things the work is waiting for, checked every frame
   let alive = true;
@@ -127,11 +128,21 @@ export async function buildGoatmanSite(stations, hall) {
   const standFor = (target, grip, yaw = yawTo(me.pos, target)) => {
     const g = new THREE.Vector3(grip.x, 0, grip.z).applyAxisAngle(UP, yaw);
     const spot = new THREE.Vector3(target.x - g.x, 0, target.z - g.z);
+    // Only a spot over the pallet itself moves, out to whichever side it is nearer.
     const behind = spot.clone().sub(centre).dot(out);
-    if (behind < halfAlong + CLEAR && Math.abs(spot.clone().sub(centre).cross(out).y) < ROUND) {
-      spot.addScaledVector(out, halfAlong + CLEAR - behind);
+    if (Math.abs(behind) < halfAlong + CLEAR && Math.abs(spot.clone().sub(centre).cross(out).y) < ROUND) {
+      spot.addScaledVector(out, Math.sign(behind || 1) * (halfAlong + CLEAR) - behind);
     }
     return { spot, yaw };
+  };
+  // Where to kneel for a block on the floor: on its far side from the stack, facing back
+  // towards it, so his hand comes down right on it and he never reaches across the pallet.
+  const pickFor = (pos) => {
+    const n = new THREE.Vector3(pos.x - centre.x, 0, pos.z - centre.z).normalize();
+    const at = standFor(pos, kneelGrip, Math.atan2(n.x, n.z));
+    at.spot.x = THREE.MathUtils.clamp(at.spot.x, bounds.minX + 0.4, bounds.maxX - 0.4);
+    at.spot.z = THREE.MathUtils.clamp(at.spot.z, bounds.minZ + 0.4, bounds.maxZ - 0.4);
+    return at;
   };
   // A point to walk by so as to go round the stack, not through it (null: the way is clear).
   const roundBy = (from, to) => {
@@ -168,8 +179,9 @@ export async function buildGoatmanSite(stations, hall) {
       while (loose.length && nextSlot() >= 0 && alive) {
         loose.sort((a, b) => a.pos.distanceTo(me.pos) - b.pos.distanceTo(me.pos));
         const b = loose.shift();
-        await walkTo(standFor(b.pos, kneelGrip));
+        await walkTo(pickFor(b.pos));
         await gm.play('kneel');
+        reach = gm.grip.getWorldPosition(new THREE.Vector3()).distanceTo(b.pos);
         carried = { b, from: { pos: b.pos.clone(), quat: b.quat.clone() }, k: 0 };
         gm.holding = true;
         await gm.play('stand');
@@ -255,7 +267,7 @@ export async function buildGoatmanSite(stations, hall) {
 
     // The block in his hand settles into his grip as he gets up.
     if (carried) {
-      carried.k = Math.min(1, carried.k + dt * 2.5);
+      carried.k = Math.min(1, carried.k + dt * 5);
       heldNow();
       carried.b.pos.lerpVectors(carried.from.pos, heldPos, carried.k);
       carried.b.quat.slerpQuaternions(carried.from.quat, heldQuat, carried.k);
@@ -313,7 +325,7 @@ export async function buildGoatmanSite(stations, hall) {
     station,
     // For testing: where he is and how the stack stands.
     get state() {
-      return { pos: me.pos.clone(), yaw: me.yaw, stacked: taken.filter(Boolean).length, loose: loose.length, falling: falling.length, staring, holding: gm.holding, goal: !!goal, acting: gm.acting, setting: !!setting };
+      return { pos: me.pos.clone(), yaw: me.yaw, stacked: taken.filter(Boolean).length, loose: loose.length, falling: falling.length, staring, holding: gm.holding, reach, goal: !!goal, acting: gm.acting, setting: !!setting };
     },
     colliders: [collider], // him, moving with him (the stack's own is the hall's)
     update,
