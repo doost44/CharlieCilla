@@ -47,12 +47,6 @@ export const config = {
   hall: { width: 70, depth: 45, height: 9 },
   walk: { speed: 4.5, run: 7.5, eye: 1.7, radius: 0.35 },
 
-  // v1 project orbs: removed when stations.js replaces orbs.js.
-  orbits: { radius: [13, 20], height: [1.5, 10], speed: 0.018 },
-  orbSize: [1.1, 1.6],
-  palette: [0xe0503c, 0xe8a33a, 0x7fc24a, 0x4fa3c9, 0xb06ad8, 0x3ad6b8, 0xd8d24a, 0x6c7cf4, 0xf06aa8],
-  amber: '#ffb43c',
-
   font: '"IBM Plex Mono", ui-monospace, Menlo, monospace',
   serif: '"IBM Plex Serif", Georgia, "Times New Roman", serif',
 };

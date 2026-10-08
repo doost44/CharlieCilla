@@ -131,7 +131,7 @@ export function peelTexture() {
   g.fillStyle = 'rgba(46,38,32,0.55)'; // paint edge shadow
   for (const [x, y, w, h] of rects) g.fillRect(x - 2, y + 2, w + 3, h + 1);
   g.fillStyle = 'rgba(232,228,216,0.9)'; // lifted paint lip
-  for (const [x, y, w, h] of rects) g.fillRect(x - 1, y - 1, w + 1, 1);
+  for (const [x, y, w] of rects) g.fillRect(x - 1, y - 1, w + 1, 1);
   g.save();
   g.beginPath();
   for (const [x, y, w, h] of rects) g.rect(x, y, w, h);

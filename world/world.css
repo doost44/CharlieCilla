@@ -66,20 +66,13 @@ body.world-open { overflow: hidden; }
   border-radius: 50%; background: #fff; mix-blend-mode: difference;
   transition: width 0.12s, height 0.12s, background 0.12s;
 }
-#cw-crosshair.cw-ring { width: 18px; height: 18px; background: none; border: 2px solid #fff; }
-#cw-target { position: absolute; left: 50%; top: calc(50% + 22px); transform: translateX(-50%); white-space: nowrap; color: var(--link-blue); }
+#cw-crosshair.cw-ring { width: 22px; height: 22px; background: none; border: 1px solid #fff; } /* a thin ring, open in the middle, so the link under it stays readable */
+#cw-target { position: absolute; left: 50%; top: calc(50% + 48px); transform: translateX(-50%); white-space: nowrap; color: var(--link-blue); }
 #cw-hint { position: absolute; right: 16px; bottom: 52px; }
 #cw-help { position: absolute; right: 16px; bottom: 16px; max-width: calc(100% - 32px); text-align: right; }
 #cw-error { position: absolute; top: 96px; left: 16px; max-width: 420px; color: #b3261e; }
 body.cw-intro #cw-title, body.cw-intro #cw-crosshair, body.cw-intro #cw-help { opacity: 0; }
-body.cw-reading #cw-crosshair { display: none; }
-body.cw-reading #cw-target { top: auto; bottom: 88px; }
-body.cw-no-hud #cw-hud > :not(#cw-reader):not(#cw-crosshair) { display: none; }
-
-/* Reading mode: same size and place as the 3D panel at its reading distance (70% of the view height). */
-#cw-reader { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0; transition: opacity 0.15s; }
-#cw-reader.cw-on { opacity: 1; }
-#cw-reader canvas { display: block; height: 70vh; width: auto; max-width: 94vw; object-fit: contain; }
+body.cw-no-hud #cw-hud > :not(#cw-crosshair) { display: none; }
 
 /* Links and buttons: the site's mono links (like the modal's "back to works"). */
 .cw-link {

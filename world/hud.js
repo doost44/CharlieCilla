@@ -10,7 +10,6 @@ const TEMPLATE = `
 <canvas id="cw-ascii"></canvas>
 <div id="cw-hud">
   <div id="cw-title"><span class="cw-name">charlie cilla</span><span id="cw-subtitle" class="cw-label"></span></div>
-  <div id="cw-reader"></div>
   <div id="cw-crosshair"></div>
   <div id="cw-target" class="cw-label cw-hidden"></div>
   <div id="cw-hint" class="cw-label cw-hidden"></div>
@@ -47,7 +46,7 @@ const TEMPLATE = `
     <label>volume <span id="cw-opt-vol-val"></span>
       <input id="cw-opt-vol" type="range" min="0" max="1" step="0.05">
     </label>
-    <label>music (bass-line wind) <span id="cw-opt-music-val"></span>
+    <label>music (synths, drone, bass-line wind) <span id="cw-opt-music-val"></span>
       <input id="cw-opt-music" type="range" min="0" max="1" step="0.05">
     </label>
     <label class="cw-check"><input id="cw-opt-mute" type="checkbox"> mute</label>
@@ -76,36 +75,11 @@ export function setSubtitle(text) {
   $('subtitle').textContent = text;
 }
 
-// What the crosshair is on: a line of text, or (until stations replace them) an orb.
-export function showTarget(orb, held) {
+// What the crosshair is on (a link's action), or null.
+export function showTarget(text) {
   const el = $('target');
-  if (typeof orb === 'string') {
-    el.textContent = orb;
-    return el.classList.remove('cw-hidden');
-  }
-  if (!orb) {
-    document.body.classList.remove('cw-reading');
-    return el.classList.add('cw-hidden');
-  }
-  el.classList.remove('cw-hidden');
-  document.body.classList.toggle('cw-reading', !!orb.reading);
-  const name = orb.project.title;
-  const pages = orb.panel?.pages.length ?? 1;
-  if (orb.reading) {
-    const turn = pages > 1 ? ` · PAGE ${orb.page + 1}/${pages} ← →` : '';
-    el.textContent = `READING: ${name}${turn} · F BACK · ENTER OPEN`;
-  } else if (held) {
-    el.textContent = `HOLDING: ${name} · WHEEL PULL · F READ · ENTER OPEN · CLICK RELEASE`;
-  } else {
-    el.textContent = `${name} · ENTER OPEN`;
-  }
-}
-
-// The panel being read, as a sharp 2D copy over the 3D view (null hides it).
-export function showReader(panelCanvas) {
-  const el = $('reader');
-  if (panelCanvas && el.firstChild !== panelCanvas) el.replaceChildren(panelCanvas);
-  el.classList.toggle('cw-on', !!panelCanvas);
+  el.classList.toggle('cw-hidden', !text);
+  if (text) el.textContent = text;
 }
 
 // Small prompt in the lower right. Several things can ask for it, so each has its
