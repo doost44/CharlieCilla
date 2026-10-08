@@ -155,12 +155,15 @@ export const linksWidth = (links) => links.reduce((w, l, i) => w + textWidth(FON
 export const MONO = { line: MONO_LINE, base: 13 };
 
 // A blank sheet of the site's paper with its thin --line border, in CSS pixels.
-export function paper(w, h) {
-  const c = canvas(Math.ceil(w * SCALE), Math.ceil(h * SCALE));
+// reuse: a canvas from an earlier call, drawn over again if it is big enough (a panel
+// growing into it frame by frame; the sheet shows only its top-left w x h).
+export function paper(w, h, reuse) {
+  const big = reuse && reuse.width >= w * SCALE && reuse.height >= h * SCALE;
+  const c = big ? reuse : canvas(Math.ceil(w * SCALE), Math.ceil(h * SCALE));
   const g = c.getContext('2d');
-  g.scale(SCALE, SCALE);
+  g.setTransform(SCALE, 0, 0, SCALE, 0, 0);
   g.fillStyle = COLOR.paper;
-  g.fillRect(0, 0, w, h);
+  g.fillRect(0, 0, c.width / SCALE, c.height / SCALE);
   g.strokeStyle = COLOR.line;
   g.lineWidth = 1;
   g.strokeRect(0.5, 0.5, w - 1, h - 1);
@@ -214,6 +217,8 @@ export function createSheet(anchor = 0.5) {
         material.needsUpdate = true;
         old?.dispose();
       }
+      material.map.repeat.set((w * SCALE) / c.width, (h * SCALE) / c.height); // the canvas's top-left w x h
+      material.map.offset.set(0, 1 - material.map.repeat.y);
       if (w !== size.w || h !== size.h) {
         mesh.geometry.dispose();
         mesh.geometry = back.geometry = new THREE.PlaneGeometry(w * PX, h * PX).translate((0.5 - anchor) * w * PX, (-h * PX) / 2, 0);
@@ -299,8 +304,9 @@ export function createCard(project, index) {
     },
     setLevel: (k) => sheet.setLevel(k),
     update(dt) {
-      // With a panel open the pair slides over so it stays centred under the lamp.
-      const shift = card.panel ? -(GAP + card.panel.width * Math.cos(TILT)) / 2 : 0;
+      // With a panel open the pair slides over so it stays centred under the lamp (as
+      // it first opened: a book's spreads then extend out to the right).
+      const shift = card.panel ? -(GAP + card.panel.restWidth * Math.cos(TILT)) / 2 : 0;
       group.position.x += (shift - group.position.x) * Math.min(1, dt * 6);
       card.panel?.update(dt);
     },
