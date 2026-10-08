@@ -246,7 +246,7 @@ export function linkAt(rects, p) {
 }
 
 const GAP = 0.06; // metres between the card and an open project panel
-const TILT = 0.2; // the panel turns this much (radians) towards the visitor
+const TILT = 0.25; // with a project open, the card turns in this much (radians) beside it
 
 export function createCard(project, index) {
   const color = linkColor(index);
@@ -256,6 +256,7 @@ export function createCard(project, index) {
   let pages = null; // the full description in pages, made on first open
   let rects = [];
   let disposed = false;
+  let tilt = 0;
 
   const group = new THREE.Group(); // the card, plus the project panel when one is open
   const sheet = createSheet(0.5);
@@ -297,17 +298,23 @@ export function createCard(project, index) {
       card.panel = panel;
       if (panel) {
         panel.group.position.set(sheet.width / 2 + GAP, 0, 0);
-        panel.group.rotation.y = -TILT;
         group.add(panel.group);
       }
       redraw();
     },
     setLevel: (k) => sheet.setLevel(k),
     update(dt) {
-      // With a panel open the pair slides over so it stays centred under the lamp (as
-      // it first opened: a book's spreads then extend out to the right).
-      const shift = card.panel ? -(GAP + card.panel.restWidth * Math.cos(TILT)) / 2 : 0;
-      group.position.x += (shift - group.position.x) * Math.min(1, dt * 6);
+      // An open project is what the visitor reads: the pair slides over until the panel
+      // is centred under the lamp, square to them (the holder turns to face them), and
+      // the card turns in beside it about its right edge. A book's spread slides out to
+      // the right, then the pair settles centred on it.
+      const k = Math.min(1, dt * 6);
+      const shift = card.panel ? -(sheet.width / 2 + GAP + card.panel.width / 2) : 0;
+      group.position.x += (shift - group.position.x) * k;
+      tilt += ((card.panel ? TILT : 0) - tilt) * k;
+      const half = sheet.width / 2;
+      sheet.mesh.rotation.y = tilt;
+      sheet.mesh.position.set(half * (1 - Math.cos(tilt)), 0, half * Math.sin(tilt));
       card.panel?.update(dt);
     },
     dispose() {

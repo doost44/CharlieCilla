@@ -139,7 +139,6 @@ export function createProjectPanel(project, index) {
   const st = { page: 0, loading: true, failed: false, noVideo: false, hover: null, aspect: 0, span: 1, spanFrom: 1, spanTo: 1, spanT: 1 };
   let box = boxFor(4 / 3); // one page (or picture), until the first picture says otherwise
   let boxTop = 0; // CSS pixels
-  let restW = 0; // the sheet's width with one page, CSS pixels
   let rects = [];
   let token = 0; // newest picture request; older ones are dropped when they arrive
   let video = null, videoTexture = null, disposed = false;
@@ -150,7 +149,6 @@ export function createProjectPanel(project, index) {
     project, index, group,
     targets: [sheet.mesh, ...leaves.map((l) => l.mesh), play],
     get width() { return sheet.width; },
-    get restWidth() { return restW * PX; },
     get height() { return sheet.height; },
 
     linkAt(object, uv) {
@@ -284,7 +282,7 @@ export function createProjectPanel(project, index) {
     if (disposed) return;
     // The frame is st.span pages wide; the title keeps its one-page wrapping so nothing
     // moves while it slides, and "expand close" ride along its right edge.
-    restW = Math.ceil(box.w / PX + 2 * PAD_X);
+    const restW = Math.ceil(box.w / PX + 2 * PAD_X); // with one page
     const w = Math.ceil((box.w * st.span) / PX + 2 * PAD_X);
     const inner = w - 2 * PAD_X;
     const links = [{ id: 'expand', text: 'expand' }, { id: 'close', text: 'close' }];
