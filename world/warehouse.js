@@ -43,7 +43,8 @@ export function buildWarehouse(scene) {
   const parts = { sheets: [], timber: [] }; // corrugated sheets and timber from every builder, drawn once each
   const walls = buildWalls(group, parts);
   buildFloor(group);
-  const colliders = [...buildRoof(group, parts), ...buildProps(group, parts)];
+  const props = buildProps(group, parts);
+  const colliders = [...buildRoof(group, parts), ...props.colliders];
   boxes(group, flatMaterial({ map: tex.corrugatedTexture() }), parts.sheets);
   boxes(group, flatMaterial({ map: tex.timberTexture() }), parts.timber);
   const light = buildLight(group, walls);
@@ -93,6 +94,9 @@ export function buildWarehouse(scene) {
     },
     bounds: { minX: -HX + 0.6, maxX: HX - 0.6, minZ: -HZ + 0.6, maxZ: HZ - 0.6 },
     colliders,
+    // The top of the stack GoatMan tends, and the blocks knocked off it: { mesh (instanced),
+    // items ({ p, s, r, c } per instance), stack: { x, z, nx, nz, top } }.
+    work: props.work,
     dispose() {
       scene.remove(group, ambient, top);
       group.traverse((o) => {
@@ -449,6 +453,9 @@ const STACKS = [
   [-29.6, -1.9, 3, 5, 5],
   [-31.6, 3.4, 3, 4, 3],
 ];
+// The stack GoatMan tends (goatman-site.js): its top layer and the blocks knocked off are
+// drawn as a mesh of their own, so he can move them.
+const WORK = 1;
 
 function buildProps(group, { timber }) {
   const r = rng(504);
@@ -502,7 +509,8 @@ function buildProps(group, { timber }) {
   }
 
   // Cinder blocks stacked on pallets, a few knocked off.
-  for (const [cx, cz, nx, nz, layers] of STACKS) {
+  const work = [];
+  STACKS.forEach(([cx, cz, nx, nz, layers], si) => {
     const w = nx * 0.41, d = nz * 0.21;
     for (const z of [-d / 2 + 0.05, 0, d / 2 - 0.05]) timber.push({ p: [cx, 0.05, cz + z], s: [w + 0.1, 0.1, 0.1] });
     for (let x = -w / 2; x <= w / 2; x += 0.25) timber.push({ p: [cx + x, 0.115, cz], s: [0.12, 0.03, d + 0.1] });
@@ -512,14 +520,14 @@ function buildProps(group, { timber }) {
           if (ly === layers - 1 && r() < 0.35) continue;
           const g = 0.8 + r() * 0.25;
           const p = [cx + (ix - (nx - 1) / 2) * 0.41, 0.23 + ly * 0.2, cz + (iz - (nz - 1) / 2) * 0.21];
-          blocks.push({ p, s: [0.4, 0.19, 0.2], r: [0, (r() - 0.5) * 0.05, 0], c: [g, g, g * 0.98] });
+          (si === WORK && ly === layers - 1 ? work : blocks).push({ p, s: [0.4, 0.19, 0.2], r: [0, (r() - 0.5) * 0.05, 0], c: [g, g, g * 0.98] });
         }
       }
     }
     colliders.push({ x: cx, z: cz, r: Math.hypot(w, d) / 2 + 0.2 });
-  }
+  });
   for (let k = 0; k < 9; k++) {
-    blocks.push({ p: [-29.2 + r() * 2.5, 0.1, -3 + r() * 7], s: [0.4, 0.19, 0.2], r: [r() < 0.3 ? Math.PI / 2 : 0, r() * Math.PI, 0], c: [0.85, 0.85, 0.84] });
+    work.push({ p: [-29.2 + r() * 2.5, 0.1, -3 + r() * 7], s: [0.4, 0.19, 0.2], r: [r() < 0.3 ? Math.PI / 2 : 0, r() * Math.PI, 0], c: [0.85, 0.85, 0.84] });
   }
 
   // Planks lying about, and a few leaning on the far wall.
@@ -531,8 +539,10 @@ function buildProps(group, { timber }) {
 
   group.add(new THREE.Mesh(sand.geometry(), flatMaterial({ map: tex.sandTexture(), vertexColors: true })));
   boxes(group, flatMaterial({ map: tex.brickBitTexture() }), bricks);
-  boxes(group, flatMaterial({ map: tex.cinderTexture() }), blocks);
-  return colliders;
+  const cinder = flatMaterial({ map: tex.cinderTexture() });
+  boxes(group, cinder, blocks);
+  const [x, z, nx, nz, layers] = STACKS[WORK];
+  return { colliders, work: { mesh: boxes(group, cinder, work), items: work, stack: { x, z, nx, nz, top: layers - 1 } } };
 }
 
 // --- Fake light: god-ray shafts, pools of sun on the floor, haze, glow round windows ----

@@ -543,6 +543,19 @@ function fromStation(i, seconds) {
   return g;
 }
 
+// A one-off sound from a point in the hall, fading out by `reach` metres away (none past it).
+function fromPoint(p, seconds, reach = 18) {
+  if (!ready()) return null;
+  const d = Math.hypot(p.x - ear.x, p.z - ear.z);
+  if (d > reach) return null;
+  const g = gain(1 - d / reach);
+  const pan = panner(p);
+  g.connect(pan);
+  pan.connect(master);
+  setTimeout(() => { g.disconnect(); pan.disconnect(); }, (seconds + 1) * 1000);
+  return g;
+}
+
 // Play one note in a station's (v1: orb's) voice: step is a scale step above its root.
 function voice(i, step = 0, { vol = 0.04, dur, octave = 0, pan = 0, delay = 0, echoAmount = 0.35 } = {}) {
   const v = voiceOf(i);
@@ -623,6 +636,13 @@ export const sfx = {
   // A glyph locking into place: a tiny high blip from the scale.
   tick(level = 0.5) {
     synth({ freq: noteFreq((Math.random() * 5) | 0, 6), dur: 0.04, type: 'square', vol: 0.006 + level * 0.014, cutoff: 5000, cutoffEnd: 1500, echoAmount: 0.15, verb: 0.1, pan: rnd(-0.6, 0.6) });
+  },
+  // A cinder block set down on the stack, or landing on the concrete (GoatMan at work).
+  block(p, strength = 1) {
+    const dest = fromPoint(p, 1);
+    if (!dest) return;
+    tone({ freq: 150, to: 70, dur: 0.12, vol: 0.12 * strength, verb: 0.25, dest });
+    noise({ dur: 0.08, filter: 'bandpass', freq: 900, to: 380, q: 1.2, vol: 0.09 * strength, verb: 0.3, dest });
   },
   // A wall slamming flat onto the concrete, then its dust, booming round the hall.
   thud(pan = 0) {

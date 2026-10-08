@@ -180,7 +180,9 @@ function stutter(e, seed) {
 const wrapAngle = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 
 // start (optional): a point the chair faces (e.g. room.focus); the newest station is that way.
-export function buildStations(scene, { bounds, avoid = [], start } = {}) {
+// companions (optional): { name: { x, z } }, where a project's `companion` (goatman-site.js)
+// works; that project's station trades places with whichever hangs nearest it.
+export function buildStations(scene, { bounds, avoid = [], start, companions = {} } = {}) {
   const projects = window.AdminData.getHomeProjects().filter((p) => p.visible !== false);
   const b = bounds ?? DEFAULT_BOUNDS;
   const parts = sharedParts();
@@ -190,6 +192,13 @@ export function buildStations(scene, { bounds, avoid = [], start } = {}) {
   const r = rng(5);
 
   const spots = layout(projects.length, b, avoid, start);
+  projects.forEach((p, i) => {
+    const at = companions[p.companion];
+    if (!at) return;
+    const dist = (s) => Math.hypot(s.x - at.x, s.y - at.z);
+    const j = spots.reduce((best, s, k) => (dist(s) < dist(spots[best]) ? k : best), 0);
+    [spots[i], spots[j]] = [spots[j], spots[i]];
+  });
   const stations = projects.map((project, index) => {
     const { x, y: z } = spots[index];
     const { lamp, materials, setLevel } = buildLamp(parts);

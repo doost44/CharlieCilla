@@ -233,6 +233,7 @@ const DEFAULT_HOME_PROJECTS = [
     type: "video",
     youtubeUrl: "https://www.youtube.com/watch?v=_8m2P_TAWSE",
     youtubeId: "_8m2P_TAWSE",
+    companion: "goatman", // in the chair world, GoatMan works beside its station
     visible: true,
   },
   {

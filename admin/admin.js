@@ -709,7 +709,8 @@
         const index = projects.findIndex((p) => p.id === id);
         if (index !== -1) {
           projectData.visible = projects[index].visible;
-          projects[index] = projectData;
+          // Keep what the form doesn't show (e.g. a chair-world companion).
+          projects[index] = { ...projects[index], ...projectData };
         }
       } else {
         projects.push(projectData);
@@ -1110,7 +1111,8 @@
         const index = projects.findIndex((p) => p.id === id);
         if (index !== -1) {
           projectData.visible = projects[index].visible;
-          projects[index] = projectData;
+          // Keep what the form doesn't show (e.g. a chair-world companion).
+          projects[index] = { ...projects[index], ...projectData };
         }
       } else {
         projects.push(projectData);
@@ -1604,7 +1606,8 @@
         const index = projects.findIndex((p) => p.id === id);
         if (index !== -1) {
           projectData.visible = projects[index].visible;
-          projects[index] = projectData;
+          // Keep what the form doesn't show (e.g. a chair-world companion).
+          projects[index] = { ...projects[index], ...projectData };
         }
       } else {
         projects.push(projectData);
