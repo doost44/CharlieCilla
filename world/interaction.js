@@ -44,7 +44,9 @@ export function createInteraction({ camera, look, stations, signal, onExpand, on
     if (hover?.owner !== next?.owner || hover?.link.id !== next?.link.id) {
       hover?.owner.setHover(null);
       next?.owner.setHover(next.link.id);
-      setCrosshair(next ? 'ring' : 'dot');
+      // Over a video the crosshair gets out of the way; over other links it becomes a ring.
+      const overVideo = next?.link.id === 'play' && next.link.label !== 'expand';
+      setCrosshair(overVideo ? 'none' : next ? 'ring' : 'dot');
     }
     hover = next;
     const text = next?.link.label ?? null;

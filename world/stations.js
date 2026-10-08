@@ -11,6 +11,7 @@ import { createCard } from './cards.js';
 // nearest the camera (fading across), everything else is glow sprites and decals.
 
 const CARD_TOP = 1.76; // top edge of the card; its middle is near eye height
+const OPEN_EYE = 1.6; // with a project open, the pair rises until the panel's middle is about here
 const LAMP_Y = 3.4; // bottom rim of the shade
 const ROOF_Y = config.hall.height;
 const CLEAR = 9.5; // metres kept free round the chair (the room and its fallen walls)
@@ -300,7 +301,11 @@ export function buildStations(scene, { bounds, avoid = [], start } = {}) {
         h.rotation.y = s.yaw;
         const bob = BOB * THREE.MathUtils.smoothstep(Math.hypot(dx, dz), STILL, STILL + 3);
         s.bob += (bob - s.bob) * Math.min(1, dt * 2);
-        h.position.y = CARD_TOP + Math.sin(time * 0.8 + s.seed) * s.bob;
+        // An open project hangs down from the card's top edge, so lift the pair to eye level.
+        const panel = s.card.panel;
+        const lift = panel ? Math.max(0, OPEN_EYE + panel.height / 2 - CARD_TOP) : 0;
+        s.lift = (s.lift ?? 0) + (lift - (s.lift ?? 0)) * (1 - Math.exp(-dt * 4));
+        h.position.y = CARD_TOP + s.lift + Math.sin(time * 0.8 + s.seed) * s.bob;
         s.card.update(dt);
       }
       assignLights(camera, dt);

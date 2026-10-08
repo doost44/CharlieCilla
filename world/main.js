@@ -20,6 +20,7 @@ import { createSequence } from './sequence.js';
 let world = null;
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const ROOM_AMBIENT = 0.3; // the only other light in the room is its swag lamp
+const ZOOM = 2.5; // Z narrows the view this many times (and slows the mouse to match)
 
 // home: the page's ASCII chair hook (window.asciiChair). audio: an AudioContext made
 // inside the E key press. phase: where to start (?phase= for testing). onLeft: called
@@ -66,8 +67,12 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
     onExpand: openWork,
     onTick: (i) => sfx.cardTick(i),
   });
+  // Z toggles a zoomed-in view; the field of view eases between the two (see updateZoom).
+  // Options re-apply the plain field of view, so the zoom is applied again after them.
+  let zoom = 0, zoomTo = 0, zoomStale = false;
   const options = createOptions({
     renderer, camera, look, signal,
+    onApply: () => { zoomStale = true; },
     onOpen: () => showOverlay(false),
     onClose: () => showOverlay(!look.isLocked),
   });
@@ -116,6 +121,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
       else options.open();
     }
     if (e.code === 'Space' && sequence.intro) sequence.skip();
+    if (e.code === 'KeyZ' && !options.isOpen) zoomTo = 1 - zoomTo;
   });
 
   // "expand" on a project opens the site's own project view over the world; closing it comes back here.
@@ -151,6 +157,17 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
     camera.updateProjectionMatrix();
     ascii.resize();
   });
+
+  function updateZoom(dt) {
+    if (zoom === zoomTo && !zoomStale) return;
+    zoomStale = false;
+    zoom += (zoomTo - zoom) * Math.min(1, dt * 8);
+    if (Math.abs(zoomTo - zoom) < 0.002) zoom = zoomTo;
+    const factor = THREE.MathUtils.lerp(1, ZOOM, zoom);
+    camera.fov = settings.fov / factor;
+    camera.updateProjectionMatrix();
+    look.pointerSpeed = settings.sensitivity / factor;
+  }
 
   // --- The intro ------------------------------------------------------------------
   let shake = 0;
@@ -248,6 +265,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
     hall.update(dt, camera);
     stations.update(dt, camera);
     player.update(dt);
+    updateZoom(dt);
     interaction.update(dt);
     updateSound(dt, camera, { hall: state.hall });
 
