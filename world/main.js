@@ -3,15 +3,14 @@ import { config } from './config.js';
 import { mountHud, setSubtitle, showHint } from './hud.js';
 import { createLook } from './mouse.js';
 import { createOptions, settings } from './options.js';
-import { startSound, stopSound, resumeSound, updateSound, sfx } from './sound.js';
-import { buildWorld } from './world-island.js';
-import { buildChair, seatPose, homePose } from './chair.js';
+import { startSound, stopSound, resumeSound, updateSound, setStations, sfx } from './sound.js';
+import { buildWarehouse } from './warehouse.js';
+import { buildChair, seatPose } from './chair.js';
 import { buildRoom } from './room.js';
 import { createAscii } from './ascii.js';
+import { createReveal } from './reveal.js';
 import { createPlayer } from './player.js';
-import { buildProjects } from './projects.js';
-import { updateOrbs, resetOrbits, startArrival, finishArrival } from './orbs.js';
-import { updatePanels } from './panels.js';
+import { buildStations } from './stations.js';
 import { createInteraction } from './interaction.js';
 import { createSequence } from './sequence.js';
 
@@ -20,13 +19,18 @@ import { createSequence } from './sequence.js';
 
 let world = null;
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const ROOM_AMBIENT = 0.3; // the only other light in the room is its swag lamp
 
 // home: the page's ASCII chair hook (window.asciiChair). audio: an AudioContext made
 // inside the E key press. phase: where to start (?phase= for testing). onLeft: called
 // once the world is gone and the page should show again.
 export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) {
   if (world) return;
-  await document.fonts.load(`500 16px ${config.font}`); // the canvases draw text in it
+  await Promise.all([ // the canvases draw text in the site's fonts
+    document.fonts.load(`500 16px ${config.font}`),
+    document.fonts.load(`600 16px ${config.serif}`),
+    document.fonts.load(`italic 16px ${config.serif}`),
+  ]);
   const abort = new AbortController();
   const { signal } = abort;
   const on = (target, type, fn, opts = {}) => target.addEventListener(type, fn, { ...opts, signal });
@@ -35,34 +39,41 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
   mountHud(root);
   document.body.classList.add('cw-intro');
   const view = $('view');
-  const renderer = new THREE.WebGLRenderer({ canvas: view, antialias: false });
+  const renderer = new THREE.WebGLRenderer({ canvas: view, antialias: true });
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.05, 400);
+  const ambient = new THREE.AmbientLight(0xfff0dd, ROOM_AMBIENT);
+  scene.add(ambient);
 
-  const island = buildWorld(scene);
-  const chair = buildChair(home);
-  scene.add(chair);
-  const startPose = homePose(home, chair); // the home page's view of the chair, right now
-  const seat = seatPose(chair);
+  const hall = buildWarehouse(scene);
   const room = buildRoom(scene);
-  const ascii = createAscii({ canvas: $('ascii'), room, center: new THREE.Vector3(seat.pos.x, 0, seat.pos.z), eye: seat.pos, chair });
+  const reveal = createReveal(room); // the room is invisible (but hides glyphs) until it builds out
+  room.lamp.setLevel(0);
+  const chair = buildChair(home, room.focus); // facing the lamp corner
+  scene.add(chair);
+  const seat = seatPose(chair, room.focus);
+  const ascii = createAscii({ canvas: $('ascii'), room, chair, eye: seat.pos });
   const look = createLook(camera, root, signal);
-  const player = createPlayer(camera, look);
-  const projects = buildProjects(scene);
-  const { orbs, lines, panels } = projects;
-  setSubtitle(`SELECTED WORKS · ${projects.count} PROJECTS`);
+  const player = createPlayer({ camera, look, signal, chair, seat });
+  const stations = buildStations(scene, { bounds: hall.bounds, avoid: hall.colliders, start: room.focus }); // station 0 the way the chair faces
+  player.setWorld({ bounds: hall.bounds, colliders: [...hall.colliders, ...stations.colliders] });
+  setSubtitle(`selected works · ${stations.stations.length} projects`);
   startSound(audio);
+  setStations(stations.stations.map((s) => s.lampPosition));
 
-  const interaction = createInteraction({ camera, look, orbs, panels, signal, onOpen: openWork });
+  const interaction = createInteraction({
+    camera, look, signal, stations,
+    onExpand: openWork,
+    onTick: (i) => sfx.cardTick(i),
+  });
   const options = createOptions({
     renderer, camera, look, signal,
     onOpen: () => showOverlay(false),
     onClose: () => showOverlay(!look.isLocked),
-    onResetOrbs: () => resetOrbs(),
   });
 
   // --- Pause screen, pointer lock, leaving -------------------------------------
-  const state = { modal: false }; // the site's project view is open over the world
+  const state = { modal: false, hall: false }; // modal: the site's project view is open over the world
   const overlay = $('overlay');
   let everLocked = look.isLocked;
   let leaving = false;
@@ -79,7 +90,6 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
     resumeSound();
   };
   look.onUnlock = () => {
-    interaction.release();
     if (!options.isOpen && !state.modal && !leaving) showOverlay(true);
   };
   on($('resume'), 'click', resume);
@@ -88,7 +98,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
   on($('back'), 'click', leave);
   // Clicking the world itself (not a button) takes the mouse, or skips the intro.
   on(root, 'mousedown', (e) => {
-    if (e.button !== 0 || e.target.closest('button, #cw-options, #cw-overlay .cw-box')) return;
+    if (e.button !== 0 || e.target.closest('button, #cw-options, #cw-overlay .cw-card')) return;
     if (!look.isLocked) resume();
     else if (sequence.intro) sequence.skip();
   });
@@ -105,17 +115,16 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
       if (options.isOpen) options.close();
       else options.open();
     }
-    if (e.code === 'KeyR' && !sequence.intro) resetOrbs();
     if (e.code === 'Space' && sequence.intro) sequence.skip();
   });
 
-  // Enter on an orb opens the site's own project view over the world; closing it comes back here.
+  // "expand" on a project opens the site's own project view over the world; closing it comes back here.
   const modal = document.getElementById('project-modal');
-  function openWork(orb) {
+  function openWork(project) {
     state.modal = true;
     sfx.open();
     look.unlock();
-    window.openProject(orb.project.id);
+    window.openProject(project.id);
   }
   const watcher = new MutationObserver(() => {
     if (!state.modal || modal.classList.contains('is-open')) return;
@@ -136,11 +145,6 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
     onLeft?.();
   }
 
-  function resetOrbs() {
-    interaction.release();
-    resetOrbits(orbs);
-  }
-
   on(window, 'resize', () => {
     renderer.setSize(innerWidth, innerHeight, false);
     camera.aspect = innerWidth / innerHeight;
@@ -151,16 +155,14 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
   // --- The intro ------------------------------------------------------------------
   let shake = 0;
   const toWall = new THREE.Vector3(), right = new THREE.Vector3();
+  const revealTop = config.room.height + 1.7; // past the ceiling's bias, the noise and the edge band
   const sequence = createSequence({
+    // In the chair from the first frame; the head stays turned to the room while it forms.
     sit: {
       start(instant) {
-        player.begin(startPose, seat);
+        player.seat(seat, true);
+        room.lamp.setLevel(0); // the bulb comes up as the room builds out
         if (!instant) sfx.creak();
-      },
-      update: (t, k) => player.ease(k),
-      finish() {
-        player.seated();
-        options.seated = true;
       },
     },
     swirl: {
@@ -173,23 +175,31 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
       start: () => ascii.form(),
       finish: () => ascii.lockAll(),
     },
+    // The room builds out of its glyphs from the floor up.
     texture: {
       update(t, k) {
-        room.setOpacity(k);
-        ascii.setOpacity(1 - k);
+        const h = THREE.MathUtils.lerp(-0.2, revealTop, k);
+        reveal.set(h);
+        ascii.setReveal(h);
+        room.lamp.setLevel(THREE.MathUtils.smoothstep(h, -0.2, 1)); // warms up as the floor appears
       },
       finish() {
-        room.setOpacity(1);
+        reveal.finish();
+        room.lamp.setLevel(1);
         ascii.show(false);
-        island.reveal(true); // hidden behind the solid room until the walls fall
+        player.freeLook();
+        state.hall = true;
       },
     },
     collapse: {
       start(instant) {
+        hall.reveal(true); // still hidden by the closed room; its light comes up as the walls fall
+        stations.group.visible = true; // the station lamps hang dark until they flicker on
         room.collapse.start();
         if (!instant) sfx.lift();
       },
       update(t, k, dt) {
+        ambient.intensity = ROOM_AMBIENT * (1 - k); // the room's warm fill gives way to the hall's light
         for (const name of room.collapse.update(t, dt)) {
           // Thud from the side the wall fell on.
           toWall.copy(room.walls[name].pivot.position).sub(camera.position).normalize();
@@ -198,27 +208,36 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
           shake = Math.max(shake, 0.6);
         }
       },
-      finish: () => room.collapse.finish(),
+      finish() {
+        room.collapse.finish();
+        ambient.intensity = 0;
+      },
     },
+    // Station lamps flicker on one by one along the path; then the visitor may stand up.
     projects: {
       start() {
-        startArrival(orbs);
+        stations.startArrival((i) => sfx.lampOn(i));
         interaction.enabled = true;
+        player.allowStanding(true);
         document.body.classList.remove('cw-intro');
       },
-      finish: () => finishArrival(orbs),
+      finish: () => stations.finishArrival(),
     },
   });
 
-  world = { root, renderer, scene, abort, watcher, ascii, room, island, panels, home };
+  world = { root, renderer, scene, abort, watcher, ascii, reveal, room, hall, stations };
 
-  // Fade the page to black first (entry.js), then show the chair and start.
+  // Compile the hall's shaders (and the fogged versions of the rest) now, so the reveal doesn't stutter.
+  hall.reveal(true);
+  renderer.compile(scene, camera);
+  hall.reveal(false);
+
+  // Fade the page to white first (entry.js), then start, already in the chair.
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let startIn = config.fade;
   const clock = new THREE.Clock();
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.1);
-    const t = clock.elapsedTime;
     if (startIn > 0 && (startIn -= dt) <= 0) {
       sequence.start(reduced ? 'projects' : phase);
       view.classList.add('cw-shown');
@@ -226,13 +245,16 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
     sequence.update(dt);
     room.update(dt);
     ascii.update(dt);
-    updateOrbs(orbs, lines, t, dt);
+    hall.update(dt, camera);
+    stations.update(dt, camera);
+    player.update(dt);
     interaction.update(dt);
-    updatePanels(panels, camera, dt);
-    updateSound(dt, camera, orbs);
+    updateSound(dt, camera, { hall: state.hall });
 
-    showHint(sequence.intro && startIn <= 0 ? 'SPACE OR CLICK TO SKIP' : null, 'skip');
-    showHint(!look.isLocked && !everLocked ? 'CLICK TO LOOK AROUND' : null, 'lock');
+    const intro = sequence.intro && startIn <= 0;
+    showHint(intro ? 'space or click to skip' : null, 'skip');
+    showHint(!intro && player.seated ? 'e or w a s d to stand' : player.canSit ? 'e to sit' : null, 'stand');
+    showHint(!look.isLocked && !everLocked ? 'click to look around' : null, 'lock');
 
     // Screen shake on the canvas itself, so it doesn't fight mouse look.
     if (shake > 0.01 && settings.shake) {
@@ -248,7 +270,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', onLeft }) 
   });
 
   // Handy for debugging in the browser console.
-  window.chairWorld = { scene, camera, renderer, sequence, player, orbs, panels, room, look, interaction };
+  window.chairWorld = { scene, camera, renderer, sequence, player, room, hall, stations, look, interaction, chair };
 }
 
 // Stop everything and free it: loop, listeners, sound, GPU memory, DOM.
@@ -261,18 +283,21 @@ export function leaveWorld() {
   w.watcher.disconnect();
   stopSound();
   w.ascii.dispose();
+  w.reveal.dispose();
   w.room.collapse.dispose();
-  const extra = [w.island.sky, ...w.panels.flatMap((p) => [p.screen, ...p.pageTextures])];
-  disposeScene(w.scene, extra);
+  w.hall.dispose();
+  w.stations.dispose();
+  disposeScene(w.scene);
   w.renderer.dispose();
   w.renderer.forceContextLoss();
-  document.body.classList.remove('cw-intro', 'cw-reading', 'cw-no-hud');
+  document.body.classList.remove('cw-intro', 'cw-no-hud');
   w.root.replaceChildren();
   delete window.chairWorld;
 }
 
-function disposeScene(scene, extra) {
-  const textures = new Set(extra);
+function disposeScene(scene) {
+  const textures = new Set();
+  if (scene.background?.isTexture) textures.add(scene.background);
   scene.traverse((o) => {
     o.geometry?.dispose();
     for (const m of [o.material].flat()) {

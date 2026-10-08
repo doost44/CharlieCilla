@@ -1,6 +1,6 @@
 /* Chair world (world/): the hint under the home page's ASCII chair, and the
-   full-screen world with Automation Map's amber HUD in the site's IBM Plex Mono.
-   Loaded by entry.js. */
+   full-screen world, in the site's own look: white paper, IBM Plex Serif and Mono,
+   small uppercase mono labels like the home page's .list-heading. Loaded by entry.js. */
 
 /* --- Home page ------------------------------------------------------------- */
 .ascii-wrap { position: relative; }
@@ -22,84 +22,89 @@ body.world-open { overflow: hidden; }
 /* --- The world ------------------------------------------------------------- */
 #world-root {
   position: fixed; inset: 0; z-index: 400; /* under the project modal (500), so Enter can open one over it */
-  overflow: hidden; background: #000; opacity: 0; transition: opacity 0.5s ease;
-  font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; color: #ffb43c;
+  overflow: hidden; background: var(--bg); opacity: 0; transition: opacity 0.5s ease;
+  font-family: var(--serif); color: var(--text);
 }
 #world-root[hidden] { display: none; }
 #world-root.cw-on { opacity: 1; }
-#world-root.cw-white { background: #fff; }
+#world-root.cw-white { background: var(--bg); }
 #world-root.cw-loading::before {
-  content: "LOADING\2026"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  padding: 6px 10px; border: 2px solid rgba(255, 180, 60, 0.35); background: rgba(10, 10, 8, 0.6);
-  font-weight: 500; letter-spacing: 1px;
+  content: "loading\2026"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  font-family: var(--mono); font-size: 0.78rem; color: var(--faint);
 }
 
 #cw-view, #cw-ascii { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-#cw-view { image-rendering: pixelated; opacity: 0; transition: opacity 0.3s; } /* half-res render, upscaled without smoothing */
+#cw-view { image-rendering: pixelated; opacity: 0; transition: opacity 0.3s; } /* pixelated only shows at the chunky pixel sizes */
 #cw-view.cw-shown { opacity: 1; }
 #cw-ascii { pointer-events: none; } /* full-res glyph layer */
-#cw-white { position: absolute; inset: 0; z-index: 20; background: #fff; opacity: 0; transition: opacity 0.5s; pointer-events: none; }
+#cw-white { position: absolute; inset: 0; z-index: 20; background: var(--bg); opacity: 0; transition: opacity 0.5s; pointer-events: none; }
 #cw-white.cw-on { opacity: 1; }
 
-.cw-box {
-  background: rgba(10, 10, 8, 0.6);
-  border: 2px solid rgba(255, 180, 60, 0.35);
-  padding: 6px 10px;
-  font-weight: 500;
-  letter-spacing: 1px;
+/* Small mono labels, like the home page's "Selected Works" heading, on a paper chip
+   so they read over the white void and the dark hall alike. */
+.cw-label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  text-shadow: 2px 2px 0 #000;
+  color: var(--faint);
 }
+#cw-hud .cw-label { background: rgba(255, 255, 255, 0.92); border: 1px solid var(--line); padding: 4px 8px; }
 .cw-hidden { display: none !important; }
 
 #cw-hud { position: absolute; inset: 0; pointer-events: none; }
 #cw-hud > * { transition: opacity 0.8s; }
-#cw-title { position: absolute; top: 16px; left: 16px; font-size: 22px; }
-#cw-subtitle { display: block; font-size: 11px; opacity: 0.75; margin-top: 2px; }
+#cw-title {
+  position: absolute; top: 16px; left: 16px; display: flex; flex-direction: column; gap: 6px;
+  background: rgba(255, 255, 255, 0.92); border: 1px solid var(--line); padding: 10px 12px;
+}
+#cw-title .cw-name { font-size: 0.8rem; font-style: italic; color: var(--muted); }
+#cw-hud #cw-subtitle { background: none; border: 0; padding: 0; }
+/* A dot that turns into a ring over links; difference blending keeps it visible on white and dark. */
 #cw-crosshair {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -52%);
-  font-size: 22px; font-weight: 500; text-shadow: 1px 1px 0 #000;
+  position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; transform: translate(-50%, -50%);
+  border-radius: 50%; background: #fff; mix-blend-mode: difference;
+  transition: width 0.12s, height 0.12s, background 0.12s;
 }
-#cw-target { position: absolute; left: 50%; top: calc(50% + 24px); transform: translateX(-50%); font-size: 13px; white-space: nowrap; }
-#cw-hint { position: absolute; right: 16px; bottom: 56px; font-size: 12px; }
-#cw-help { position: absolute; right: 16px; bottom: 16px; max-width: calc(100% - 32px); text-align: right; font-size: 11px; opacity: 0.8; }
-#cw-error { position: absolute; top: 64px; left: 16px; color: #ff6040; max-width: 420px; }
+#cw-crosshair.cw-ring { width: 22px; height: 22px; background: none; border: 1px solid #fff; } /* a thin ring, open in the middle, so the link under it stays readable */
+#cw-target { position: absolute; left: 50%; top: calc(50% + 48px); transform: translateX(-50%); white-space: nowrap; color: var(--link-blue); }
+#cw-hint { position: absolute; right: 16px; bottom: 52px; }
+#cw-help { position: absolute; right: 16px; bottom: 16px; max-width: calc(100% - 32px); text-align: right; }
+#cw-error { position: absolute; top: 96px; left: 16px; max-width: 420px; color: #b3261e; }
 body.cw-intro #cw-title, body.cw-intro #cw-crosshair, body.cw-intro #cw-help { opacity: 0; }
-body.cw-reading #cw-crosshair { display: none; }
-body.cw-reading #cw-target { top: auto; bottom: 88px; }
-body.cw-no-hud #cw-hud > :not(#cw-reader):not(#cw-crosshair) { display: none; }
+body.cw-no-hud #cw-hud > :not(#cw-crosshair) { display: none; }
 
-/* Reading mode: same size and place as the 3D panel at its reading distance (70% of the view height). */
-#cw-reader { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0; transition: opacity 0.15s; }
-#cw-reader.cw-on { opacity: 1; }
-#cw-reader canvas { display: block; height: 70vh; width: auto; max-width: 94vw; object-fit: contain; image-rendering: pixelated; }
-
-.cw-btn {
-  font: inherit; font-weight: 500; letter-spacing: 1px; color: #ffb43c; cursor: pointer;
-  background: rgba(10, 10, 8, 0.8); border: 2px solid rgba(255, 180, 60, 0.6); padding: 6px 12px;
+/* Links and buttons: the site's mono links (like the modal's "back to works"). */
+.cw-link {
+  font-family: var(--mono); font-size: 0.78rem; color: var(--text); text-transform: lowercase;
+  background: none; border: none; padding: 0; cursor: pointer;
 }
-.cw-btn:hover, .cw-btn:focus-visible { background: #ffb43c; color: #111; outline: none; }
-#cw-back { position: absolute; top: 16px; right: 16px; font-size: 12px; z-index: 15; } /* above the pause screen and options */
+.cw-link:hover, .cw-link:focus-visible { color: var(--link-blue); text-decoration: underline; outline: none; }
+#cw-back {
+  position: absolute; top: 16px; right: 16px; z-index: 15; /* above the pause screen and options */
+  background: rgba(255, 255, 255, 0.92); border: 1px solid var(--line); padding: 6px 10px;
+}
 
+/* Pause screen and options: a white paper card, like the site's own pages. */
 #cw-overlay, #cw-options {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  background: rgba(0, 0, 0, 0.45); z-index: 10;
+  background: rgba(255, 255, 255, 0.55); z-index: 10;
 }
 #cw-overlay { cursor: pointer; }
-#cw-overlay .cw-box { text-align: center; padding: 24px 40px; max-width: min(640px, calc(100vw - 32px)); cursor: default; }
-#cw-overlay h1 { margin: 0 0 8px; font-size: 32px; font-weight: 500; }
-#cw-overlay p { margin: 6px 0; }
-.cw-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 16px; }
-.cw-small { font-size: 11px; opacity: 0.75; }
-#cw-overlay .cw-small { margin-top: 16px; }
+.cw-card {
+  background: var(--bg); border: 1px solid var(--line); padding: 28px 36px;
+  max-width: min(560px, calc(100vw - 32px)); cursor: default;
+}
+#cw-overlay .cw-card { text-align: center; }
+#cw-overlay h1 { margin: 6px 0 4px; font-size: 2.1rem; font-weight: 600; letter-spacing: -0.01em; text-transform: lowercase; }
+.cw-row { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin-top: 18px; }
+.cw-small { margin-top: 18px; line-height: 1.6; }
 
-#cw-options { z-index: 11; background: rgba(0, 0, 0, 0.55); }
-#cw-options .cw-box { width: min(420px, calc(100vw - 32px)); padding: 20px 24px; }
-#cw-options h2 { margin: 0 0 14px; font-size: 24px; font-weight: 500; }
-#cw-options label { display: block; margin: 12px 0; font-size: 13px; }
-#cw-options label span { color: #fff2d0; }
-#cw-options input[type="range"], #cw-options select { display: block; width: 100%; margin-top: 6px; accent-color: #ffb43c; }
-#cw-options select { font: inherit; color: #ffb43c; background: #111; border: 2px solid rgba(255, 180, 60, 0.6); padding: 4px; }
-#cw-options .cw-check input { accent-color: #ffb43c; margin-right: 8px; }
+#cw-options { z-index: 11; }
+#cw-options .cw-card { width: min(420px, calc(100vw - 32px)); }
+#cw-options label { display: block; margin: 12px 0; font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+#cw-options label span { color: var(--text); }
+#cw-options input[type="range"], #cw-options select { display: block; width: 100%; margin-top: 6px; accent-color: var(--link-blue); }
+#cw-options select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); padding: 4px; }
+#cw-options .cw-check input { accent-color: var(--link-blue); margin-right: 8px; }
 #cw-options .cw-row { justify-content: flex-start; }
-#cw-options .cw-small { margin: 12px 0 0; }

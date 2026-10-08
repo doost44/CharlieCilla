@@ -1,5 +1,4 @@
 import THREE from './three.js';
-import { config } from './config.js';
 
 // Small seeded RNG so the procedural textures look the same on every load.
 export function rng(seed = 1) {
@@ -51,67 +50,18 @@ export const hex = (color) => '#' + color.toString(16).padStart(6, '0');
 // no shine, which lights exactly like Lambert but per face.
 export const flatMaterial = (opts) => new THREE.MeshPhongMaterial({ flatShading: true, shininess: 0, specular: 0x000000, ...opts });
 
-export function grassTexture() {
-  const { c, g, r } = noisy(64, 64, [74, 108, 44], 40, 7);
-  for (let i = 0; i < 90; i++) {
-    g.fillStyle = r() > 0.5 ? '#3d5a22' : '#8aa04a';
-    g.fillRect((r() * 64) | 0, (r() * 64) | 0, 1, 2);
-  }
-  return crunchy(c, 6);
-}
-
-export function dirtTexture() {
-  const { c, g, r } = noisy(64, 64, [92, 70, 50], 46, 11);
-  for (let i = 0; i < 40; i++) {
-    g.fillStyle = r() > 0.5 ? '#4a3a2c' : '#7c7066';
-    g.fillRect((r() * 64) | 0, (r() * 64) | 0, 2 + ((r() * 3) | 0), 2);
-  }
-  return crunchy(c, 3);
-}
-
-// Vertical dusk gradient, used as the scene background.
-export function skyTexture() {
-  const c = canvas(2, 256);
-  const g = c.getContext('2d');
-  const grad = g.createLinearGradient(0, 0, 0, 256);
-  grad.addColorStop(0, '#3a4a66');
-  grad.addColorStop(0.45, '#7c7f8c');
-  grad.addColorStop(0.62, '#c98a56');
-  grad.addColorStop(1, '#5b4a48');
-  g.fillStyle = grad;
-  g.fillRect(0, 0, 2, 256);
-  return crunchy(c);
-}
-
-// The office chair's skins: worn white leather, moulded plastic, dull metal.
+// The office chair's skins: worn black leather, black moulded plastic, dark gunmetal.
 export function leatherTexture() {
-  const { c, g, r } = noisy(64, 64, [222, 218, 206], 16, 21);
-  for (let i = 0; i < 30; i++) {
-    g.fillStyle = r() > 0.5 ? '#b8b2a2' : '#f4f0e6';
+  const { c, g, r } = noisy(64, 64, [30, 29, 28], 10, 21);
+  for (let i = 0; i < 40; i++) {
+    g.fillStyle = r() > 0.6 ? '#4a4846' : '#141312'; // creases and scuffs
     g.fillRect((r() * 64) | 0, (r() * 64) | 0, 1 + ((r() * 3) | 0), 1);
   }
   return crunchy(c, 2);
 }
 
-export const plasticTexture = () => crunchy(noisy(32, 32, [196, 196, 192], 10, 22).c);
-export const metalTexture = () => crunchy(noisy(32, 32, [128, 130, 134], 22, 23).c);
-
-// A word rendered for a sprite. Returns the texture and its aspect ratio.
-export function wordTexture(text, color = '#ffd27a') {
-  const font = `500 20px ${config.font}`;
-  const probe = canvas(1, 1).getContext('2d');
-  probe.font = font;
-  const w = Math.ceil(probe.measureText(text).width) + 12;
-  const c = canvas(w, 28);
-  const g = c.getContext('2d');
-  g.font = font;
-  g.textBaseline = 'middle';
-  g.fillStyle = '#000';
-  g.fillText(text, 8, 16);
-  g.fillStyle = color;
-  g.fillText(text, 6, 14);
-  return { texture: crunchy(c), aspect: w / 28 };
-}
+export const plasticTexture = () => crunchy(noisy(32, 32, [24, 24, 26], 8, 22).c);
+export const metalTexture = () => crunchy(noisy(32, 32, [62, 64, 70], 16, 23).c);
 
 // Round soft puff in the given 'r,g,b' colour (dust when the walls land).
 export function puffTexture(rgb) {
