@@ -453,9 +453,10 @@ const STACKS = [
   [-29.6, -1.9, 3, 5, 5],
   [-31.6, 3.4, 3, 4, 3],
 ];
-// The stack GoatMan tends (goatman-site.js): its top layer and the blocks knocked off are
-// drawn as a mesh of their own, so he can move them.
-const WORK = 1;
+// The stack GoatMan tends (goatman-site.js): its top WORK_LAYERS layers are his, drawn as a
+// mesh of their own so he can move them. Exactly that many blocks: what is missing from the
+// stack lies on the floor round it (about FLOOR of them), so floor and stack always add up.
+const WORK = 1, WORK_LAYERS = 2, FLOOR = 20;
 
 function buildProps(group, { timber }) {
   const r = rng(504);
@@ -520,29 +521,46 @@ function buildProps(group, { timber }) {
           if (ly === layers - 1 && r() < 0.35) continue;
           const g = 0.8 + r() * 0.25;
           const p = [cx + (ix - (nx - 1) / 2) * 0.41, 0.23 + ly * 0.2, cz + (iz - (nz - 1) / 2) * 0.21];
-          (si === WORK && ly === layers - 1 ? work : blocks).push({ p, s: [0.4, 0.19, 0.2], r: [0, (r() - 0.5) * 0.05, 0], c: [g, g, g * 0.98] });
+          const tilt = (r() - 0.5) * 0.05;
+          if (si === WORK && ly >= layers - WORK_LAYERS) continue; // his: laid out below
+          blocks.push({ p, s: [0.4, 0.19, 0.2], r: [0, tilt, 0], c: [g, g, g * 0.98] });
         }
       }
     }
     colliders.push({ x: cx, z: cz, r: Math.hypot(w, d) / 2 + 0.2 });
   });
+  const [wx, wz, wnx, wnz, wl] = STACKS[WORK];
   for (let k = 0; k < 9; k++) {
-    blocks.push({ p: [-29.2 + r() * 2.5, 0.1, -3 + r() * 7], s: [0.4, 0.19, 0.2], r: [r() < 0.3 ? Math.PI / 2 : 0, r() * Math.PI, 0], c: [0.85, 0.85, 0.84] });
+    const b = { p: [-29.2 + r() * 2.5, 0.1, -3 + r() * 7], s: [0.4, 0.19, 0.2], r: [r() < 0.3 ? Math.PI / 2 : 0, r() * Math.PI, 0], c: [0.85, 0.85, 0.84] };
+    if (b.p[2] > wz + 1.5) blocks.push(b); // the ones by his stack would be his to count
   }
-  // Blocks lying round the stack GoatMan tends: most behind it, towards the wall and the big
-  // stack (where he works), a few out in front. Their own random numbers, so nothing else moves.
+  // His blocks (their own random numbers, so nothing else moves): about FLOOR on the floor,
+  // most behind the stack (towards the wall and the big stack, where he works), a few in
+  // front; the rest still on the stack, the lower of his layers first, with gaps.
   const wr = rng(505);
-  const [wx, wz] = STACKS[WORK];
-  for (let k = 0, tries = 0; k < 17 && tries < 600; tries++) {
-    const a = (k < 14 ? Math.PI : 0) + (wr() - 0.5) * 2.2; // behind is towards -x, the wall
-    const d = 1.2 + wr() * 1.6;
+  const block = (p, tilt) => {
+    const g = 0.8 + wr() * 0.25;
+    work.push({ p, s: [0.4, 0.19, 0.2], r: tilt, c: [g, g, g * 0.98] });
+  };
+  const slots = [];
+  for (let ly = wl - WORK_LAYERS; ly < wl; ly++) {
+    for (let ix = 0; ix < wnx; ix++) {
+      for (let iz = 0; iz < wnz; iz++) slots.push([wx + (ix - (wnx - 1) / 2) * 0.41, 0.23 + ly * 0.2, wz + (iz - (wnz - 1) / 2) * 0.21]);
+    }
+  }
+  const floor = [];
+  for (let tries = 0; floor.length < FLOOR && tries < 1500; tries++) {
+    const a = (floor.length < FLOOR - 4 ? Math.PI : 0) + (wr() - 0.5) * 2.2; // behind is towards -x, the wall
+    const d = 1.2 + wr() * (tries < 600 ? 1.6 : 2.2);
     const p = [wx + Math.cos(a) * d, 0.1, wz + Math.sin(a) * d];
     const onStack = STACKS.some(([x, z, nx, nz]) => Math.abs(p[0] - x) < nx * 0.205 + 0.45 && Math.abs(p[2] - z) < nz * 0.105 + 0.45);
-    if (onStack || p[0] < -HX + 1 || p[2] < wz - 1.5 || work.some((b) => Math.hypot(b.p[0] - p[0], b.p[2] - p[2]) < 0.55)) continue;
-    const g = 0.8 + wr() * 0.25;
-    work.push({ p, s: [0.4, 0.19, 0.2], r: [wr() < 0.3 ? Math.PI / 2 : 0, wr() * Math.PI, 0], c: [g, g, g * 0.98] });
-    k++;
+    const apart = tries < 900 ? 0.55 : 0.45;
+    if (onStack || p[0] < -HX + 1 || p[2] < wz - 1.5 || floor.some((q) => Math.hypot(q[0] - p[0], q[2] - p[2]) < apart)) continue;
+    floor.push(p);
   }
+  for (const p of floor) block(p, [wr() < 0.3 ? Math.PI / 2 : 0, wr() * Math.PI, 0]);
+  const lower = slots.slice(0, wnx * wnz).sort(() => wr() - 0.5); // which of the lower layer's are still there
+  for (const p of [...lower, ...slots.slice(wnx * wnz)].slice(0, slots.length - floor.length)) block(p, [0, (wr() - 0.5) * 0.05, 0]);
 
   // Planks lying about, and a few leaning on the far wall.
   for (let k = 0; k < 8; k++) {
@@ -555,8 +573,7 @@ function buildProps(group, { timber }) {
   boxes(group, flatMaterial({ map: tex.brickBitTexture() }), bricks);
   const cinder = flatMaterial({ map: tex.cinderTexture() });
   boxes(group, cinder, blocks);
-  const [x, z, nx, nz, layers] = STACKS[WORK];
-  return { colliders, work: { mesh: boxes(group, cinder, work), items: work, stack: { x, z, nx, nz, top: layers - 1 } } };
+  return { colliders, work: { mesh: boxes(group, cinder, work), items: work, stack: { x: wx, z: wz, nx: wnx, nz: wnz, from: wl - WORK_LAYERS, layers: wl } } };
 }
 
 // --- Fake light: god-ray shafts, pools of sun on the floor, haze, glow round windows ----
