@@ -3,7 +3,7 @@ import { config } from './config.js';
 import { mountHud, setSubtitle, showHint } from './hud.js';
 import { createLook } from './mouse.js';
 import { createOptions, settings } from './options.js';
-import { startSound, stopSound, resumeSound, updateSound, setStations, sfx } from './sound.js';
+import { startSound, stopSound, resumeSound, pauseSound, updateSound, setStations, sfx } from './sound.js';
 import { buildWarehouse } from './warehouse.js';
 import { buildChair, seatPose } from './chair.js';
 import { buildRoom } from './room.js';
@@ -137,6 +137,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', portal, on
   function openWork(project) {
     state.modal = true;
     sfx.open();
+    setTimeout(() => state.modal && pauseSound(), 400); // after the open sound; a film or another world may have its own
     look.unlock();
     window.openProject(project.id);
   }
@@ -272,6 +273,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', portal, on
   const clock = new THREE.Clock();
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.1);
+    if (state.modal) return; // the site's project view covers the world: nothing to draw
     if (!started && (startIn -= dt) <= 0) {
       started = true;
       sequence.start(reduced ? 'projects' : portal ? 'swirl' : phase);

@@ -84,6 +84,8 @@ export function stopSound() {
 
 // Browsers may hold the context suspended until a click; call this from one.
 export const resumeSound = () => ctx?.resume?.()?.catch?.(() => {});
+// Silent while the site's own project view is up over the world.
+export const pauseSound = () => ctx?.suspend?.()?.catch?.(() => {});
 
 // The stations' lamp positions (Vector3s), in station order (index 0 = newest).
 export function setStations(positions = []) {

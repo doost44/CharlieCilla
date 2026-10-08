@@ -18,7 +18,7 @@ The home page's ASCII office chair is a doorway: click it ("click E for more" ap
 - `ascii.js` the glyph swirl and the glyphs landing flat on the room's surfaces (own full-res canvas, instanced quads, motion in the vertex shader, depth-only copies of the room and chair for occlusion). `reveal.js` the bottom-up build-out: patches the room's materials with `onBeforeCompile` and restores them after.
 - `room.js` the bedroom set (walls as hinged flats in two halves, the swag lamp as the only light) and its collapse; `furniture.js` its fittings and props and the swag lamp; `room-textures.js` their canvas textures.
 - `warehouse.js` the hall (brick, windows, columns, roof hole, god-rays, dust, fog; colliders and bounds for walking); `warehouse-textures.js` its textures.
-- `stations.js` one station per visible project (hanging lamp, light pool, card; at most 4 real point lights handed to the nearest), `cards.js` the home-list-style cards (canvas at 2x, mipmapped), `project-panel.js` a project opened beside its card (slides, video, YouTube hand-off; books marked `spread` show the cover alone and then two pages side by side, paired by the page's own `buildCarouselGroups`, the frame sliding out to the right for them), `interaction.js` crosshair aiming and clicking on card links.
+- `stations.js` one station per visible project (hanging lamp, light pool, card; at most 4 real point lights handed to the nearest), `cards.js` the home-list-style cards (canvas at 2x, mipmapped), `project-panel.js` a project opened beside its card (slides, video, a hand-off to the site's project view for YouTube films and `interactive` projects such as Automation Map; books marked `spread` show the cover alone and then two pages side by side, paired by the page's own `buildCarouselGroups`, the frame sliding out to the right for them), `interaction.js` crosshair aiming and clicking on card links.
 - `sound.js` everything audible, synthesised with Web Audio: generated hall reverb, drone, a generative voice per station in A-flat major pentatonic with HRTF proximity (at most 3 at once), footsteps, thuds, lamps, plus the bass-line wind.
 - `hud.js` the world's DOM; `options.js` the options menu; `world.css` all of it in the site's look.
 
@@ -31,7 +31,7 @@ The home page's ASCII office chair is a doorway: click it ("click E for more" ap
 Everything about a project comes from `admin/data.js` / the admin panel (`title`, `year`, `category`, `description`, `type`, media fields, optional `cover`). Nothing project-specific is hard-coded in `world/`. Stations follow the home list's order (newest nearest the chair).
 
 ## Integration with index.html
-Keep it tiny: the hook at the end of the ASCII IIFE (`window.asciiChair`), `#chair-hint`, `#world-root` and one module script tag. "expand" on a project calls the page's own `openProject(id)`; the world notices the modal closing and takes the mouse back. Never duplicate the modal code.
+Keep it tiny: the hook at the end of the ASCII IIFE (`window.asciiChair`), `#chair-hint`, `#world-root` and one module script tag. "expand" on a project calls the page's own `openProject(id)`; while that view is up the world stops drawing and its sound is suspended, and it takes the mouse back when the view closes. Never duplicate the modal code.
 
 ## Testing
 Serve the repo root (`python3 -m http.server 8000`). `?phase=sit|swirl|form|texture|hold|collapse|projects|free` jumps straight to a phase. Desktop only: under 900px wide, no fine pointer or no WebGL, the chair stays decorative.
