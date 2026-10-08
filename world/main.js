@@ -13,6 +13,7 @@ import { createPlayer } from './player.js';
 import { buildStations } from './stations.js';
 import { createInteraction } from './interaction.js';
 import { createSequence } from './sequence.js';
+import { buildGoatmanSite } from './goatman-site.js';
 
 // The chair world: built inside #world-root when the visitor presses E at the
 // home page's ASCII chair (see entry.js), and torn down completely on the way back.
@@ -64,8 +65,17 @@ export async function launchWorld({ root, home, audio, phase = 'sit', portal, on
   const look = createLook(camera, root, signal);
   const player = createPlayer({ camera, look, signal, chair, seat });
   await breathe();
-  const stations = buildStations(scene, { bounds: hall.bounds, avoid: hall.colliders, start: room.focus }); // station 0 the way the chair faces
-  player.setWorld({ bounds: hall.bounds, colliders: [...hall.colliders, ...stations.colliders] });
+  const stations = buildStations(scene, {
+    bounds: hall.bounds, avoid: hall.colliders,
+    start: room.focus, // station 0 the way the chair faces
+    companions: { goatman: hall.work.stack }, // GoatMan's project hangs by the stack he tends
+  });
+  // GoatMan at work by his project's station (if a project has him as its companion).
+  const site = await buildGoatmanSite(stations, hall).catch((err) => {
+    console.warn('GoatMan stayed home:', err);
+    return null;
+  });
+  player.setWorld({ bounds: hall.bounds, colliders: [...hall.colliders, ...stations.colliders, ...(site?.colliders ?? [])] });
   setSubtitle(`selected works · ${stations.stations.length} projects`);
   startSound(audio);
   setStations(stations.stations.map((s) => s.lampPosition));
@@ -253,7 +263,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', portal, on
     },
   });
 
-  world = { root, renderer, scene, abort, watcher, ascii, reveal, room, hall, stations };
+  world = { root, renderer, scene, abort, watcher, ascii, reveal, room, hall, stations, site };
 
   // Compile the hall's shaders (and the fogged versions of the rest) now, so the reveal doesn't stutter.
   await breathe();
@@ -284,6 +294,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', portal, on
     ascii.update(dt);
     hall.update(dt, camera);
     stations.update(dt, camera);
+    site?.update(dt, camera);
     player.update(dt);
     updateZoom(dt);
     interaction.update(dt);
@@ -308,7 +319,7 @@ export async function launchWorld({ root, home, audio, phase = 'sit', portal, on
   });
 
   // Handy for debugging in the browser console.
-  window.chairWorld = { scene, camera, renderer, sequence, player, room, hall, stations, look, interaction, chair, ascii };
+  window.chairWorld = { scene, camera, renderer, sequence, player, room, hall, stations, look, interaction, chair, ascii, site };
 }
 
 // Stop everything and free it: loop, listeners, sound, GPU memory, DOM.
@@ -324,6 +335,7 @@ export function leaveWorld() {
   w.reveal.dispose();
   w.room.collapse.dispose();
   w.hall.dispose();
+  w.site?.dispose(); // before the stations: it hangs in their group
   w.stations.dispose();
   disposeScene(w.scene);
   w.renderer.dispose();
