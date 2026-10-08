@@ -1,0 +1,110 @@
+/* Chair world (world/): the hint under the home page's ASCII chair, and the
+   full-screen world, in the site's own look: white paper, IBM Plex Serif and Mono,
+   small uppercase mono labels like the home page's .list-heading. Loaded by entry.js. */
+
+/* --- Home page ------------------------------------------------------------- */
+.ascii-wrap { position: relative; }
+#chair-hint {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--link-blue);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: cw-hint-in 0.25s ease-out;
+}
+#chair-hint[hidden] { display: none; }
+@keyframes cw-hint-in { from { opacity: 0; transform: translate(-50%, 4px); } }
+
+body.world-open { overflow: hidden; }
+
+/* --- The world ------------------------------------------------------------- */
+#world-root {
+  position: fixed; inset: 0; z-index: 400; /* under the project modal (500), so Enter can open one over it */
+  overflow: hidden; background: var(--bg); opacity: 0; transition: opacity 0.5s ease;
+  font-family: var(--serif); color: var(--text);
+}
+#world-root[hidden] { display: none; }
+#world-root.cw-on { opacity: 1; }
+#world-root.cw-white { background: var(--bg); }
+#world-root.cw-loading::before {
+  content: "loading\2026"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  font-family: var(--mono); font-size: 0.78rem; color: var(--faint);
+}
+
+#cw-view, #cw-ascii { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#cw-view { image-rendering: pixelated; opacity: 0; transition: opacity 0.3s; } /* pixelated only shows at the chunky pixel sizes */
+#cw-view.cw-shown { opacity: 1; }
+#cw-ascii { pointer-events: none; } /* full-res glyph layer */
+#cw-white { position: absolute; inset: 0; z-index: 20; background: var(--bg); opacity: 0; transition: opacity 0.5s; pointer-events: none; }
+#cw-white.cw-on { opacity: 1; }
+
+/* Small mono labels, like the home page's "Selected Works" heading, on a paper chip
+   so they read over the white void and the dark hall alike. */
+.cw-label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+#cw-hud .cw-label { background: rgba(255, 255, 255, 0.92); border: 1px solid var(--line); padding: 4px 8px; }
+.cw-hidden { display: none !important; }
+
+#cw-hud { position: absolute; inset: 0; pointer-events: none; }
+#cw-hud > * { transition: opacity 0.8s; }
+#cw-title {
+  position: absolute; top: 16px; left: 16px; display: flex; flex-direction: column; gap: 6px;
+  background: rgba(255, 255, 255, 0.92); border: 1px solid var(--line); padding: 10px 12px;
+}
+#cw-title .cw-name { font-size: 0.8rem; font-style: italic; color: var(--muted); }
+#cw-hud #cw-subtitle { background: none; border: 0; padding: 0; }
+/* A dot that turns into a ring over links; difference blending keeps it visible on white and dark. */
+#cw-crosshair {
+  position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; transform: translate(-50%, -50%);
+  border-radius: 50%; background: #fff; mix-blend-mode: difference;
+  transition: width 0.12s, height 0.12s, background 0.12s;
+}
+#cw-crosshair.cw-ring { width: 22px; height: 22px; background: none; border: 1px solid #fff; } /* a thin ring, open in the middle, so the link under it stays readable */
+#cw-target { position: absolute; left: 50%; top: calc(50% + 48px); transform: translateX(-50%); white-space: nowrap; color: var(--link-blue); }
+#cw-hint { position: absolute; right: 16px; bottom: 52px; }
+#cw-help { position: absolute; right: 16px; bottom: 16px; max-width: calc(100% - 32px); text-align: right; }
+#cw-error { position: absolute; top: 96px; left: 16px; max-width: 420px; color: #b3261e; }
+body.cw-intro #cw-title, body.cw-intro #cw-crosshair, body.cw-intro #cw-help { opacity: 0; }
+body.cw-no-hud #cw-hud > :not(#cw-crosshair) { display: none; }
+
+/* Links and buttons: the site's mono links (like the modal's "back to works"). */
+.cw-link {
+  font-family: var(--mono); font-size: 0.78rem; color: var(--text); text-transform: lowercase;
+  background: none; border: none; padding: 0; cursor: pointer;
+}
+.cw-link:hover, .cw-link:focus-visible { color: var(--link-blue); text-decoration: underline; outline: none; }
+#cw-back {
+  position: absolute; top: 16px; right: 16px; z-index: 15; /* above the pause screen and options */
+  background: rgba(255, 255, 255, 0.92); border: 1px solid var(--line); padding: 6px 10px;
+}
+
+/* Pause screen and options: a white paper card, like the site's own pages. */
+#cw-overlay, #cw-options {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.55); z-index: 10;
+}
+#cw-overlay { cursor: pointer; }
+.cw-card {
+  background: var(--bg); border: 1px solid var(--line); padding: 28px 36px;
+  max-width: min(560px, calc(100vw - 32px)); cursor: default;
+}
+#cw-overlay .cw-card { text-align: center; }
+#cw-overlay h1 { margin: 6px 0 4px; font-size: 2.1rem; font-weight: 600; letter-spacing: -0.01em; text-transform: lowercase; }
+.cw-row { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin-top: 18px; }
+.cw-small { margin-top: 18px; line-height: 1.6; }
+
+#cw-options { z-index: 11; }
+#cw-options .cw-card { width: min(420px, calc(100vw - 32px)); }
+#cw-options label { display: block; margin: 12px 0; font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+#cw-options label span { color: var(--text); }
+#cw-options input[type="range"], #cw-options select { display: block; width: 100%; margin-top: 6px; accent-color: var(--link-blue); }
+#cw-options select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); padding: 4px; }
+#cw-options .cw-check input { accent-color: var(--link-blue); margin-right: 8px; }
+#cw-options .cw-row { justify-content: flex-start; }
