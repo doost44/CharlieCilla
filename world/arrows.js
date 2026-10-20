@@ -1,7 +1,7 @@
 // Floating ASCII arrows round the home page's chair and across the page, all pointing at
 // the chair world's prompt in the chair (asciiChair.labelRect()) and drifting towards it
-// and back. Any that would sit on the page's text or the chair's ink fade out, so the
-// page stays readable. entry.js shows them once the visitor has looked round a little.
+// and back. Any that would sit on the page's text or the chair's ink are left out, so the
+// page stays readable. entry.js shows them while the pointer is on something clickable.
 
 const ARROW = '--->';
 const LENGTH = 27; // px, roughly: four 11px mono glyphs
@@ -60,7 +60,7 @@ export function createArrows(home) {
   function frame(now) {
     raf = requestAnimationFrame(frame);
     const r = home.labelRect();
-    layer.classList.toggle('cw-ready', !!r);
+    layer.classList.toggle('cw-on', !!r); // only once there is a prompt to point at
     if (!r) return;
     const check = frames++ % RECHECK === 0;
     if (check && !words) words = textRects();
@@ -83,7 +83,6 @@ export function createArrows(home) {
   return {
     show() {
       if (raf) return;
-      layer.classList.add('cw-on');
       restale();
       raf = requestAnimationFrame(frame);
     },
@@ -92,7 +91,5 @@ export function createArrows(home) {
       cancelAnimationFrame(raf);
       raf = 0;
     },
-    // Fainter once the visitor has found the chair (hovering or selecting it).
-    found(on) { layer.classList.toggle('cw-found', on); },
   };
 }

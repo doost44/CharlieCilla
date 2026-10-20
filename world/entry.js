@@ -1,7 +1,8 @@
 // Home-page glue for the chair world. At first the page is just the page. Once the
 // visitor has looked round it (hovered a project, a link or the chair), "click E for
-// more" appears in a box inside the ASCII chair, drawn in its own glyphs, and ASCII
-// arrows float round the page pointing at it (arrows.js). E, or a click on the box, sits
+// more" appears in a box inside the ASCII chair, drawn in its own glyphs; from then on,
+// whenever the pointer is on something clickable, ASCII arrows round the page point at
+// it (arrows.js). E, or a click on the box, sits
 // them in the chair; clicking the chair still selects it too. Everything heavy (main.js
 // and the rest of world/) only loads on that first E, so the home page stays light.
 // Phones, tablets, narrow windows and browsers without WebGL keep the chair as it
@@ -15,6 +16,7 @@ const LOADING_DELAY = 300; // ms before a "loading…" line shows (only without 
 const LOOK_ROUND = 1500; // ms on the page before hovering things brings the prompt
 const LABEL = ['+--------------------+', '|  click E for more  |', '+--------------------+'];
 const SEEN = 'chair-world-prompted'; // sessionStorage: prompted already this visit
+const CLICKABLE = 'a, button, .entry, [role="button"], input, select, textarea';
 
 const root = document.getElementById('world-root');
 let home = null; // window.asciiChair, set once the page's three.js chair is running
@@ -38,10 +40,9 @@ function select(on) {
   selected = on;
   home.setSelected(on);
   if (on) showPrompt();
-  arrows.found(on);
 }
 
-// The prompt: the box in the chair, and the arrows pointing at it.
+// The prompt: the box in the chair (the arrows point at it while something clickable is hovered).
 function showPrompt() {
   if (inWorld || !supported()) return;
   if (!prompted) {
@@ -50,12 +51,16 @@ function showPrompt() {
     home.domEl.setAttribute('aria-label', 'Sit in the chair to explore projects: press E');
   }
   home.setLabel(LABEL);
-  arrows.show();
 }
 
 function hidePrompt() {
   home.setLabel(null);
   arrows.hide();
+}
+
+function pointAt(on) {
+  if (on && prompted && !inWorld) arrows.show();
+  else arrows.hide();
 }
 
 const inside = (r, e) => r && e.clientX >= r.left && e.clientX <= r.left + r.width && e.clientY >= r.top && e.clientY <= r.top + r.height;
@@ -125,9 +130,12 @@ function init() {
   // the prompt; straight away if it came up earlier this visit.
   const lookRound = performance.now() + LOOK_ROUND;
   document.addEventListener('pointerover', (e) => {
-    if (prompted || performance.now() < lookRound) return;
-    if (e.target.closest?.('a, button, .entry, [role="button"], input, select, textarea')) showPrompt();
+    if (e.target === el) return; // the chair: only its ink and the box count (mousemove below)
+    const clickable = !!e.target.closest?.(CLICKABLE);
+    if (clickable && !prompted && performance.now() >= lookRound) showPrompt();
+    pointAt(clickable);
   });
+  document.addEventListener('pointerout', (e) => !e.relatedTarget && pointAt(false)); // off the window
   try { if (sessionStorage.getItem(SEEN) === '1') showPrompt(); } catch { /* storage blocked: wait for a hover */ }
 
   // Hover cursor where there is ink or the prompt's box; hovering the chair counts as looking round too.
@@ -135,9 +143,8 @@ function init() {
     const onChair = home.hitTest(e.clientX, e.clientY), onBox = prompted && inside(home.labelRect(), e);
     el.style.cursor = supported() && (onChair || onBox) ? 'pointer' : '';
     if (onChair && !prompted && performance.now() >= lookRound) showPrompt();
-    arrows.found(selected || onChair || onBox);
+    pointAt(onChair || onBox);
   });
-  el.addEventListener('mouseleave', () => arrows.found(selected));
   // A click on the prompt's box goes straight in; on the chair it selects it; anywhere else deselects.
   document.addEventListener('click', (e) => {
     if (inWorld) return;
