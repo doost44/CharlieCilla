@@ -2192,15 +2192,11 @@
             if (label) placeLabel();
             sampleToAscii(renderer.domElement);
           }
-          // The prompt sits on the backrest, following it (eased) as the chair turns.
-          const backrest = new THREE.Vector3(0, 0.87, -0.3), onScreen = new THREE.Vector3();
+          // The prompt sits on the chair's centre (its rig's origin, which it spins round).
+          const onScreen = new THREE.Vector3();
           function placeLabel() {
-            mesh.updateMatrixWorld();
-            onScreen.copy(backrest).applyMatrix4(mesh.matrixWorld).project(camera);
-            const col = ((onScreen.x + 1) / 2) * cols, row = ((1 - onScreen.y) / 2) * rows;
-            if (!labelAt) labelAt = { col, row };
-            labelAt.col += (col - labelAt.col) * 0.2;
-            labelAt.row += (row - labelAt.row) * 0.2;
+            onScreen.copy(mesh.position).project(camera);
+            labelAt = { col: ((onScreen.x + 1) / 2) * cols, row: ((1 - onScreen.y) / 2) * rows };
           }
           loop();
 

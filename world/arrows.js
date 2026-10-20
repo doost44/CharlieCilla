@@ -3,8 +3,8 @@
 // and back. Any that would sit on the page's text or the chair's ink fade out, so the
 // page stays readable. entry.js shows them once the visitor has looked round a little.
 
-const ARROW = '.:-==>'; // light to dense, like the chair's own glyph ramp
-const LENGTH = 40; // px, roughly: six 11px mono glyphs
+const ARROW = '--->';
+const LENGTH = 27; // px, roughly: four 11px mono glyphs
 // Spots to try across the page, as fractions of the window...
 const PAGE = [[0.04, 0.07], [0.3, 0.06], [0.24, 0.32], [0.05, 0.62], [0.24, 0.7], [0.06, 0.92], [0.52, 0.86], [0.96, 0.45], [0.94, 0.9]];
 // ...and round the chair: [angle from the prompt (radians, 0 = right, y down), px away].
