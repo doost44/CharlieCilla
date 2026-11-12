@@ -27,6 +27,7 @@ const BOB = 0.025; // metres; it fades out as you come close, so links hold stil
 const STILL = 3; // metres from the card at which it stops bobbing
 const PURLIN_STEP = 2.25; // the warehouse roof's purlins run along x every 2.25 m from its back wall
 const PURLIN_FROM = -config.hall.depth / 2;
+const BESIDE = 5; // metres: a companion's station further than this from it moves to the spot it offers
 const DEFAULT_BOUNDS = { minX: -34.4, maxX: 34.4, minZ: -21.9, maxZ: 21.9 }; // the warehouse's, if none are passed
 
 // Soft radial spot, for glows and the light pool.
@@ -198,6 +199,8 @@ export function buildStations(scene, { bounds, avoid = [], start, companions = {
     const dist = (s) => Math.hypot(s.x - at.x, s.y - at.z);
     const j = spots.reduce((best, s, k) => (dist(s) < dist(spots[best]) ? k : best), 0);
     [spots[i], spots[j]] = [spots[j], spots[i]];
+    // With many projects the nearest spot can still be far off: hang it where the companion leaves room.
+    if (at.beside && dist(spots[i]) > BESIDE) spots[i].set(at.beside.x, at.beside.z);
   });
   const stations = projects.map((project, index) => {
     const { x, y: z } = spots[index];
