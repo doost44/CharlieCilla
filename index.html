@@ -994,6 +994,7 @@
         modal.classList.remove("is-open");
         document.body.classList.remove("modal-open");
         closeCarouselZoom();
+        if (location.hash) history.replaceState(null, "", location.pathname + location.search); // a deep link's project is closed
         setTimeout(() => {
           document.getElementById("modal-content").innerHTML = "";
           Object.keys(homeViewers).forEach((k) => delete homeViewers[k]);
@@ -1493,6 +1494,16 @@
       }
 
       renderHomePage();
+
+      // Deep links (#voices-2025, used by the portfolio glimpse PDF) open that project straight away.
+      const projectSlug = (title) => String(title).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      function openFromHash() {
+        const want = decodeURIComponent(location.hash.slice(1));
+        const p = want && Object.values(homeProjectCache).find((p) => projectSlug(p.title) === want || p.id === want);
+        if (p) openProject(p.id);
+      }
+      openFromHash();
+      addEventListener("hashchange", openFromHash);
 
       if ("requestIdleCallback" in window) {
         requestIdleCallback(() => preloadFlipbookImages(), { timeout: 4000 });
