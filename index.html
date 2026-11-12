@@ -691,6 +691,8 @@
 
         <div class="ascii-wrap">
           <pre id="asciiCanvas" aria-hidden="true"></pre>
+          <!-- chair world (world/entry.js): shown when the chair is clicked -->
+          <div id="chair-hint" aria-live="polite" hidden>click E for more</div>
         </div>
       </div>
     </div>
@@ -1623,9 +1625,6 @@
           targetRotX = 0;
         let autoBase = 0;
         let spin = 0; // chair world: extra turn per frame while its load screen runs
-        let label = null; // chair world: lines of ASCII stamped into the chair (its prompt), or null
-        let labelAt = null; // the grid cell the label is centred on: { col, row }
-        let labelBox = null; // where it was stamped last frame: { col, row, w, h } in cells
         let isTracking = false;
         let resumeTimeout = null;
         const MAX_YAW = 0.5,
@@ -1677,11 +1676,10 @@
           const inkColor = lerpColor(INK, ACCENT, excited);
           outEl.style.color = `rgb(${inkColor.r},${inkColor.g},${inkColor.b})`;
 
-          const lines = [];
+          let out = "";
           let p = 0;
           for (let ry = 0; ry < rows; ry++) {
             const dRow = ry & 3;
-            let out = "";
             for (let rx = 0; rx < cols; rx++, p += 4) {
               let lum =
                 (img[p] * 0.299 + img[p + 1] * 0.587 + img[p + 2] * 0.114) /
@@ -1695,21 +1693,9 @@
                   : Math.min(ramp.length - 1, Math.floor(lum * ramp.length));
               out += ramp[idx];
             }
-            lines.push(out);
+            out += "\n";
           }
-          // The chair world's prompt, written over the chair's own glyphs in its box.
-          labelBox = null;
-          if (label && labelAt) {
-            const w = label[0].length, h = label.length;
-            const col = Math.max(0, Math.min(cols - w, Math.round(labelAt.col - w / 2)));
-            const row = Math.max(0, Math.min(rows - h, Math.round(labelAt.row - h / 2)));
-            label.forEach((text, i) => {
-              const line = lines[row + i];
-              lines[row + i] = line.slice(0, col) + text + line.slice(col + w);
-            });
-            labelBox = { col, row, w, h };
-          }
-          outEl.textContent = lines.join("\n") + "\n";
+          outEl.textContent = out;
         }
 
         // Stylized office chair: hinged two-panel backrest (curved and
@@ -2200,14 +2186,7 @@
             const pulse = 1 + excited * 0.06;
             mesh.scale.setScalar(pulse);
             renderer.render(scene, camera);
-            if (label) placeLabel();
             sampleToAscii(renderer.domElement);
-          }
-          // The prompt sits on the chair's centre (its rig's origin, which it spins round).
-          const onScreen = new THREE.Vector3();
-          function placeLabel() {
-            onScreen.copy(mesh.position).project(camera);
-            labelAt = { col: ((onScreen.x + 1) / 2) * cols, row: ((1 - onScreen.y) / 2) * rows };
           }
           loop();
 
@@ -2220,14 +2199,6 @@
             setSelected(on) { selected = on; },
             setPaused(on) { paused = on; },
             setSpin(v) { spin = v; },
-            // Lines of ASCII (all the same length) to write into the chair, or null.
-            setLabel(lines) { label = lines; if (!lines) labelAt = labelBox = null; },
-            // Where the label is on screen (client px), or null.
-            labelRect() {
-              if (!labelBox) return null;
-              const r = outEl.getBoundingClientRect();
-              return { left: r.left + labelBox.col * charWidth, top: r.top + labelBox.row * LINE_HEIGHT, width: labelBox.w * charWidth, height: labelBox.h * LINE_HEIGHT };
-            },
             hitTest(x, y) {
               const r = outEl.getBoundingClientRect();
               const u = (x - r.left) / (cols * charWidth), v = (y - r.top) / (rows * LINE_HEIGHT);
