@@ -35,6 +35,6 @@ Everything about a project comes from `admin/data.js` / the admin panel (`title`
 Keep it tiny: the hook at the end of the ASCII IIFE (`window.asciiChair`, including `setLabel(lines)` / `labelRect()`: the prompt is stamped over the chair's text in `sampleToAscii`), `#world-root` and one module script tag. "expand" on a project calls the page's own `openProject(id)`; while that view is up the world stops drawing and its sound is suspended, and it takes the mouse back when the view closes. Never duplicate the modal code.
 
 ## Testing
-Serve the repo root (`python3 -m http.server 8000`). `?phase=sit|swirl|form|texture|hold|collapse|projects|free` jumps straight to a phase. Desktop only: under 900px wide, no fine pointer or no WebGL, the chair stays decorative.
+Serve the repo root (`python3 -m http.server 8000`). `?phase=sit|swirl|form|texture|hold|collapse|projects|free` jumps straight to a phase. `?enter` (the link the portfolio glimpse PDF uses) plays the whole way in as if E had been pressed, once the chair has drawn; the first click then takes the mouse and starts the sound. Desktop only: under 900px wide, no fine pointer or no WebGL, the chair stays decorative.
 
 Keep modules short and readable; comment only what is non-obvious.

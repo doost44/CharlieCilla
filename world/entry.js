@@ -172,8 +172,19 @@ function init() {
   document.addEventListener('visibilitychange', () => document.hidden && selected && select(false));
 
   // ?phase=swirl|form|texture|collapse|projects jumps straight to that part of the intro.
-  const phase = new URLSearchParams(location.search).get('phase');
+  const params = new URLSearchParams(location.search);
+  const phase = params.get('phase');
   if (phase) launch(phase);
+  else if (params.has('enter')) enterOnArrival();
+}
+
+// ?enter (the portfolio glimpse PDF links here) goes straight into the world: once the chair
+// has drawn, it carries the visitor in as if they had pressed E. With no click yet the mouse
+// and sound wait, and the world asks for a click to look around.
+function enterOnArrival() {
+  history.replaceState(null, '', location.pathname + location.hash); // so a reload, or coming back, is the plain page
+  const drawn = () => (home.domEl.textContent.trim() ? setTimeout(launch, 700) : requestAnimationFrame(drawn));
+  drawn();
 }
 
 if (window.asciiChair) init();
