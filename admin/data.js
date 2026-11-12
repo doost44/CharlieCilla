@@ -212,6 +212,22 @@ const DEFAULT_HOME_PROJECTS = [
     visible: true,
   },
   {
+    id: "home-12",
+    title: "IMPROVING HOSPITAL FLOW",
+    year: "2025",
+    category: "RESEARCH POSTER",
+    description:
+      "For GBDA 301, our brief was to outline a potential process flow for the emergency room. I followed one bottleneck through it: access block, where critically ill (CTAS Level 1) patients wait in the ER because there's no inpatient bed to move them to. Turning a bed over can take anywhere from a minute to more than twelve hours, and hospital capacity in Canada hasn't kept pace with population growth.<br><br>Building on CADTH's map of the patient journey, I charted the routes through the ER &mdash; ambulance, walk-in and regional transfers, through triage, assessment and treatment, out to discharge or admission &mdash; and marked in red where patients get stuck waiting for a bed, alongside Ontario's average wait for an inpatient bed by region. The research pointed to a gap: inpatient units have no standardized, real-time way to measure discharges. The poster proposes a discharge readiness tool, something like the CTAS triage scale but for discharge, so beds open up sooner for the patients who need them most.",
+    credit: "",
+    type: "carousel-images",
+    carouselImages: {
+      basePath: "Assets/improving-hospital-flow/slide-",
+      pageCount: 2,
+      extension: ".jpg",
+    },
+    visible: true,
+  },
+  {
     id: "home-7",
     title: "WATERLOO BLOCKCHAIN",
     year: "2025",

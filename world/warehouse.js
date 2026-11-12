@@ -95,7 +95,8 @@ export function buildWarehouse(scene) {
     bounds: { minX: -HX + 0.6, maxX: HX - 0.6, minZ: -HZ + 0.6, maxZ: HZ - 0.6 },
     colliders,
     // The top of the stack GoatMan tends, and the blocks knocked off it: { mesh (instanced),
-    // items ({ p, s, r, c } per instance), stack: { x, z, nx, nz, top } }.
+    // items ({ p, s, r, c } per instance), stack: { x, z, nx, nz, top, beside } }, where `beside` is
+    // a spot for his project's lamp.
     work: props.work,
     dispose() {
       scene.remove(group, ambient, top);
@@ -530,6 +531,9 @@ function buildProps(group, { timber }) {
     colliders.push({ x: cx, z: cz, r: Math.hypot(w, d) / 2 + 0.2 });
   });
   const [wx, wz, wnx, wnz, wl] = STACKS[WORK];
+  // Where his project's lamp can hang beside him: the side his floor blocks leave clear (they lie
+  // at z > wz - 1.5), under a roof purlin.
+  const beside = { x: wx - 1.8, z: wz - 2.6 };
   for (let k = 0; k < 9; k++) {
     const b = { p: [-29.2 + r() * 2.5, 0.1, -3 + r() * 7], s: [0.4, 0.19, 0.2], r: [r() < 0.3 ? Math.PI / 2 : 0, r() * Math.PI, 0], c: [0.85, 0.85, 0.84] };
     if (b.p[2] > wz + 1.5) blocks.push(b); // the ones by his stack would be his to count
@@ -573,7 +577,7 @@ function buildProps(group, { timber }) {
   boxes(group, flatMaterial({ map: tex.brickBitTexture() }), bricks);
   const cinder = flatMaterial({ map: tex.cinderTexture() });
   boxes(group, cinder, blocks);
-  return { colliders, work: { mesh: boxes(group, cinder, work), items: work, stack: { x: wx, z: wz, nx: wnx, nz: wnz, from: wl - WORK_LAYERS, layers: wl } } };
+  return { colliders, work: { mesh: boxes(group, cinder, work), items: work, stack: { x: wx, z: wz, nx: wnx, nz: wnz, from: wl - WORK_LAYERS, layers: wl, beside } } };
 }
 
 // --- Fake light: god-ray shafts, pools of sun on the floor, haze, glow round windows ----
